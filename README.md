@@ -35,12 +35,24 @@ contAIner aims to:
 
 ## Architecture (High-Level)
 
-User Intent  
-→ Intent Canonicalization  
-→ OS Detection  
-→ NL → Command Planner  
-→ Safety Filters  
-→ Dry-Run / Sandbox Execution  
+```mermaid
+flowchart LR
+    Input["User Intent"]
+    Canon["Intent\nCanonicalization"]
+    OS["OS Detection"]
+    Planner["NL → Command\nPlanner"]
+    Safety["Safety\nFilters"]
+    Exec["Dry-Run /\nSandbox Execution"]
+    
+    Input --> Canon --> OS --> Planner --> Safety --> Exec
+    
+    style Input fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style Canon fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style OS fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style Planner fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Safety fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    style Exec fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
+```  
 
 ---
 
@@ -95,21 +107,29 @@ to prevent ambiguity and unsafe command generation.
 
 ---
 
-## Repository Structure (Simplified)
+## Documentation
+
+Detailed documentation is available in the `docs/` directory:
+
+- [Architecture Diagrams](docs/ARCHITECTURE_DIAGRAM.md) - Visual system architecture with Mermaid diagrams
+- [System 1: Intent Understanding](docs/system-1-intent-understanding/README.md) - Intent classification, entity extraction, and decomposition
+- [System 2: Command Generation](docs/system-2-command-generation/README.md) - OS-aware command generation and validation
+- [Integration Guide](docs/integration/README.md) - System orchestration and deployment architectures
+- [Dataset Documentation](docs/datasets/README.md) - Training data sources and schemas
+
+
+## Repository Structure
 
 ```
 contAIner/
-├── core/
-│ ├── intent/
-│ ├── os_detect/
-│ ├── planner/
-│ └── safety/
-├── nlp/
-│ ├── datasets/
-│ ├── models/
-│ └── training/
-├── cli/
-└── tests/
+├── docs/
+│   ├── ARCHITECTURE_DIAGRAM.md
+│   ├── system-1-intent-understanding/
+│   ├── system-2-command-generation/
+│   ├── integration/
+│   └── datasets/
+├── LICENSE
+└── README.md
 ```
 
 ---
