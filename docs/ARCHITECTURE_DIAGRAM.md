@@ -53,9 +53,9 @@ steps: winget install ..."] --> Final
     Final(["FINAL OUTPUT: Array CommandPlan
 Ready for execution"])
     
-    style System1 fill:#e1f5ff
-    style System2 fill:#fff4e1
-    style Final fill:#e8f5e9
+    style System1 fill:#1e5f74,stroke:#48c9b0,stroke-width:2px,color:#fff
+    style System2 fill:#935116,stroke:#f39c12,stroke-width:2px,color:#fff
+    style Final fill:#1e8449,stroke:#52be80,stroke-width:2px,color:#fff
 ```
 
 ---
@@ -83,11 +83,11 @@ flowchart TD
     
     CodeT5Train --> Model2["CodeT5+\nCommand Generator"]
     
-    style IntentData fill:#e1f5ff
-    style CommandData fill:#fff4e1
-    style Model1A fill:#c8e6c9
-    style Model1B fill:#c8e6c9
-    style Model2 fill:#c8e6c9
+    style IntentData fill:#1e5f74,stroke:#48c9b0,stroke-width:2px,color:#fff
+    style CommandData fill:#935116,stroke:#f39c12,stroke-width:2px,color:#fff
+    style Model1A fill:#145a32,stroke:#52be80,stroke-width:2px,color:#fff
+    style Model1B fill:#145a32,stroke:#52be80,stroke-width:2px,color:#fff
+    style Model2 fill:#145a32,stroke:#52be80,stroke-width:2px,color:#fff
 ```
 
 ---
@@ -119,9 +119,9 @@ flowchart TD
     
     Generator --> CommandPlan["CommandPlan\nos: windows\nshell: powershell\nsteps: winget install Python.Python.3.10\nrequires_elevation: false"]
     
-    style Input fill:#e8f5e9
-    style CanonicalIntent fill:#fff3e0
-    style CommandPlan fill:#f3e5f5
+    style Input fill:#1e8449,stroke:#52be80,stroke-width:2px,color:#fff
+    style CanonicalIntent fill:#935116,stroke:#f39c12,stroke-width:2px,color:#fff
+    style CommandPlan fill:#5b2c6f,stroke:#a569bd,stroke-width:2px,color:#fff
 ```
 
 ---
@@ -158,9 +158,9 @@ flowchart TD
     
     Final(["Array CommandPlan: 3 commands ready for execution"])
     
-    style Input fill:#e8f5e9
-    style UserResponse fill:#fff3e0
-    style Final fill:#f3e5f5
+    style Input fill:#1e8449,stroke:#52be80,stroke-width:2px,color:#fff
+    style UserResponse fill:#935116,stroke:#f39c12,stroke-width:2px,color:#fff
+    style Final fill:#5b2c6f,stroke:#a569bd,stroke-width:2px,color:#fff
 ```
 
 ---
@@ -183,10 +183,10 @@ flowchart TD
     System1 -->|"CanonicalIntent"| Integration["Integration Layer: Orchestration"]
     System2 --> Integration
     
-    style IntentDataset fill:#e1f5ff
-    style System1 fill:#e1f5ff
-    style System2 fill:#fff4e1
-    style Integration fill:#e8f5e9
+    style IntentDataset fill:#1e5f74,stroke:#48c9b0,stroke-width:2px,color:#fff
+    style System1 fill:#1e5f74,stroke:#48c9b0,stroke-width:2px,color:#fff
+    style System2 fill:#935116,stroke:#f39c12,stroke-width:2px,color:#fff
+    style Integration fill:#1e8449,stroke:#52be80,stroke-width:2px,color:#fff
 ```
 
 ---
@@ -218,8 +218,8 @@ OS-aware: windows, linux, macos
 Shell-aware: bash, powershell, cmd, zsh"]
     end
     
-    style System1 fill:#e1f5ff
-    style System2 fill:#fff4e1
+    style System1 fill:#1e5f74,stroke:#48c9b0,stroke-width:2px,color:#fff
+    style System2 fill:#935116,stroke:#f39c12,stroke-width:2px,color:#fff
 ```
 
 ---
@@ -260,10 +260,10 @@ flowchart LR
     Check3 -->|"No"| Reject3["Reject: Must decompose first"]
     Check3 -->|"Yes"| Accept["Valid for System 2"]
     
-    style Accept fill:#c8e6c9
-    style Reject1 fill:#ffcdd2
-    style Reject2 fill:#ffcdd2
-    style Reject3 fill:#ffcdd2
+    style Accept fill:#145a32,stroke:#52be80,stroke-width:2px,color:#fff
+    style Reject1 fill:#78281f,stroke:#ec7063,stroke-width:2px,color:#fff
+    style Reject2 fill:#78281f,stroke:#ec7063,stroke-width:2px,color:#fff
+    style Reject3 fill:#78281f,stroke:#ec7063,stroke-width:2px,color:#fff
 ```
 
 **Required Conditions:**

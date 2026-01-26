@@ -46,12 +46,12 @@ flowchart LR
     
     Input --> Canon --> OS --> Planner --> Safety --> Exec
     
-    style Input fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style Canon fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    style OS fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    style Planner fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Safety fill:#fce4ec,stroke:#880e4f,stroke-width:2px
-    style Exec fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
+    style Input fill:#2d5f8d,stroke:#5dade2,stroke-width:2px,color:#fff
+    style Canon fill:#1e5f74,stroke:#48c9b0,stroke-width:2px,color:#fff
+    style OS fill:#5b2c6f,stroke:#a569bd,stroke-width:2px,color:#fff
+    style Planner fill:#935116,stroke:#f39c12,stroke-width:2px,color:#fff
+    style Safety fill:#78281f,stroke:#ec7063,stroke-width:2px,color:#fff
+    style Exec fill:#1e8449,stroke:#52be80,stroke-width:2px,color:#fff
 ```  
 
 ---

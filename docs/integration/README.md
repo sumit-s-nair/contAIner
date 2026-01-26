@@ -17,9 +17,9 @@ flowchart LR
         System1 -->|"CanonicalIntent"| System2
     end
     
-    style contAIner fill:#f0f0f0,stroke:#333,stroke-width:2px
-    style System1 fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    style System2 fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style contAIner fill:#1a252f,stroke:#5dade2,stroke-width:2px,color:#fff
+    style System1 fill:#1e5f74,stroke:#48c9b0,stroke-width:2px,color:#fff
+    style System2 fill:#935116,stroke:#f39c12,stroke-width:2px,color:#fff
 ```
 
 ### Key Interface: CanonicalIntent
@@ -74,11 +74,11 @@ flowchart TD
     Output1 --> System2
     System2 --> Output2
     
-    style Input fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style System1 fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    style System2 fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Output1 fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
-    style Output2 fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
+    style Input fill:#2d5f8d,stroke:#5dade2,stroke-width:2px,color:#fff
+    style System1 fill:#1e5f74,stroke:#48c9b0,stroke-width:2px,color:#fff
+    style System2 fill:#935116,stroke:#f39c12,stroke-width:2px,color:#fff
+    style Output1 fill:#1e8449,stroke:#52be80,stroke-width:2px,color:#fff
+    style Output2 fill:#1e8449,stroke:#52be80,stroke-width:2px,color:#fff
 ```
 
 ### Complex Example: "install python and nodejs"
@@ -116,12 +116,12 @@ flowchart TD
     Process1 --> Output
     Process2 --> Output
     
-    style Input fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style System1 fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    style Intent1 fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
-    style Intent2 fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
-    style System2 fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Output fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
+    style Input fill:#2d5f8d,stroke:#5dade2,stroke-width:2px,color:#fff
+    style System1 fill:#1e5f74,stroke:#48c9b0,stroke-width:2px,color:#fff
+    style Intent1 fill:#1e8449,stroke:#52be80,stroke-width:2px,color:#fff
+    style Intent2 fill:#1e8449,stroke:#52be80,stroke-width:2px,color:#fff
+    style System2 fill:#935116,stroke:#f39c12,stroke-width:2px,color:#fff
+    style Output fill:#1e8449,stroke:#52be80,stroke-width:2px,color:#fff
 ```
 
 ---
