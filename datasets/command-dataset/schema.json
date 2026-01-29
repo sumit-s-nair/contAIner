@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CommandDatasetRow",
+  "description": "Schema for a single row in the command-dataset",
+  "type": "object",
+  "required": ["instruction", "intent_type", "entities", "os", "shell", "command", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "instruction": {
+      "type": "string",
+      "description": "Canonicalized instruction for the intent"
+    },
+    "intent_type": {
+      "type": "string",
+      "description": "Classified intent type"
+    },
+    "entities": {
+      "type": "object",
+      "description": "Extracted entities from the instruction",
+      "required": ["runtime", "package", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "runtime": {
+          "type": ["string", "null"],
+          "description": "Runtime/language (e.g., python, node)"
+        },
+        "package": {
+          "type": ["string", "null"],
+          "description": "Package name"
+        },
+        "version": {
+          "type": ["string", "null"],
+          "description": "Version specifier"
+        }
+      }
+    },
+    "os": {
+      "type": "string",
+      "description": "Target operating system (e.g., linux, macos, windows)"
+    },
+    "shell": {
+      "type": "string",
+      "description": "Target shell (e.g., bash, zsh, powershell)"
+    },
+    "command": {
+      "type": "string",
+      "description": "The executable command or serialized step"
+    },
+    "source": {
+      "type": "string",
+      "description": "Data origin (e.g., NL2SH-ALFA, manual, generated)"
+    }
+  }
+}
