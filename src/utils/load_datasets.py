@@ -20,6 +20,10 @@ from typing import Optional, Tuple
 from datasets import load_dataset, DatasetDict
 from huggingface_hub import login
 
+# Load environment variables from .env files
+from .env_loader import ensure_env_loaded
+ensure_env_loaded()
+
 
 # Dataset identifiers
 INTENT_DATASET = "sumit-s-nair/intent-dataset"
