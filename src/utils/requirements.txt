@@ -1,0 +1,3 @@
+# Dataset Loading Dependencies
+datasets>=2.14.0
+huggingface_hub>=0.16.0
