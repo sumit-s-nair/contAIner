@@ -237,6 +237,37 @@ System 2 processes each CanonicalIntent independently and returns a CommandPlan 
 
 ---
 
+## Implementation
+
+The training implementation is located at `src/system2_command_generation/`. 
+
+### Quick Start
+
+```bash
+# Install dependencies
+pip install -r src/system2_command_generation/requirements.txt
+
+# Train CodeT5+ (primary model)
+python -m src.system2_command_generation.train --model codet5plus
+
+# Train FLAN-T5 (baseline comparison)
+python -m src.system2_command_generation.train --model flan_t5 --baseline
+```
+
+### Module Structure
+
+| File | Description |
+|------|-------------|
+| `config.py` | Training configuration, schemas, and hyperparameters |
+| `data_preprocessing.py` | Data loading and CanonicalIntent → CommandPlan transformation |
+| `models.py` | CodeT5+ and FLAN-T5 model loading and inference |
+| `metrics.py` | Evaluation metrics (exact match, normalized match, etc.) |
+| `train.py` | Main training script with HuggingFace Trainer |
+
+See [src/system2_command_generation/README.md](../../src/system2_command_generation/README.md) for detailed usage.
+
+---
+
 ## See Also
 
 - [System 1 Documentation](../system-1-intent-understanding/README.md) - Intent understanding
