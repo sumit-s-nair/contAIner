@@ -171,8 +171,27 @@ python scripts/push_datasets_to_hf.py \
 
 ---
 
+## Progress Snapshot (March 2026)
+
+Completed:
+- Intent classifier training pipeline implemented (`src/system1_intent_understanding/train_intent_classifier.py`)
+- Intent model verification workflow implemented (`src/system1_intent_understanding/verify_intent_classifier.py`)
+- Command generation training stack implemented (`src/system2_command_generation/`)
+- Dataset schemas and validators implemented for both intent and command datasets
+- Final System 1 model artifacts exported under `outputs/intent_classifier/final_model/`
+
+In Progress:
+- System 1 + System 2 runtime orchestration integration
+- End-to-end evaluation harness for canonical-intent to command-plan flow
+- Safety-layer expansion for pre-execution risk scoring
+
+Planned:
+- Dry-run execution sandbox (Stage 3)
+- Human-in-the-loop clarification loop with persistent state
+- Automated regression suite for cross-OS command validity
+
 ## Step-1 Scope (Current)
-Natural language → intent canonicalization  
+Natural language to intent canonicalization  
 Linux and Windows command generation  
 Dataset normalization and augmentation  
 LLM-based command planning  
@@ -242,6 +261,17 @@ contAIner/
 │       ├── env_loader.py         # Environment variable loader
 │       ├── requirements.txt      # Python dependencies
 │       └── README.md             # Usage documentation
+│   └── system1_intent_understanding/
+│       ├── train_intent_classifier.py
+│       ├── verify_intent_classifier.py
+│       └── README.md
+│   └── system2_command_generation/
+│       ├── train.py
+│       ├── config.py
+│       ├── data_preprocessing.py
+│       ├── metrics.py
+│       ├── models.py
+│       └── README.md
 ├── datasets/
 │   ├── intent-dataset/           # Intent understanding dataset
 │   │   ├── README.md
@@ -262,13 +292,17 @@ contAIner/
 │       └── scripts/
 │           └── validate_schema.py
 ├── scripts/
-│   └── push_datasets_to_hf.py    # Upload datasets to HF Hub
+│   ├── push_datasets_to_hf.py    # Upload datasets to HF Hub
+│   └── README.md
 ├── docs/
 │   ├── ARCHITECTURE_DIAGRAM.md
 │   ├── system-1-intent-understanding/
 │   ├── system-2-command-generation/
 │   ├── integration/
 │   └── datasets/
+├── outputs/
+│   ├── intent_classifier/
+│   └── README.md
 ├── .env                          # Environment variables (create this)
 ├── LICENSE
 └── README.md
