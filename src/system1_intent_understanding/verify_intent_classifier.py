@@ -1,30 +1,110 @@
-"""
-Verification Script for System 1A: Intent Classifier
+"""Verify a trained System 1 intent model in interactive or batch mode.
 
-Loads the fine-tuned model and lets you interactively test predictions,
-or run batch verification against a dataset file.
-
-Usage:
-    # Interactive mode (type instructions, see predictions)
-    python src/system1_intent_understanding/verify_intent_classifier.py \
-        --model_dir outputs/system1_intent_classifier/final_model
-
-    # Batch mode (verify against a JSONL file, shows mismatches)
-    python src/system1_intent_understanding/verify_intent_classifier.py \
-        --model_dir outputs/system1_intent_classifier/final_model \
-        --verify_file datasets/intent-dataset/data/software_dataset_combined.jsonl \
-        --sample_size 50
+This utility loads an exported model directory and prints intent/entity
+predictions for free-text instructions, or compares predictions against a
+JSONL file with expected `intent_type` labels.
 """
 
 import argparse
 import json
 import random
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+import torch.nn as nn
+from transformers import AutoConfig, AutoModel, AutoTokenizer, PreTrainedModel
+from transformers.modeling_outputs import ModelOutput
+
+
+NER_LABEL_FALLBACK = [
+    "O",
+    "B-runtime",
+    "B-package",
+    "B-version",
+    "B-virtual_env",
+    "B-package_manager",
+    "B-project",
+    "I-runtime",
+    "I-package",
+    "I-version",
+    "I-virtual_env",
+    "I-package_manager",
+    "I-project",
+]
+
+
+@dataclass
+class JointOutput(ModelOutput):
+    loss: Optional[torch.FloatTensor] = None
+    intent_logits: Optional[torch.FloatTensor] = None
+    ner_logits: Optional[torch.FloatTensor] = None
+
+
+class JointIntentNER(PreTrainedModel):
+    """Joint intent classification + token-level NER model used in training."""
+
+    def __init__(
+        self,
+        config,
+        num_intent_labels: int,
+        num_ner_labels: int,
+        ner_loss_weight: float = 0.5,
+    ):
+        super().__init__(config)
+        self.roberta = AutoModel.from_config(config)
+        hidden_size = config.hidden_size
+
+        self.intent_dropout = nn.Dropout(p=0.1)
+        self.intent_head = nn.Sequential(
+            nn.Linear(hidden_size, 256),
+            nn.GELU(),
+            nn.Dropout(p=0.1),
+            nn.Linear(256, num_intent_labels),
+        )
+
+        self.ner_dropout = nn.Dropout(p=0.1)
+        self.ner_head = nn.Linear(hidden_size, num_ner_labels)
+
+        self.num_intent_labels = num_intent_labels
+        self.num_ner_labels = num_ner_labels
+        self.ner_loss_weight = ner_loss_weight
+
+        self.post_init()
+
+    def forward(
+        self,
+        input_ids=None,
+        attention_mask=None,
+        intent_labels=None,
+        ner_labels=None,
+        **kwargs,
+    ) -> JointOutput:
+        outputs = self.roberta(input_ids=input_ids, attention_mask=attention_mask)
+        sequence_output = outputs.last_hidden_state
+        cls_output = sequence_output[:, 0, :]
+
+        intent_logits = self.intent_head(self.intent_dropout(cls_output))
+        ner_logits = self.ner_head(self.ner_dropout(sequence_output))
+
+        loss = None
+        if intent_labels is not None and ner_labels is not None:
+            intent_loss_fn = nn.CrossEntropyLoss()
+            ner_loss_fn = nn.CrossEntropyLoss(ignore_index=-100)
+            intent_loss = intent_loss_fn(intent_logits, intent_labels)
+            ner_loss = ner_loss_fn(
+                ner_logits.view(-1, self.num_ner_labels),
+                ner_labels.view(-1),
+            )
+            loss = intent_loss + self.ner_loss_weight * ner_loss
+
+        return JointOutput(
+            loss=loss,
+            intent_logits=intent_logits,
+            ner_logits=ner_logits,
+        )
 
 
 # =============================================================================
@@ -40,30 +120,55 @@ def load_model(model_dir: str):
         print(f"Error: Model directory not found: {model_dir}")
         sys.exit(1)
 
-    # Load label map
-    label_map_path = model_dir / "label_map.json"
+    # Load intent label map (new model format)
+    label_map_path = model_dir / "intent_label_map.json"
     if not label_map_path.exists():
-        print(f"Error: label_map.json not found in {model_dir}")
+        print(f"Error: intent_label_map.json not found in {model_dir}")
         sys.exit(1)
 
     with open(label_map_path) as f:
-        label_map = json.load(f)
+        intent_label_map = json.load(f)
 
-    id_to_label = {int(v): k for k, v in label_map.items()}
+    id_to_label = {int(v): k for k, v in intent_label_map.items()}
+
+    ner_map_path = model_dir / "ner_label_map.json"
+    if ner_map_path.exists():
+        with open(ner_map_path) as f:
+            ner_map = json.load(f)
+        id_to_ner = {
+            int(k): v
+            for k, v in ner_map.get("id2label", {}).items()
+        }
+    else:
+        id_to_ner = {i: label for i, label in enumerate(NER_LABEL_FALLBACK)}
+
+    max_length = 128
+    training_cfg_path = model_dir / "training_config.json"
+    if training_cfg_path.exists():
+        with open(training_cfg_path) as f:
+            training_cfg = json.load(f)
+        max_length = int(training_cfg.get("max_length", 128))
 
     # Load model and tokenizer
     print(f"Loading model from: {model_dir}")
     tokenizer = AutoTokenizer.from_pretrained(str(model_dir))
-    model = AutoModelForSequenceClassification.from_pretrained(str(model_dir))
+
+    config = AutoConfig.from_pretrained(str(model_dir))
+    model = JointIntentNER.from_pretrained(
+        str(model_dir),
+        config=config,
+        num_intent_labels=len(intent_label_map),
+        num_ner_labels=len(id_to_ner),
+    )
     model.eval()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
     print(f"Model loaded on: {device}")
-    print(f"Labels: {list(label_map.keys())}")
+    print(f"Intent labels: {list(intent_label_map.keys())}")
     print()
 
-    return model, tokenizer, label_map, id_to_label, device
+    return model, tokenizer, intent_label_map, id_to_label, id_to_ner, device, max_length
 
 
 # =============================================================================
@@ -76,6 +181,7 @@ def predict(
     model,
     tokenizer,
     id_to_label: Dict[int, str],
+    id_to_ner: Dict[int, str],
     device: torch.device,
     max_length: int = 128,
 ) -> Dict:
@@ -89,14 +195,18 @@ def predict(
         truncation=True,
         padding="max_length",
         max_length=max_length,
+        return_offsets_mapping=True,
         return_tensors="pt",
     )
+    offsets = inputs["offset_mapping"].squeeze(0).tolist()
+    inputs.pop("offset_mapping")
     inputs = {k: v.to(device) for k, v in inputs.items()}
 
     with torch.no_grad():
         outputs = model(**inputs)
-        logits = outputs.logits
-        probs = torch.softmax(logits, dim=-1).squeeze()
+        intent_logits = outputs.intent_logits
+        ner_logits = outputs.ner_logits
+        probs = torch.softmax(intent_logits, dim=-1).squeeze()
 
     pred_id = torch.argmax(probs).item()
     pred_label = id_to_label[pred_id]
@@ -104,10 +214,31 @@ def predict(
 
     all_probs = {id_to_label[i]: probs[i].item() for i in range(len(id_to_label))}
 
+    ner_ids = torch.argmax(ner_logits, dim=-1).squeeze(0).tolist()
+    entity_values: Dict[str, List[str]] = {}
+
+    for ner_id, (start, end) in zip(ner_ids, offsets):
+        if start == 0 and end == 0:
+            continue
+        tag = id_to_ner.get(int(ner_id), "O")
+        if tag == "O" or "-" not in tag:
+            continue
+        _, entity_type = tag.split("-", 1)
+        token_text = text[start:end].strip()
+        if token_text:
+            entity_values.setdefault(entity_type, []).append(token_text)
+
+    entities = {
+        entity_type: " ".join(chunks)
+        for entity_type, chunks in entity_values.items()
+        if chunks
+    }
+
     return {
         "prediction": pred_label,
         "confidence": confidence,
         "probabilities": all_probs,
+        "entities": entities,
     }
 
 
@@ -130,6 +261,12 @@ def format_prediction(text: str, result: Dict, expected: Optional[str] = None) -
     prob_str = " | ".join(f"{k}: {v:.4f}" for k, v in sorted_probs)
     lines.append(f"  Probs:      {prob_str}")
 
+    if result.get("entities"):
+        entity_str = ", ".join(
+            f"{k}={v}" for k, v in sorted(result["entities"].items())
+        )
+        lines.append(f"  Entities:   {entity_str}")
+
     return "\n".join(lines)
 
 
@@ -138,7 +275,7 @@ def format_prediction(text: str, result: Dict, expected: Optional[str] = None) -
 # =============================================================================
 
 
-def interactive_mode(model, tokenizer, id_to_label, device):
+def interactive_mode(model, tokenizer, id_to_label, id_to_ner, device, max_length):
     """Run interactive prediction loop."""
     print("=" * 60)
     print("INTERACTIVE INTENT VERIFICATION")
@@ -173,7 +310,15 @@ def interactive_mode(model, tokenizer, id_to_label, device):
             print("Exiting.")
             break
 
-        result = predict(text, model, tokenizer, id_to_label, device)
+        result = predict(
+            text,
+            model,
+            tokenizer,
+            id_to_label,
+            id_to_ner,
+            device,
+            max_length=max_length,
+        )
         print(format_prediction(text, result))
         print()
 
@@ -187,8 +332,10 @@ def batch_verify(
     model,
     tokenizer,
     id_to_label,
+    id_to_ner,
     device,
     verify_file: str,
+    max_length: int,
     sample_size: Optional[int] = None,
     seed: int = 42,
     show_correct: bool = False,
@@ -228,7 +375,15 @@ def batch_verify(
     for i, row in enumerate(data):
         text = row["instruction"]
         expected = row["intent_type"]
-        result = predict(text, model, tokenizer, id_to_label, device)
+        result = predict(
+            text,
+            model,
+            tokenizer,
+            id_to_label,
+            id_to_ner,
+            device,
+            max_length=max_length,
+        )
         predicted = result["prediction"]
 
         if predicted == expected:
@@ -301,7 +456,7 @@ def parse_args():
     parser.add_argument(
         "--model_dir",
         type=str,
-        default="outputs/system1_intent_classifier/final_model",
+        default="outputs/intent_classifier/final_model",
         help="Path to the saved model directory",
     )
     parser.add_argument(
@@ -335,18 +490,20 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    model, tokenizer, label_map, id_to_label, device = load_model(args.model_dir)
+    model, tokenizer, label_map, id_to_label, id_to_ner, device, max_length = load_model(args.model_dir)
 
     if args.verify_file:
         batch_verify(
             model,
             tokenizer,
             id_to_label,
+            id_to_ner,
             device,
             verify_file=args.verify_file,
+            max_length=max_length,
             sample_size=args.sample_size,
             seed=args.seed,
             show_correct=args.show_correct,
         )
     else:
-        interactive_mode(model, tokenizer, id_to_label, device)
+        interactive_mode(model, tokenizer, id_to_label, id_to_ner, device, max_length)

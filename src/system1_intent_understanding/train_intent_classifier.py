@@ -1,403 +1,508 @@
-"""
-Training Script for System 1A: Intent Classification
+"""Train the System 1 joint intent-classification and NER model.
 
-Fine-tunes DistilBERT to classify user instructions into intent types
-(e.g., install_package, update_package, install_runtime, update_runtime).
+This script fine-tunes a shared DistilRoBERTa encoder with two heads:
+- intent classification head over the instruction
+- token-level NER head using BIO tags
 
-Usage:
-    python src/system1_intent_understanding/train_intent_classifier.py \
-        --data_path datasets/intent-dataset/data/software_dataset_combined.jsonl \
-        --output_dir outputs/system1_intent_classifier \
-        --num_epochs 5
+The training objective combines both losses so entity context can improve
+intent prediction quality and vice versa.
 
-The script will:
-    1. Download distilbert-base-uncased from HuggingFace
-    2. Load and split the intent dataset (80/10/10 stratified)
-    3. Fine-tune with HuggingFace Trainer
-    4. Evaluate on the test split
-    5. Save model, tokenizer, and label mapping
+Typical usage:
+        python train_intent_classifier.py
+        python train_intent_classifier.py --train datasets/intent-dataset/data/train.jsonl \
+                                          --val datasets/intent-dataset/data/validation.jsonl \
+                                          --test datasets/intent-dataset/data/test.jsonl \
+                                          --output outputs/intent_classifier
 """
 
+from __future__ import annotations
 import argparse
 import json
 import logging
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 import numpy as np
 import torch
+import torch.nn as nn
 from datasets import Dataset, DatasetDict
+from seqeval.metrics import classification_report as seq_classification_report
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
-    confusion_matrix,
     f1_score,
-    precision_score,
-    recall_score,
 )
-from sklearn.model_selection import train_test_split
 from transformers import (
-    AutoModelForSequenceClassification,
+    AutoModel,
     AutoTokenizer,
     EarlyStoppingCallback,
+    PreTrainedModel,
     Trainer,
     TrainingArguments,
+    PretrainedConfig,
 )
+from transformers.modeling_outputs import ModelOutput
+from dataclasses import dataclass
 
+# ---------------------------------------------------------------------------
+# Config
+# ---------------------------------------------------------------------------
 
-# =============================================================================
-# Logging Setup
-# =============================================================================
+BASE_MODEL  = "distilroberta-base"   # small, fast, strong on short instructions
+MAX_LENGTH  = 128                    # instructions are short — 64 would also work
 
+# NER label scheme: BIO tagging for 6 entity types + O
+ENTITY_TYPES = ["runtime", "package", "version", "virtual_env", "package_manager", "project"]
+NER_LABELS   = ["O"] + [f"B-{e}" for e in ENTITY_TYPES] + [f"I-{e}" for e in ENTITY_TYPES]
+NER_LABEL2ID = {l: i for i, l in enumerate(NER_LABELS)}
+NER_ID2LABEL = {i: l for l, i in NER_LABEL2ID.items()}
 
-def setup_logging(output_dir: str, level: int = logging.INFO) -> logging.Logger:
-    """Configure logging for training."""
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+
+def setup_logging(output_dir: str) -> logging.Logger:
     os.makedirs(output_dir, exist_ok=True)
-
     logger = logging.getLogger("intent_classifier")
-    logger.setLevel(level)
+    logger.setLevel(logging.INFO)
     logger.handlers.clear()
-
-    # Console handler
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(level)
-    console_fmt = logging.Formatter(
-        "%(asctime)s | %(levelname)-8s | %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    console_handler.setFormatter(console_fmt)
-    logger.addHandler(console_handler)
-
-    # File handler
-    file_handler = logging.FileHandler(
-        os.path.join(output_dir, "training.log"), mode="w"
-    )
-    file_handler.setLevel(level)
-    file_handler.setFormatter(console_fmt)
-    logger.addHandler(file_handler)
-
+    fmt = logging.Formatter("%(asctime)s | %(levelname)-8s | %(message)s",
+                            datefmt="%Y-%m-%d %H:%M:%S")
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setFormatter(fmt)
+    logger.addHandler(ch)
+    fh = logging.FileHandler(os.path.join(output_dir, "training.log"), mode="w")
+    fh.setFormatter(fmt)
+    logger.addHandler(fh)
     return logger
 
+# ---------------------------------------------------------------------------
+# Data loading
+# ---------------------------------------------------------------------------
 
-# =============================================================================
-# Data Loading & Preprocessing
-# =============================================================================
-
-
-def load_jsonl(path: str) -> List[Dict]:
-    """Load a JSONL file into a list of dictionaries."""
-    data = []
-    with open(path, "r", encoding="utf-8") as f:
-        for line_num, line in enumerate(f, 1):
+def load_jsonl(path: str) -> list[dict]:
+    rows = []
+    with open(path, encoding="utf-8") as f:
+        for i, line in enumerate(f, 1):
             line = line.strip()
             if not line:
                 continue
             try:
-                data.append(json.loads(line))
+                rows.append(json.loads(line))
             except json.JSONDecodeError as e:
-                print(f"Warning: Skipping malformed line {line_num}: {e}")
-    return data
+                print(f"Warning: skipping malformed line {i}: {e}")
+    return rows
 
 
-def build_label_map(data: List[Dict]) -> Dict[str, int]:
-    """Build a mapping from intent_type strings to integer labels."""
-    intent_types = sorted(set(row["intent_type"] for row in data))
-    return {intent: idx for idx, intent in enumerate(intent_types)}
+def build_intent_label_map(rows: list[dict]) -> dict[str, int]:
+    intents = sorted(set(r["intent_type"] for r in rows))
+    return {intent: i for i, intent in enumerate(intents)}
 
 
-def split_dataset(
-    data: List[Dict],
-    test_size: float = 0.1,
-    val_size: float = 0.1,
-    seed: int = 42,
-) -> Dict[str, List[Dict]]:
-    """
-    Split dataset into train/validation/test with stratification.
+# ---------------------------------------------------------------------------
+# NER label alignment
+# Entity spans give us character offsets → we need token-level BIO labels
+# ---------------------------------------------------------------------------
 
-    Args:
-        data: Full dataset rows
-        test_size: Fraction for test split
-        val_size: Fraction for validation split
-        seed: Random seed
-
-    Returns:
-        Dict with 'train', 'validation', 'test' keys
-    """
-    labels = [row["intent_type"] for row in data]
-
-    # First split: separate out test
-    train_val_data, test_data, train_val_labels, _ = train_test_split(
-        data, labels, test_size=test_size, random_state=seed, stratify=labels
-    )
-
-    # Second split: separate train and validation
-    # Adjust val_size relative to the remaining data
-    relative_val_size = val_size / (1.0 - test_size)
-    train_data, val_data = train_test_split(
-        train_val_data,
-        test_size=relative_val_size,
-        random_state=seed,
-        stratify=train_val_labels,
-    )
-
-    return {
-        "train": train_data,
-        "validation": val_data,
-        "test": test_data,
-    }
-
-
-def preprocess_dataset(
-    data: List[Dict],
+def align_ner_labels(
+    instruction: str,
+    entity_spans: dict,
+    encoding,           # tokenizer output for this instruction
     tokenizer,
-    label_map: Dict[str, int],
-    max_length: int = 128,
+) -> list[int]:
+    """
+    Convert character-level entity_spans to token-level BIO labels.
+    Tokens that are special tokens or padding get label -100 (ignored in loss).
+    """
+    tokens = tokenizer.convert_ids_to_tokens(encoding["input_ids"])
+    n_tokens = len(tokens)
+    labels = [-100] * n_tokens  # default: ignored
+
+    # Build a char→token index map using offset_mapping
+    # We need the tokenizer called with return_offsets_mapping=True
+    offsets = encoding.get("offset_mapping", [])
+
+    # Mark non-special tokens as O first
+    for tok_idx, (start, end) in enumerate(offsets):
+        if start == 0 and end == 0:
+            continue  # special token [CLS], [SEP], <pad>
+        labels[tok_idx] = NER_LABEL2ID["O"]
+
+    # Assign BIO labels from entity_spans
+    for entity_key, span in entity_spans.items():
+        if not isinstance(span, dict):
+            continue
+        char_start = span.get("start")
+        char_end   = span.get("end")
+        if char_start is None or char_end is None:
+            continue
+
+        first = True
+        for tok_idx, (tok_start, tok_end) in enumerate(offsets):
+            if tok_start == 0 and tok_end == 0:
+                continue  # special token
+            # Token overlaps with entity span
+            if tok_start >= char_start and tok_end <= char_end:
+                tag = f"B-{entity_key}" if first else f"I-{entity_key}"
+                if tag in NER_LABEL2ID:
+                    labels[tok_idx] = NER_LABEL2ID[tag]
+                    first = False
+            elif tok_start >= char_end:
+                break
+
+    return labels
+
+
+# ---------------------------------------------------------------------------
+# Dataset preparation
+# ---------------------------------------------------------------------------
+
+def prepare_split(
+    rows: list[dict],
+    tokenizer,
+    intent_label_map: dict[str, int],
+    max_length: int = MAX_LENGTH,
 ) -> Dataset:
-    """
-    Tokenize instructions and convert labels to integers.
+    """Tokenize and build a HuggingFace Dataset for one split."""
+    input_ids_list      = []
+    attention_mask_list = []
+    intent_labels_list  = []
+    ner_labels_list     = []
 
-    Args:
-        data: List of dataset rows
-        tokenizer: HuggingFace tokenizer
-        label_map: Mapping from intent_type to label ID
-        max_length: Max token length for instructions
+    for row in rows:
+        instruction   = row.get("instruction", "")
+        intent_type   = row.get("intent_type", "")
+        entity_spans  = row.get("entity_spans", {})
 
-    Returns:
-        HuggingFace Dataset ready for Trainer
-    """
-    instructions = [row["instruction"] for row in data]
-    labels = [label_map[row["intent_type"]] for row in data]
+        # Tokenize with offset mapping so we can align NER labels
+        encoding = tokenizer(
+            instruction,
+            truncation=True,
+            padding="max_length",
+            max_length=max_length,
+            return_offsets_mapping=True,
+            return_tensors=None,
+        )
 
-    encodings = tokenizer(
-        instructions,
-        truncation=True,
-        padding="max_length",
-        max_length=max_length,
-        return_tensors="pt",
-    )
+        ner_labels = align_ner_labels(
+            instruction, entity_spans, encoding, tokenizer
+        )
 
-    dataset = Dataset.from_dict(
-        {
-            "input_ids": encodings["input_ids"],
-            "attention_mask": encodings["attention_mask"],
-            "labels": labels,
-        }
-    )
+        # Pad NER labels to max_length
+        while len(ner_labels) < max_length:
+            ner_labels.append(-100)
+        ner_labels = ner_labels[:max_length]
+
+        input_ids_list.append(encoding["input_ids"])
+        attention_mask_list.append(encoding["attention_mask"])
+        intent_labels_list.append(intent_label_map.get(intent_type, 0))
+        ner_labels_list.append(ner_labels)
+
+    dataset = Dataset.from_dict({
+        "input_ids":       input_ids_list,
+        "attention_mask":  attention_mask_list,
+        "intent_labels":   intent_labels_list,
+        "ner_labels":      ner_labels_list,
+    })
     dataset.set_format("torch")
     return dataset
 
 
-# =============================================================================
-# Metrics
-# =============================================================================
+# ---------------------------------------------------------------------------
+# Joint model
+# ---------------------------------------------------------------------------
+
+@dataclass
+class JointOutput(ModelOutput):
+    loss:              Optional[torch.FloatTensor] = None
+    intent_logits:     Optional[torch.FloatTensor] = None
+    ner_logits:        Optional[torch.FloatTensor] = None
+    hidden_states:     Optional[tuple]             = None
+    attentions:        Optional[tuple]             = None
 
 
-def compute_metrics(eval_pred):
-    """Compute classification metrics for the Trainer."""
-    logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
-
-    accuracy = accuracy_score(labels, predictions)
-    f1_weighted = f1_score(labels, predictions, average="weighted", zero_division=0)
-    precision = precision_score(
-        labels, predictions, average="weighted", zero_division=0
-    )
-    recall = recall_score(labels, predictions, average="weighted", zero_division=0)
-
-    return {
-        "accuracy": accuracy,
-        "f1_weighted": f1_weighted,
-        "precision_weighted": precision,
-        "recall_weighted": recall,
-    }
-
-
-# =============================================================================
-# Evaluation
-# =============================================================================
-
-
-def evaluate_model(
-    trainer: Trainer,
-    test_dataset: Dataset,
-    label_map: Dict[str, int],
-    logger: logging.Logger,
-) -> Dict:
+class JointIntentNER(PreTrainedModel):
     """
-    Run full evaluation on the test set and print detailed metrics.
+    distilroberta-base with two heads:
+      1. Classification head on [CLS] → intent_type
+      2. Token classification head on all tokens → BIO NER tags
 
-    Args:
-        trainer: Trained HuggingFace Trainer
-        test_dataset: Test split Dataset
-        label_map: Label mapping
-        logger: Logger instance
-
-    Returns:
-        Dict of evaluation metrics
+    Loss = intent_loss + ner_loss_weight * ner_loss
+    The NER weight is set lower (0.5) because intent accuracy is the
+    primary objective and NER data is noisier (many inferred entities
+    have no spans).
     """
-    logger.info("=" * 60)
-    logger.info("EVALUATION ON TEST SET")
-    logger.info("=" * 60)
 
-    # Get predictions
-    predictions_output = trainer.predict(test_dataset)
-    logits = predictions_output.predictions
-    true_labels = predictions_output.label_ids
-    preds = np.argmax(logits, axis=-1)
+    def __init__(self, config, num_intent_labels: int, num_ner_labels: int,
+                 ner_loss_weight: float = 0.5):
+        super().__init__(config)
+        self.roberta         = AutoModel.from_config(config)
+        hidden_size          = config.hidden_size
 
-    # Reverse label map
-    id_to_label = {v: k for k, v in label_map.items()}
-    target_names = [id_to_label[i] for i in range(len(label_map))]
-
-    # Classification report
-    report = classification_report(
-        true_labels, preds, target_names=target_names, digits=4
-    )
-    logger.info(f"\nClassification Report:\n{report}")
-
-    # Confusion matrix
-    cm = confusion_matrix(true_labels, preds)
-    logger.info(f"Confusion Matrix:\n{cm}")
-
-    # Overall metrics
-    metrics = predictions_output.metrics
-    logger.info(f"\nOverall Metrics:")
-    for key, value in sorted(metrics.items()):
-        logger.info(
-            f"  {key}: {value:.4f}" if isinstance(value, float) else f"  {key}: {value}"
+        # Intent classification head
+        self.intent_dropout  = nn.Dropout(p=0.1)
+        self.intent_head     = nn.Sequential(
+            nn.Linear(hidden_size, 256),
+            nn.GELU(),
+            nn.Dropout(p=0.1),
+            nn.Linear(256, num_intent_labels),
         )
 
-    return metrics
+        # NER token classification head
+        self.ner_dropout     = nn.Dropout(p=0.1)
+        self.ner_head        = nn.Linear(hidden_size, num_ner_labels)
+
+        self.num_intent_labels = num_intent_labels
+        self.num_ner_labels    = num_ner_labels
+        self.ner_loss_weight   = ner_loss_weight
+
+        self.post_init()
+
+    def forward(
+        self,
+        input_ids=None,
+        attention_mask=None,
+        intent_labels=None,
+        ner_labels=None,
+        **kwargs,
+    ) -> JointOutput:
+        outputs = self.roberta(input_ids=input_ids, attention_mask=attention_mask)
+        sequence_output = outputs.last_hidden_state   # (B, T, H)
+        cls_output      = sequence_output[:, 0, :]    # (B, H)  — [CLS] token
+
+        # Intent logits
+        intent_logits = self.intent_head(self.intent_dropout(cls_output))
+
+        # NER logits
+        ner_logits = self.ner_head(self.ner_dropout(sequence_output))
+
+        loss = None
+        if intent_labels is not None and ner_labels is not None:
+            intent_loss_fn = nn.CrossEntropyLoss()
+            ner_loss_fn    = nn.CrossEntropyLoss(ignore_index=-100)
+
+            intent_loss = intent_loss_fn(intent_logits, intent_labels)
+            ner_loss    = ner_loss_fn(
+                ner_logits.view(-1, self.num_ner_labels),
+                ner_labels.view(-1),
+            )
+            loss = intent_loss + self.ner_loss_weight * ner_loss
+
+        return JointOutput(
+            loss=loss,
+            intent_logits=intent_logits,
+            ner_logits=ner_logits,
+        )
 
 
-# =============================================================================
-# Main Training Pipeline
-# =============================================================================
+# ---------------------------------------------------------------------------
+# Metrics
+# ---------------------------------------------------------------------------
 
+def make_compute_metrics(intent_id2label: dict[int, str]):
+    """Returns a compute_metrics function for the Trainer."""
+
+    def compute_metrics(eval_pred):
+        # eval_pred.predictions is a tuple: (intent_logits, ner_logits)
+        (intent_logits, ner_logits), labels = eval_pred
+        # labels is a dict-like: we packed intent_labels and ner_labels together
+        # Trainer passes them as a tuple when there are multiple label columns
+        intent_labels, ner_labels = labels
+
+        # --- Intent metrics ---
+        intent_preds = np.argmax(intent_logits, axis=-1)
+        intent_acc   = accuracy_score(intent_labels, intent_preds)
+        intent_f1    = f1_score(intent_labels, intent_preds,
+                                average="weighted", zero_division=0)
+
+        # --- NER metrics (seqeval — ignores -100) ---
+        ner_preds_flat = np.argmax(ner_logits, axis=-1)
+
+        true_seqs = []
+        pred_seqs = []
+        for pred_row, label_row in zip(ner_preds_flat, ner_labels):
+            true_seq, pred_seq = [], []
+            for p, l in zip(pred_row, label_row):
+                if l == -100:
+                    continue
+                true_seq.append(NER_ID2LABEL.get(int(l), "O"))
+                pred_seq.append(NER_ID2LABEL.get(int(p), "O"))
+            true_seqs.append(true_seq)
+            pred_seqs.append(pred_seq)
+
+        try:
+            ner_report  = seq_classification_report(true_seqs, pred_seqs,
+                                                     output_dict=True, zero_division=0)
+            ner_f1      = ner_report.get("weighted avg", {}).get("f1-score", 0.0)
+            ner_precision = ner_report.get("weighted avg", {}).get("precision", 0.0)
+            ner_recall    = ner_report.get("weighted avg", {}).get("recall", 0.0)
+        except Exception:
+            ner_f1 = ner_precision = ner_recall = 0.0
+
+        return {
+            "intent_accuracy":    round(intent_acc,   4),
+            "intent_f1_weighted": round(intent_f1,    4),
+            "ner_f1_weighted":    round(ner_f1,       4),
+            "ner_precision":      round(ner_precision, 4),
+            "ner_recall":         round(ner_recall,    4),
+            # Combined metric used for best model selection
+            "combined_f1": round((intent_f1 + ner_f1) / 2, 4),
+        }
+
+    return compute_metrics
+
+
+# ---------------------------------------------------------------------------
+# Full evaluation report
+# ---------------------------------------------------------------------------
+
+def evaluate_model(trainer, test_dataset, intent_label_map, logger):
+    logger.info("=" * 60)
+    logger.info("TEST SET EVALUATION")
+    logger.info("=" * 60)
+
+    pred_output = trainer.predict(test_dataset)
+    intent_logits, ner_logits = pred_output.predictions
+    intent_labels, ner_labels = pred_output.label_ids
+
+    intent_preds = np.argmax(intent_logits, axis=-1)
+    id2intent    = {v: k for k, v in intent_label_map.items()}
+
+    logger.info("\n--- Intent Classification ---")
+    logger.info(f"Accuracy: {accuracy_score(intent_labels, intent_preds):.4f}")
+    logger.info("\n" + classification_report(
+        intent_labels, intent_preds,
+        target_names=[id2intent[i] for i in sorted(id2intent)],
+        zero_division=0,
+    ))
+
+    # NER per-entity breakdown
+    logger.info("\n--- NER Entity Extraction ---")
+    ner_preds_flat = np.argmax(ner_logits, axis=-1)
+    true_seqs, pred_seqs = [], []
+    for pred_row, label_row in zip(ner_preds_flat, ner_labels):
+        true_seq, pred_seq = [], []
+        for p, l in zip(pred_row, label_row):
+            if l == -100:
+                continue
+            true_seq.append(NER_ID2LABEL.get(int(l), "O"))
+            pred_seq.append(NER_ID2LABEL.get(int(p), "O"))
+        true_seqs.append(true_seq)
+        pred_seqs.append(pred_seq)
+
+    try:
+        logger.info("\n" + seq_classification_report(true_seqs, pred_seqs,
+                                                      zero_division=0))
+    except Exception as e:
+        logger.warning(f"Could not generate NER report: {e}")
+
+    return pred_output.metrics
+
+
+# ---------------------------------------------------------------------------
+# Training entry point
+# ---------------------------------------------------------------------------
 
 def train(
-    data_path: str,
-    output_dir: str,
-    model_name: str = "distilbert-base-uncased",
-    num_epochs: int = 5,
-    batch_size: int = 16,
-    learning_rate: float = 2e-5,
-    max_length: int = 128,
-    warmup_ratio: float = 0.1,
-    weight_decay: float = 0.01,
-    gradient_accumulation_steps: int = 2,
-    fp16: bool = True,
-    seed: int = 42,
+    train_path:    str,
+    val_path:      str,
+    test_path:     str,
+    output_dir:    str,
+    model_name:    str  = BASE_MODEL,
+    num_epochs:    int  = 8,
+    batch_size:    int  = 32,
+    learning_rate: float = 3e-5,
+    max_length:    int  = MAX_LENGTH,
+    warmup_ratio:  float = 0.1,
+    weight_decay:  float = 0.01,
+    grad_accum:    int  = 1,
+    ner_loss_weight: float = 0.5,
+    fp16:          bool = True,
+    seed:          int  = 42,
     early_stopping_patience: int = 3,
-    eval_strategy: str = "epoch",
-    save_strategy: str = "epoch",
-    logging_steps: int = 50,
-    save_total_limit: int = 2,
     resume_from_checkpoint: Optional[str] = None,
 ):
-    """
-    Full training pipeline for intent classification.
-
-    Args:
-        data_path: Path to the JSONL dataset file
-        output_dir: Directory to save model and logs
-        model_name: HuggingFace model identifier
-        num_epochs: Number of training epochs
-        batch_size: Per-device batch size
-        learning_rate: Peak learning rate
-        max_length: Max tokenization length for instructions
-        warmup_ratio: Warmup fraction of total steps
-        weight_decay: AdamW weight decay
-        gradient_accumulation_steps: Gradient accumulation steps
-        fp16: Use mixed precision
-        seed: Random seed
-        early_stopping_patience: Early stopping patience (epochs)
-        eval_strategy: When to evaluate ("epoch" or "steps")
-        save_strategy: When to save checkpoints
-        logging_steps: Log every N steps
-        save_total_limit: Max checkpoints to keep
-        resume_from_checkpoint: Path to resume from
-    """
-    # Setup
     logger = setup_logging(output_dir)
-    logger.info("=" * 60)
-    logger.info("System 1A: Intent Classification Training")
-    logger.info("=" * 60)
-    logger.info(f"Model: {model_name}")
-    logger.info(f"Data:  {data_path}")
-    logger.info(f"Output: {output_dir}")
+    logger.info(f"Base model:  {model_name}")
+    logger.info(f"Output dir:  {output_dir}")
+    logger.info(f"Train:       {train_path}")
+    logger.info(f"Val:         {val_path}")
+    logger.info(f"Test:        {test_path}")
 
     # -------------------------------------------------------------------------
     # 1. Load data
     # -------------------------------------------------------------------------
-    logger.info("\n--- Loading Dataset ---")
-    raw_data = load_jsonl(data_path)
-    logger.info(f"Loaded {len(raw_data)} rows from {data_path}")
+    logger.info("\n--- Loading data ---")
+    train_rows = load_jsonl(train_path)
+    val_rows   = load_jsonl(val_path)
+    test_rows  = load_jsonl(test_path)
+    logger.info(f"Rows — train={len(train_rows)}, val={len(val_rows)}, test={len(test_rows)}")
 
-    # Build label map
-    label_map = build_label_map(raw_data)
-    num_labels = len(label_map)
-    logger.info(f"Intent types ({num_labels}): {list(label_map.keys())}")
-
-    # -------------------------------------------------------------------------
-    # 2. Split data
-    # -------------------------------------------------------------------------
-    logger.info("\n--- Splitting Dataset ---")
-    splits = split_dataset(raw_data, test_size=0.1, val_size=0.1, seed=seed)
-    for split_name, split_data in splits.items():
-        label_counts = {}
-        for row in split_data:
-            label_counts[row["intent_type"]] = (
-                label_counts.get(row["intent_type"], 0) + 1
-            )
-        logger.info(f"  {split_name}: {len(split_data)} rows | {label_counts}")
+    # Build label maps from training data
+    intent_label_map = build_intent_label_map(train_rows)
+    num_intent_labels = len(intent_label_map)
+    num_ner_labels    = len(NER_LABELS)
+    logger.info(f"Intent classes: {num_intent_labels} → {list(intent_label_map.keys())}")
+    logger.info(f"NER labels:     {num_ner_labels} → {NER_LABELS}")
 
     # -------------------------------------------------------------------------
-    # 3. Load tokenizer and model
+    # 2. Tokenizer
     # -------------------------------------------------------------------------
-    logger.info(f"\n--- Loading Model: {model_name} ---")
+    logger.info(f"\n--- Loading tokenizer: {model_name} ---")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(
-        model_name,
-        num_labels=num_labels,
-        id2label={str(v): k for k, v in label_map.items()},
-        label2id=label_map,
-    )
-    logger.info(f"Model loaded: {model.config.model_type} with {num_labels} labels")
-    logger.info(
-        f"Parameters: {sum(p.numel() for p in model.parameters()):,} total, "
-        f"{sum(p.numel() for p in model.parameters() if p.requires_grad):,} trainable"
-    )
 
     # -------------------------------------------------------------------------
-    # 4. Preprocess datasets
+    # 3. Tokenize datasets
     # -------------------------------------------------------------------------
-    logger.info("\n--- Tokenizing ---")
-    train_dataset = preprocess_dataset(
-        splits["train"], tokenizer, label_map, max_length
-    )
-    val_dataset = preprocess_dataset(
-        splits["validation"], tokenizer, label_map, max_length
-    )
-    test_dataset = preprocess_dataset(splits["test"], tokenizer, label_map, max_length)
-    logger.info(
-        f"Tokenized: train={len(train_dataset)}, val={len(val_dataset)}, test={len(test_dataset)}"
-    )
+    logger.info("--- Tokenizing ---")
+    train_dataset = prepare_split(train_rows, tokenizer, intent_label_map, max_length)
+    val_dataset   = prepare_split(val_rows,   tokenizer, intent_label_map, max_length)
+    test_dataset  = prepare_split(test_rows,  tokenizer, intent_label_map, max_length)
+    logger.info(f"Tokenized: train={len(train_dataset)}, val={len(val_dataset)}, test={len(test_dataset)}")
 
     # -------------------------------------------------------------------------
-    # 5. Configure training
+    # 4. Model
     # -------------------------------------------------------------------------
-    # Check CUDA availability
+    logger.info(f"\n--- Loading model: {model_name} ---")
+    from transformers import AutoConfig
+    config = AutoConfig.from_pretrained(model_name)
+    model = JointIntentNER(
+        config,
+        num_intent_labels=num_intent_labels,
+        num_ner_labels=num_ner_labels,
+        ner_loss_weight=ner_loss_weight,
+    )
+    # Load pretrained encoder weights — only the roberta part
+    pretrained = AutoModel.from_pretrained(model_name)
+    model.roberta.load_state_dict(pretrained.state_dict(), strict=False)
+    del pretrained
+
+    total_params     = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    logger.info(f"Parameters: {total_params:,} total, {trainable_params:,} trainable")
+
+    # -------------------------------------------------------------------------
+    # 5. Device
+    # -------------------------------------------------------------------------
     use_fp16 = fp16 and torch.cuda.is_available()
-    device_info = (
-        f"CUDA ({torch.cuda.get_device_name(0)})"
-        if torch.cuda.is_available()
-        else "CPU"
-    )
-    logger.info(f"\nDevice: {device_info}")
+    if torch.cuda.is_available():
+        device_name = torch.cuda.get_device_name(0)
+        vram = torch.cuda.get_device_properties(0).total_memory / 1e9
+        logger.info(f"Device: {device_name} ({vram:.1f} GB VRAM)")
+    else:
+        logger.info("Device: CPU (training will be slow)")
     logger.info(f"FP16: {use_fp16}")
+
+    # -------------------------------------------------------------------------
+    # 6. Training arguments
+    # -------------------------------------------------------------------------
+    # Effective batch = batch_size * grad_accum
+    # For RTX 5060 8GB: batch_size=32, grad_accum=1 → effective=32
+    effective_batch = batch_size * grad_accum
+    logger.info(f"\nBatch size: {batch_size} × grad_accum {grad_accum} = effective {effective_batch}")
+    logger.info(f"Learning rate: {learning_rate} | Epochs: {num_epochs} | NER loss weight: {ner_loss_weight}")
 
     training_args = TrainingArguments(
         output_dir=output_dir,
@@ -407,225 +512,158 @@ def train(
         learning_rate=learning_rate,
         warmup_ratio=warmup_ratio,
         weight_decay=weight_decay,
-        gradient_accumulation_steps=gradient_accumulation_steps,
+        gradient_accumulation_steps=grad_accum,
         fp16=use_fp16,
-        eval_strategy=eval_strategy,
-        save_strategy=save_strategy,
-        logging_steps=logging_steps,
-        save_total_limit=save_total_limit,
+        eval_strategy="epoch",
+        save_strategy="epoch",
+        logging_steps=20,
+        save_total_limit=2,
         load_best_model_at_end=True,
-        metric_for_best_model="f1_weighted",
+        metric_for_best_model="combined_f1",
         greater_is_better=True,
         seed=seed,
-        report_to="none",  # Disable wandb/tensorboard by default
+        report_to="none",
         logging_dir=os.path.join(output_dir, "logs"),
-        dataloader_num_workers=0,  # Windows compatibility
+        dataloader_num_workers=0,   # Windows compatibility
+        label_names=["intent_labels", "ner_labels"],
     )
 
     # -------------------------------------------------------------------------
-    # 6. Train
+    # 7. Train
     # -------------------------------------------------------------------------
-    logger.info("\n--- Starting Training ---")
-    logger.info(
-        f"Epochs: {num_epochs} | Batch: {batch_size} | "
-        f"Grad Accum: {gradient_accumulation_steps} | "
-        f"Effective Batch: {batch_size * gradient_accumulation_steps} | "
-        f"LR: {learning_rate}"
-    )
-
+    logger.info("\n--- Starting training ---")
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
-        compute_metrics=compute_metrics,
-        callbacks=[
-            EarlyStoppingCallback(early_stopping_patience=early_stopping_patience)
-        ],
+        compute_metrics=make_compute_metrics({v: k for k, v in intent_label_map.items()}),
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=early_stopping_patience)],
     )
 
-    train_result = trainer.train(resume_from_checkpoint=resume_from_checkpoint)
-
-    # Log training results
-    logger.info("\n--- Training Complete ---")
-    logger.info(f"Training Loss: {train_result.training_loss:.4f}")
-    logger.info(f"Training Time: {train_result.metrics.get('train_runtime', 0):.1f}s")
+    trainer.train(resume_from_checkpoint=resume_from_checkpoint)
+    logger.info("Training complete.")
 
     # -------------------------------------------------------------------------
-    # 7. Evaluate
+    # 8. Evaluate on test set
     # -------------------------------------------------------------------------
-    evaluate_model(trainer, test_dataset, label_map, logger)
+    evaluate_model(trainer, test_dataset, intent_label_map, logger)
 
     # -------------------------------------------------------------------------
-    # 8. Save model, tokenizer, and label map
+    # 9. Save
     # -------------------------------------------------------------------------
-    logger.info("\n--- Saving Model ---")
+    logger.info("\n--- Saving model ---")
     final_dir = os.path.join(output_dir, "final_model")
     os.makedirs(final_dir, exist_ok=True)
 
     trainer.save_model(final_dir)
     tokenizer.save_pretrained(final_dir)
 
-    # Save label map
-    label_map_path = os.path.join(final_dir, "label_map.json")
-    with open(label_map_path, "w") as f:
-        json.dump(label_map, f, indent=2)
+    # Save label maps so inference code can reconstruct predictions
+    with open(os.path.join(final_dir, "intent_label_map.json"), "w") as f:
+        json.dump(intent_label_map, f, indent=2)
 
-    # Save training config
-    config_path = os.path.join(final_dir, "training_config.json")
-    with open(config_path, "w") as f:
-        json.dump(
-            {
-                "model_name": model_name,
-                "num_epochs": num_epochs,
-                "batch_size": batch_size,
-                "learning_rate": learning_rate,
-                "max_length": max_length,
-                "warmup_ratio": warmup_ratio,
-                "weight_decay": weight_decay,
-                "gradient_accumulation_steps": gradient_accumulation_steps,
-                "fp16": use_fp16,
-                "seed": seed,
-                "num_labels": num_labels,
-                "label_map": label_map,
-                "dataset": data_path,
-                "dataset_size": len(raw_data),
-                "train_size": len(splits["train"]),
-                "val_size": len(splits["validation"]),
-                "test_size": len(splits["test"]),
-            },
-            f,
-            indent=2,
-        )
+    with open(os.path.join(final_dir, "ner_label_map.json"), "w") as f:
+        json.dump({"label2id": NER_LABEL2ID, "id2label": NER_ID2LABEL}, f, indent=2)
 
-    logger.info(f"Model saved to: {final_dir}")
-    logger.info(f"Label map saved to: {label_map_path}")
-    logger.info(f"Config saved to: {config_path}")
+    with open(os.path.join(final_dir, "entity_types.json"), "w") as f:
+        json.dump(ENTITY_TYPES, f, indent=2)
 
-    logger.info("\n" + "=" * 60)
-    logger.info("TRAINING COMPLETE")
+    with open(os.path.join(final_dir, "training_config.json"), "w") as f:
+        json.dump({
+            "base_model":          model_name,
+            "num_intent_labels":   num_intent_labels,
+            "num_ner_labels":      num_ner_labels,
+            "ner_loss_weight":     ner_loss_weight,
+            "max_length":          max_length,
+            "num_epochs":          num_epochs,
+            "batch_size":          batch_size,
+            "learning_rate":       learning_rate,
+            "warmup_ratio":        warmup_ratio,
+            "weight_decay":        weight_decay,
+            "gradient_accumulation_steps": grad_accum,
+            "fp16":                use_fp16,
+            "seed":                seed,
+            "train_size":          len(train_rows),
+            "val_size":            len(val_rows),
+            "test_size":           len(test_rows),
+            "intent_label_map":    intent_label_map,
+            "entity_types":        ENTITY_TYPES,
+            "ner_labels":          NER_LABELS,
+        }, f, indent=2)
+
+    logger.info(f"Saved to: {final_dir}")
     logger.info("=" * 60)
-
+    logger.info("DONE")
+    logger.info("=" * 60)
     return final_dir
 
 
-# =============================================================================
-# CLI Entry Point
-# =============================================================================
-
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Fine-tune DistilBERT for intent classification (System 1A)",
+        description="Train joint intent classifier + NER model for contAIner Stage 1",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    parser.add_argument("--train",  default="datasets/intent-dataset/data/train.jsonl")
+    parser.add_argument("--val",    default="datasets/intent-dataset/data/validation.jsonl")
+    parser.add_argument("--test",   default="datasets/intent-dataset/data/test.jsonl")
+    parser.add_argument("--output", default="outputs/intent_classifier")
 
-    # Required
-    parser.add_argument(
-        "--data_path",
-        type=str,
-        default="datasets/intent-dataset/data/software_dataset_combined.jsonl",
-        help="Path to the JSONL dataset file",
-    )
-    parser.add_argument(
-        "--output_dir",
-        type=str,
-        default="outputs/system1_intent_classifier",
-        help="Directory to save model and logs",
-    )
-
-    # Model
-    parser.add_argument(
-        "--model_name",
-        type=str,
-        default="distilbert-base-uncased",
-        help="HuggingFace model identifier to fine-tune",
-    )
-
-    # Training hyperparameters
-    parser.add_argument("--num_epochs", type=int, default=5, help="Number of epochs")
-    parser.add_argument(
-        "--batch_size", type=int, default=16, help="Per-device batch size"
-    )
-    parser.add_argument(
-        "--learning_rate", type=float, default=2e-5, help="Peak learning rate"
-    )
-    parser.add_argument("--max_length", type=int, default=128, help="Max token length")
-    parser.add_argument("--warmup_ratio", type=float, default=0.1, help="Warmup ratio")
-    parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay")
-    parser.add_argument(
-        "--gradient_accumulation_steps",
-        type=int,
-        default=2,
-        help="Gradient accumulation steps",
-    )
-    parser.add_argument(
-        "--fp16",
-        action="store_true",
-        default=True,
-        help="Use mixed precision (auto-disabled on CPU)",
-    )
-    parser.add_argument(
-        "--no_fp16", action="store_true", help="Disable mixed precision"
-    )
-    parser.add_argument("--seed", type=int, default=42, help="Random seed")
-
-    # Training control
-    parser.add_argument(
-        "--early_stopping_patience",
-        type=int,
-        default=3,
-        help="Early stopping patience (epochs)",
-    )
-    parser.add_argument(
-        "--eval_strategy",
-        type=str,
-        default="epoch",
-        choices=["epoch", "steps"],
-        help="Evaluation strategy",
-    )
-    parser.add_argument(
-        "--logging_steps", type=int, default=50, help="Log every N steps"
-    )
-    parser.add_argument(
-        "--save_total_limit", type=int, default=2, help="Max checkpoints to keep"
-    )
-    parser.add_argument(
-        "--resume_from_checkpoint",
-        type=str,
-        default=None,
-        help="Resume training from checkpoint path",
-    )
-
-    args = parser.parse_args()
-
-    # Handle --no_fp16 flag
-    if args.no_fp16:
-        args.fp16 = False
-
-    return args
+    parser.add_argument("--model",          default=BASE_MODEL,
+                        help="HuggingFace model identifier")
+    parser.add_argument("--epochs",         type=int,   default=8)
+    parser.add_argument("--batch_size",     type=int,   default=32)
+    parser.add_argument("--lr",             type=float, default=3e-5)
+    parser.add_argument("--max_length",     type=int,   default=MAX_LENGTH)
+    parser.add_argument("--warmup_ratio",   type=float, default=0.1)
+    parser.add_argument("--weight_decay",   type=float, default=0.01)
+    parser.add_argument("--grad_accum",     type=int,   default=1)
+    parser.add_argument("--ner_loss_weight",type=float, default=0.5,
+                        help="Weight for NER loss relative to intent loss")
+    parser.add_argument("--no_fp16",        action="store_true")
+    parser.add_argument("--seed",           type=int,   default=42)
+    parser.add_argument("--patience",       type=int,   default=3,
+                        help="Early stopping patience")
+    parser.add_argument("--resume",         default=None,
+                        help="Resume from checkpoint path")
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
 
+    # Install check
+    missing = []
+    for pkg in ["transformers", "datasets", "torch", "sklearn", "seqeval"]:
+        try:
+            __import__(pkg if pkg != "sklearn" else "sklearn")
+        except ImportError:
+            missing.append(pkg)
+    if missing:
+        print(f"Missing packages: {missing}")
+        print(f"Install with: pip install {' '.join(missing)}")
+        sys.exit(1)
+
     train(
-        data_path=args.data_path,
-        output_dir=args.output_dir,
-        model_name=args.model_name,
-        num_epochs=args.num_epochs,
+        train_path=args.train,
+        val_path=args.val,
+        test_path=args.test,
+        output_dir=args.output,
+        model_name=args.model,
+        num_epochs=args.epochs,
         batch_size=args.batch_size,
-        learning_rate=args.learning_rate,
+        learning_rate=args.lr,
         max_length=args.max_length,
         warmup_ratio=args.warmup_ratio,
         weight_decay=args.weight_decay,
-        gradient_accumulation_steps=args.gradient_accumulation_steps,
-        fp16=args.fp16,
+        grad_accum=args.grad_accum,
+        ner_loss_weight=args.ner_loss_weight,
+        fp16=not args.no_fp16,
         seed=args.seed,
-        early_stopping_patience=args.early_stopping_patience,
-        eval_strategy=args.eval_strategy,
-        save_strategy=args.eval_strategy,  # Match eval strategy
-        logging_steps=args.logging_steps,
-        save_total_limit=args.save_total_limit,
-        resume_from_checkpoint=args.resume_from_checkpoint,
+        early_stopping_patience=args.patience,
+        resume_from_checkpoint=args.resume,
     )
