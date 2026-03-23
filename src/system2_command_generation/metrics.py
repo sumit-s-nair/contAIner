@@ -1,14 +1,7 @@
-"""
-Evaluation Metrics for System 2: Command Generation
+"""Evaluation metrics for System 2 command-generation outputs.
 
-Implements all metrics specified in the requirements:
-- Exact match
-- Normalized match (ignoring whitespace/flag order)
-- Intent preservation
-- Entity preservation
-- Syntax validity
-- OS/shell compatibility
-- Confidence correlation
+Provides exact/normalized matching, contract preservation checks, schema and
+syntax validation, compatibility checks, and aggregated reporting helpers.
 """
 
 import json

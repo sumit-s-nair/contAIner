@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
-"""
-Schema validation script for command-dataset.
+"""Validate command-dataset JSONL files against `schema.json`.
 
-Usage:
-    python validate_schema.py <jsonl_file>
-    python validate_schema.py ../data/train.jsonl
-
-Validates each line against schema.json and reports errors.
+The script checks each non-empty line, reports JSON/schema violations, and
+returns a non-zero exit code when errors are found.
 """
 
 import argparse

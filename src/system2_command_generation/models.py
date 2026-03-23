@@ -1,8 +1,7 @@
-"""
-Model Definitions for System 2: Command Generation
+"""Model loading and inference wrappers for System 2.
 
-Provides model loading, configuration, and inference utilities for
-CodeT5+ and FLAN-T5 models.
+Supports CodeT5+ and FLAN-T5 with a shared interface for tokenizer/model
+loading, text generation, and saving/loading trained checkpoints.
 """
 
 import os

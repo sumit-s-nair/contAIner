@@ -1,24 +1,8 @@
-"""
-Training Script for System 2: Command Generation
+"""Training entrypoint for System 2 command-generation models.
 
-Main training pipeline for CodeT5+ and FLAN-T5 models that convert
-structured intent data to CommandPlan objects.
-
-Training Data (command-dataset schema):
-    {instruction, intent_type, entities, os, shell, command, source}
-
-Output (model learns):
-    CommandPlan JSON
-
-Usage:
-    python -m src.system2_command_generation.train --model codet5plus
-    python -m src.system2_command_generation.train --model flan_t5 --baseline
-
-    # With custom config
-    python -m src.system2_command_generation.train --config config.json
-
-    # Resume training
-    python -m src.system2_command_generation.train --resume checkpoint-1000
+This module orchestrates data loading, model initialization, training,
+evaluation, and checkpointing for CodeT5+ and FLAN-T5 experiments using the
+command-dataset schema.
 """
 
 import os

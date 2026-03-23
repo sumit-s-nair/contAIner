@@ -47,6 +47,12 @@ python src/utils/load_datasets.py
 2. **Command Dataset**: `sumit-s-nair/command-dataset`
    - Used for command generation tasks
 
+## Status
+
+- `load_datasets.py` is ready for both scripted and import-based usage.
+- `env_loader.py` provides centralized `.env` discovery and loading.
+- Utilities are actively used by training and dataset upload workflows.
+
 ## API Reference
 
 ### `load_datasets()`

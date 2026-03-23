@@ -1,10 +1,7 @@
-"""
-Data Preprocessing Module for System 2: Command Generation
+"""Data preprocessing utilities for System 2 command generation.
 
-Simplified preprocessing that works directly with the command-dataset schema:
-{instruction, intent_type, entities, os, shell, command, source}
-
-The model learns: (intent_type, entities, os, shell) → CommandPlan
+This module formats command-dataset rows into model input/output text, validates
+schema constraints, builds torch datasets, and provides inference helpers.
 """
 
 import json
@@ -224,7 +221,7 @@ class CommandGenerationDataset(Dataset):
         self.max_output_length = max_output_length
         self.compact_prompts = compact_prompts
         
-        # Process and filter data
+        # Keep only rows that pass schema and OS/shell compatibility checks.
         self.data = []
         for row in data:
             is_valid, error = validate_dataset_row(row)

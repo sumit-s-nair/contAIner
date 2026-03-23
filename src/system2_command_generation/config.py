@@ -1,8 +1,7 @@
-"""
-Configuration Module for System 2: Command Generation
+"""Configuration and schema definitions for System 2 training.
 
-Contains all hyperparameters, schema definitions, and configuration classes
-for training the command generation models.
+Includes model presets, JSON schemas for CanonicalIntent/CommandPlan, and the
+`TrainingConfig` dataclass used across the training pipeline.
 """
 
 from dataclasses import dataclass, field

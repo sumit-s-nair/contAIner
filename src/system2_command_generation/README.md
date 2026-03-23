@@ -12,6 +12,17 @@ The Command Generation system uses fine-tuned language models to generate shell 
 - **Shell-specific**: Produces valid syntax for PowerShell, Bash, Cmd, or Zsh
 - **Structured**: Outputs valid JSON with sequential execution steps
 
+## Status
+
+Implemented:
+- Training and evaluation pipeline for CodeT5+ and FLAN-T5
+- Dataset preprocessing from command-dataset schema
+- Metric suite for match, preservation, validity, and compatibility checks
+
+Pending:
+- Dedicated production inference service wrapper
+- Cross-platform command dry-run harness integration
+
 ## Architecture
 
 ### Training Time

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Upload local dataset folders to Hugging Face Hub as dataset repositories.
+"""Upload local dataset folders to Hugging Face dataset repositories.
 
 Usage examples:
 
@@ -42,12 +41,14 @@ def push_folder(local_path: Path, repo_id: str, token: str):
         print(f"Local path not found: {local_path}")
         return 1
 
+    # Ensure the destination dataset repository exists before upload.
     print(f"Creating or checking repo: {repo_id} (type=dataset)")
     try:
         create_repo(repo_id=repo_id, token=token, repo_type="dataset", exist_ok=True)
     except Exception as e:
         print(f"Warning: create_repo may have failed or repo already exists: {e}")
 
+    # Upload folder contents to repository root.
     print(f"Uploading folder {local_path} to {repo_id}...")
     try:
         upload_folder(

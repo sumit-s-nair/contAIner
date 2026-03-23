@@ -6,6 +6,12 @@ A dataset mapping intents to executable shell commands for container/dev-environ
 
 This dataset provides **command-level supervision** for generating shell commands from structured intents. Each row contains a canonicalized instruction, intent metadata, and the corresponding command.
 
+## Progress
+
+- Train/validation/test JSONL splits are present and schema-aligned.
+- Validation script is available in `scripts/validate_schema.py`.
+- Dataset publishing workflow is available through `scripts/push_datasets_to_hf.py`.
+
 ## Schema
 
 Each JSONL row follows:
