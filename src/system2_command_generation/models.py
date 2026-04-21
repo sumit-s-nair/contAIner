@@ -1,22 +1,22 @@
 """Model loading and inference wrappers for System 2.
 
-Supports CodeT5+ and FLAN-T5 with a shared interface for tokenizer/model
+Supports CodeT5+ and Qwen2.5-Coder-1.5B with a shared interface for tokenizer/model
 loading, text generation, and saving/loading trained checkpoints.
 """
 
 import os
+import inspect
 from typing import Dict, Any, Optional, List, Union
 from enum import Enum
 
 import torch
 import torch.nn as nn
 from transformers import (
+    AutoModelForCausalLM,
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
-    T5ForConditionalGeneration,
     PreTrainedModel,
     PreTrainedTokenizer,
-    GenerationConfig,
 )
 
 from .config import ModelConfig, ModelType, MODEL_CONFIGS, TrainingConfig
@@ -71,6 +71,7 @@ def load_model(
     torch_dtype: Optional[torch.dtype] = None,
     load_in_8bit: bool = False,
     load_in_4bit: bool = False,
+    quantization_config: Optional[Any] = None,
 ) -> PreTrainedModel:
     """
     Load a pre-trained model.
@@ -82,6 +83,7 @@ def load_model(
         torch_dtype: Data type for model weights
         load_in_8bit: Whether to load in 8-bit precision
         load_in_4bit: Whether to load in 4-bit precision
+        quantization_config: Optional transformers quantization config
         
     Returns:
         Loaded model
@@ -104,14 +106,21 @@ def load_model(
     # Only add device_map and dtype for CUDA
     if torch.cuda.is_available():
         kwargs["device_map"] = device_map
-        kwargs["torch_dtype"] = torch_dtype
-        
-        if load_in_8bit:
+        model_cls = AutoModelForSeq2SeqLM if model_config.is_encoder_decoder else AutoModelForCausalLM
+        from_pretrained_params = inspect.signature(model_cls.from_pretrained).parameters
+        dtype_arg = "dtype" if "dtype" in from_pretrained_params else "torch_dtype"
+        kwargs[dtype_arg] = torch_dtype
+
+        if quantization_config is not None:
+            kwargs["quantization_config"] = quantization_config
+        elif load_in_8bit:
             kwargs["load_in_8bit"] = True
         elif load_in_4bit:
             kwargs["load_in_4bit"] = True
-    
-    model = AutoModelForSeq2SeqLM.from_pretrained(
+
+    model_cls = AutoModelForSeq2SeqLM if model_config.is_encoder_decoder else AutoModelForCausalLM
+
+    model = model_cls.from_pretrained(
         model_config.model_id,
         **kwargs,
     )
@@ -139,7 +148,7 @@ class CommandGenerationModel:
     Wrapper class for command generation models.
     
     Provides a unified interface for loading, training, and inference
-    with different model architectures (CodeT5+, FLAN-T5).
+    with different model architectures (CodeT5+, Qwen2.5-Coder-1.5B).
     """
     
     def __init__(
@@ -247,20 +256,29 @@ class CommandGenerationModel:
         max_length = max_length or self.model_config.max_output_length
         
         with torch.no_grad():
-            outputs = self.model.generate(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                max_length=max_length,
-                num_beams=num_beams,
-                num_return_sequences=num_return_sequences,
-                temperature=temperature,
-                top_p=top_p,
-                do_sample=do_sample,
-                early_stopping=early_stopping,
-                pad_token_id=self.tokenizer.pad_token_id,
-                eos_token_id=self.tokenizer.eos_token_id,
+            generation_kwargs = {
+                "input_ids": input_ids,
+                "attention_mask": attention_mask,
+                "num_beams": num_beams,
+                "num_return_sequences": num_return_sequences,
+                "temperature": temperature,
+                "top_p": top_p,
+                "do_sample": do_sample,
+                "early_stopping": early_stopping,
+                "pad_token_id": self.tokenizer.pad_token_id,
+                "eos_token_id": self.tokenizer.eos_token_id,
                 **kwargs,
-            )
+            }
+
+            if self.model_config.is_encoder_decoder:
+                generation_kwargs["max_length"] = max_length
+                outputs = self.model.generate(**generation_kwargs)
+            else:
+                generation_kwargs["max_new_tokens"] = max_length
+                outputs = self.model.generate(**generation_kwargs)
+                # Decoder-only models return prompt + completion; keep completion only.
+                prompt_len = input_ids.shape[1]
+                outputs = outputs[:, prompt_len:]
         
         return outputs
     
@@ -347,19 +365,46 @@ class CommandGenerationModel:
             config = TrainingConfig.load(config_path)
             model_type = config.model_type
         else:
-            config = TrainingConfig(model_type=model_type or ModelType.CODET5_PLUS)
+            config = TrainingConfig(model_type=model_type or ModelType.QWEN2_5_CODER_1_5B)
         
         # Load tokenizer
         tokenizer = AutoTokenizer.from_pretrained(model_dir)
+
+        if tokenizer.pad_token is None:
+            tokenizer.pad_token = tokenizer.eos_token
         
         # Load model
-        model = AutoModelForSeq2SeqLM.from_pretrained(
-            model_dir,
-            device_map="auto" if torch.cuda.is_available() else None,
-        )
+        model_config = config.get_model_config()
+        model_cls = AutoModelForSeq2SeqLM if model_config.is_encoder_decoder else AutoModelForCausalLM
+        adapter_config_path = os.path.join(model_dir, "adapter_config.json")
+        if os.path.exists(adapter_config_path):
+            try:
+                from peft import PeftConfig, PeftModel
+            except ImportError as exc:
+                raise RuntimeError(
+                    "This checkpoint contains LoRA adapters. Install peft to load it."
+                ) from exc
+
+            peft_config = PeftConfig.from_pretrained(model_dir)
+            base_model_id = peft_config.base_model_name_or_path or model_config.model_id
+            base_model = model_cls.from_pretrained(
+                base_model_id,
+                device_map="auto" if torch.cuda.is_available() else None,
+                trust_remote_code=True,
+            )
+            model = PeftModel.from_pretrained(
+                base_model,
+                model_dir,
+                device_map="auto" if torch.cuda.is_available() else None,
+            )
+        else:
+            model = model_cls.from_pretrained(
+                model_dir,
+                device_map="auto" if torch.cuda.is_available() else None,
+            )
         
         return cls(
-            model_type=model_type or ModelType.CODET5_PLUS,
+            model_type=model_type or ModelType.QWEN2_5_CODER_1_5B,
             config=config,
             model=model,
             tokenizer=tokenizer,
@@ -407,9 +452,9 @@ def create_codet5_plus(config: Optional[TrainingConfig] = None) -> CommandGenera
     return create_model(ModelType.CODET5_PLUS, config)
 
 
-def create_flan_t5(config: Optional[TrainingConfig] = None) -> CommandGenerationModel:
-    """Create a FLAN-T5 model for command generation."""
-    return create_model(ModelType.FLAN_T5, config)
+def create_qwen2_5_coder_1_5b(config: Optional[TrainingConfig] = None) -> CommandGenerationModel:
+    """Create a Qwen2.5-Coder-1.5B model for command generation."""
+    return create_model(ModelType.QWEN2_5_CODER_1_5B, config)
 
 
 # =============================================================================

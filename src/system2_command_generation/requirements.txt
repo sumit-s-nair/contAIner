@@ -1,5 +1,5 @@
 # System 2: Command Generation - Dependencies
-# Training pipeline for CodeT5+ and FLAN-T5 models
+# Training pipeline for Qwen2.5-Coder-1.5B and CodeT5+ models
 
 # Core ML frameworks
 torch>=2.9.0

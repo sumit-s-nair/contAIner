@@ -15,7 +15,7 @@ The Command Generation system uses fine-tuned language models to generate shell 
 ## Status
 
 Implemented:
-- Training and evaluation pipeline for CodeT5+ and FLAN-T5
+- Training and evaluation pipeline for Qwen2.5-Coder-1.5B and CodeT5+
 - Dataset preprocessing from command-dataset schema
 - Metric suite for match, preservation, validity, and compatibility checks
 
@@ -41,8 +41,8 @@ CanonicalIntent (from System 1) → Model → CommandPlan
 
 | Model | Description | Use Case |
 |-------|-------------|----------|
-| **CodeT5+ (770M)** | Primary model - Salesforce's code-specialized T5 | Best accuracy for code generation |
-| **FLAN-T5 Base** | Baseline model - Google's instruction-tuned T5 | Comparison and fallback |
+| **Qwen2.5-Coder-1.5B** | Primary model - Qwen code-focused decoder-only LLM | Best command synthesis and instruction following |
+| **CodeT5+ (770M)** | Baseline model - Salesforce's code-specialized T5 | Lightweight comparison baseline |
 
 ## Data Contracts
 
@@ -124,11 +124,27 @@ pip install -r src/system2_command_generation/requirements.txt
 ### Training
 
 ```bash
-# Train CodeT5+ (primary model)
-python -m src.system2_command_generation.train --model codet5plus
+# Default command (run from repo root; includes MCP doc enrichment)
+python -m src.system2_command_generation.train \
+  --model qwen2_5_coder_1_5b \
+  --use-qlora \
+  --use-mcp \
+  --mcp-url http://localhost:11435 \
+  --output-dir ./outputs/system2_command_generation
 
-# Train FLAN-T5 (baseline)
-python -m src.system2_command_generation.train --model flan_t5 --baseline
+# Train Qwen2.5-Coder-1.5B (primary model)
+python -m src.system2_command_generation.train --model qwen2_5_coder_1_5b
+
+# Recommended on 8-12 GB GPUs: QLoRA + MCP doc enrichment
+python -m src.system2_command_generation.train \
+  --model qwen2_5_coder_1_5b \
+  --use-qlora \
+  --use-mcp \
+  --mcp-url http://localhost:11435 \
+  --output-dir ./outputs/system2_command_generation
+
+# Train CodeT5+ (baseline)
+python -m src.system2_command_generation.train --model codet5plus --baseline
 
 # Train with custom configuration
 python -m src.system2_command_generation.train --config config.json
@@ -141,16 +157,35 @@ python -m src.system2_command_generation.train --resume checkpoint-1000
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--model` | `codet5plus` | Model to train: `codet5plus` or `flan_t5` |
-| `--baseline` | `false` | Train FLAN-T5 as baseline |
+| `--model` | `qwen2_5_coder_1_5b` | Model to train: `qwen2_5_coder_1_5b` or `codet5plus` |
+| `--baseline` | `false` | Train CodeT5+ as baseline |
 | `--data-source` | `huggingface` | Data source: `huggingface` or `local` |
 | `--dataset-name` | `sumit-s-nair/command-dataset` | HuggingFace dataset name |
 | `--local-data-dir` | `None` | Local data directory path |
 | `--output-dir` | `./outputs/system2_command_generation` | Output directory |
 | `--epochs` | `10` | Number of training epochs |
 | `--batch-size` | `8` | Training batch size |
+| `--eval-batch-size` | `16` | Evaluation batch size |
+| `--grad-accum-steps` | `4` | Gradient accumulation steps |
+| `--max-input-length` | `512` | Maximum prompt/input token length |
+| `--max-output-length` | `1024` | Maximum target/completion token length |
+| `--generation-num-beams` | `1` | Beam width used during evaluation generation |
+| `--warmup-steps` | `0` | Warmup steps (overrides warmup ratio when > 0) |
+| `--no-gradient-checkpointing` | `false` | Disable gradient checkpointing |
+| `--disable-auto-memory-tuning` | `false` | Disable automatic low-VRAM tuning for Qwen |
 | `--learning-rate` | `5e-5` | Learning rate |
 | `--seed` | `42` | Random seed for reproducibility |
+| `--use-qlora` | `auto` | Enable QLoRA (default behavior for Qwen2.5-Coder-1.5B) |
+| `--no-qlora` | `false` | Disable QLoRA and train full model weights |
+| `--lora-r` | `16` | LoRA rank |
+| `--lora-alpha` | `32` | LoRA alpha |
+| `--lora-dropout` | `0.05` | LoRA dropout |
+| `--lora-target-modules` | Qwen proj layers | LoRA target module names |
+| `--qlora-compute-dtype` | `float16` | QLoRA compute dtype |
+| `--qlora-quant-type` | `nf4` | 4-bit quantization type |
+| `--qlora-no-double-quant` | `false` | Disable nested quantization |
+| `--use-mcp` | `false` | Enrich each input with live MCP docs |
+| `--mcp-url` | `http://localhost:11435` | MCP server base URL |
 | `--resume` | `None` | Checkpoint to resume from |
 | `--eval-only` | `false` | Only run evaluation |
 | `--model-path` | `None` | Path to trained model for evaluation |
@@ -175,7 +210,7 @@ from src.system2_command_generation import (
 
 # Create configuration
 config = TrainingConfig(
-    model_type=ModelType.CODET5_PLUS,
+  model_type=ModelType.QWEN2_5_CODER_1_5B,
     num_epochs=10,
     batch_size=8,
     learning_rate=5e-5,
@@ -256,7 +291,7 @@ Create a `config.json` file for custom training:
 
 ```json
 {
-  "model_type": "codet5plus",
+  "model_type": "qwen2_5_coder_1_5b",
   "output_dir": "./outputs/custom_run",
   "num_epochs": 15,
   "batch_size": 16,
@@ -296,7 +331,7 @@ After training, the following files are created:
 
 ```
 outputs/system2_command_generation/
-├── codet5plus_YYYYMMDD_HHMMSS/
+├── qwen2_5_coder_1_5b_YYYYMMDD_HHMMSS/
 │   ├── config.json              # Training configuration
 │   ├── training_YYYYMMDD.log    # Training logs
 │   ├── checkpoint-*/            # Training checkpoints
@@ -313,27 +348,31 @@ outputs/system2_command_generation/
 
 | Model | VRAM (FP16) | VRAM (FP32) | Training Time (10 epochs) |
 |-------|-------------|-------------|---------------------------|
+| Qwen2.5-Coder-1.5B | ~10 GB | ~20 GB | ~3-6 hours (V100) |
 | CodeT5+ 770M | ~6 GB | ~12 GB | ~2-4 hours (V100) |
-| FLAN-T5 Base | ~2 GB | ~4 GB | ~1-2 hours (V100) |
 
 For systems with limited VRAM:
 - Use `--batch-size 4` or lower
 - Enable gradient accumulation with `gradient_accumulation_steps: 4`
-- Use 8-bit quantization (requires `bitsandbytes`)
+- Prefer `--use-qlora` for Qwen2.5-Coder-1.5B training on 8-12 GB GPUs
 
 ## Troubleshooting
 
 ### Out of Memory
 
-```bash
-# Reduce batch size
-python -m src.system2_command_generation.train --batch-size 4
+Qwen2.5-Coder-1.5B can exceed VRAM quickly at long sequence lengths.
+The trainer now auto-applies conservative settings on lower-memory GPUs
+unless `--disable-auto-memory-tuning` is set.
 
-# Or use gradient accumulation in config
-{
-  "batch_size": 4,
-  "gradient_accumulation_steps": 4
-}
+```bash
+# Explicit memory-safe run (works on many 8-12 GB GPUs)
+python -m src.system2_command_generation.train \
+  --model qwen2_5_coder_1_5b \
+  --batch-size 1 \
+  --eval-batch-size 1 \
+  --grad-accum-steps 16 \
+  --max-input-length 256 \
+  --max-output-length 256
 ```
 
 ### Dataset Not Found

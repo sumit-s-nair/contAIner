@@ -13,21 +13,21 @@ System 2 is responsible for **generating OS-specific, executable shell commands*
 
 ## Architecture
 
-System 2 uses a single trained model (CodeT5+) that has been fine-tuned on multiple command generation datasets.
+System 2 uses a primary trained model (Qwen2.5-Coder-1.5B) fine-tuned on command generation datasets, with CodeT5+ retained as a baseline.
 
-### Model: CodeT5+ (770M parameters)
+### Model: Qwen2.5-Coder-1.5B
 
-- **Base Model**: Salesforce CodeT5+ (pre-trained on code)
+- **Base Model**: Qwen/Qwen2.5-Coder-1.5B
 - **Fine-tuning Task**: Conditional text generation (intent → command)
 - **Training Data**: ~5,000+ samples from normalized datasets
 - **Conditioning**: OS type + shell type + intent + entities
 - **Output**: Shell commands with proper syntax for target environment
 
-**Why CodeT5+?**
-- Pre-trained on code (understands shell syntax)
-- Strong at cross-platform generation
+**Why Qwen2.5-Coder-1.5B?**
+- Strong code-oriented prior with better instruction following
+- Better long-context behavior for MCP-enriched prompts
+- Strong cross-platform command synthesis quality
 - Handles edge cases better than rule-based systems
-- Can learn from examples (NL2Bash, NL2SH-ALFA)
 
 ---
 
@@ -116,7 +116,7 @@ See [Dataset Documentation](../datasets/README.md) for details.
 
 ### Model Fine-tuning
 
-**Base Model**: CodeT5+ (Salesforce/codet5p-770m)
+**Base Model**: Qwen2.5-Coder-1.5B (Qwen/Qwen2.5-Coder-1.5B)
 
 **Training Configuration**:
 - Learning rate: 5e-5
@@ -247,11 +247,11 @@ The training implementation is located at `src/system2_command_generation/`.
 # Install dependencies
 pip install -r src/system2_command_generation/requirements.txt
 
-# Train CodeT5+ (primary model)
-python -m src.system2_command_generation.train --model codet5plus
+# Train Qwen2.5-Coder-1.5B (primary model)
+python -m src.system2_command_generation.train --model qwen2_5_coder_1_5b
 
-# Train FLAN-T5 (baseline comparison)
-python -m src.system2_command_generation.train --model flan_t5 --baseline
+# Train CodeT5+ (baseline comparison)
+python -m src.system2_command_generation.train --model codet5plus --baseline
 ```
 
 ### Module Structure
@@ -260,7 +260,7 @@ python -m src.system2_command_generation.train --model flan_t5 --baseline
 |------|-------------|
 | `config.py` | Training configuration, schemas, and hyperparameters |
 | `data_preprocessing.py` | Data loading and CanonicalIntent → CommandPlan transformation |
-| `models.py` | CodeT5+ and FLAN-T5 model loading and inference |
+| `models.py` | Qwen2.5-Coder-1.5B and CodeT5+ model loading and inference |
 | `metrics.py` | Evaluation metrics (exact match, normalized match, etc.) |
 | `train.py` | Main training script with HuggingFace Trainer |
 

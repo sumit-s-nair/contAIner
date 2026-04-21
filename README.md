@@ -214,17 +214,14 @@ Safety validation and CLI testing
 
 ## Models
 
-The contAIner system uses a single primary model for command generation.
+The contAIner system currently uses Qwen2.5-Coder-1.5B as the primary command-generation model.
 
-- **Primary Model:** CodeT5+ (770M)  
-  Used for all NL → OS-aware shell command generation due to its strong
-  performance on code-oriented tasks and structured output control.
+- **Primary Model:** Qwen2.5-Coder-1.5B  
+  Used for NL → OS-aware shell command generation due to stronger
+  instruction following and code-command synthesis quality.
 
-- **Baseline Model:** FLAN-T5 (base)  
-  Used only for benchmarking and evaluation.
-
-- **Experimental Model:** Qwen-Coder (QLoRA)  
-  Used for exploratory comparison and upper-bound performance analysis.
+- **Baseline Model:** CodeT5+ (770M)  
+  Used for benchmarking and lightweight comparison runs.
 
 All models are explicitly conditioned on operating system and shell type
 to prevent ambiguity and unsafe command generation.

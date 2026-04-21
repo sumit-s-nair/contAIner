@@ -144,7 +144,7 @@ COMMAND_PLAN_SCHEMA = {
 class ModelType(Enum):
     """Supported model types for command generation."""
     CODET5_PLUS = "codet5plus"
-    FLAN_T5 = "flan_t5"
+    QWEN2_5_CODER_1_5B = "qwen2_5_coder_1_5b"
 
 
 @dataclass
@@ -153,8 +153,8 @@ class ModelConfig:
     name: str
     model_id: str
     tokenizer_id: str
-    max_input_length: int = 512
-    max_output_length: int = 1024
+    max_input_length: int = 1024
+    max_output_length: int = 512
     is_encoder_decoder: bool = True
 
 
@@ -167,12 +167,14 @@ MODEL_CONFIGS = {
         max_input_length=512,
         max_output_length=1024,
     ),
-    ModelType.FLAN_T5: ModelConfig(
-        name="FLAN-T5 Base",
-        model_id="google/flan-t5-base",
-        tokenizer_id="google/flan-t5-base",
-        max_input_length=512,
-        max_output_length=1024,
+    # Decoder-only model with strong code-generation capabilities.
+    ModelType.QWEN2_5_CODER_1_5B: ModelConfig(
+        name="Qwen2.5-Coder-1.5B",
+        model_id="Qwen/Qwen2.5-Coder-1.5B",
+        tokenizer_id="Qwen/Qwen2.5-Coder-1.5B",
+        max_input_length=1024,
+        max_output_length=512,
+        is_encoder_decoder=False,
     ),
 }
 
@@ -187,7 +189,7 @@ class TrainingConfig:
     Complete training configuration for command generation models.
     
     Attributes:
-        model_type: Which model to train (CodeT5+ or FLAN-T5)
+        model_type: Which model to train (CodeT5+ or Qwen2.5-Coder-1.5B)
         output_dir: Directory to save trained models and logs
         num_epochs: Number of training epochs
         batch_size: Training batch size
@@ -205,7 +207,7 @@ class TrainingConfig:
     """
     
     # Model settings
-    model_type: ModelType = ModelType.CODET5_PLUS
+    model_type: ModelType = ModelType.QWEN2_5_CODER_1_5B
     
     # Paths
     output_dir: str = "./outputs/system2_command_generation"
@@ -227,6 +229,27 @@ class TrainingConfig:
     fp16: bool = True
     bf16: bool = False  # Use bf16 if available (better for newer GPUs)
     optim: str = "adamw_torch"
+    gradient_checkpointing: bool = True
+
+    # QLoRA settings (primarily for decoder-only models like Qwen)
+    use_qlora: bool = True
+    qlora_r: int = 16
+    qlora_alpha: int = 32
+    qlora_dropout: float = 0.05
+    qlora_target_modules: List[str] = field(
+        default_factory=lambda: [
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
+        ]
+    )
+    qlora_compute_dtype: str = "float16"
+    qlora_quant_type: str = "nf4"
+    qlora_double_quant: bool = True
     
     # Reproducibility
     seed: int = 42
@@ -241,6 +264,7 @@ class TrainingConfig:
     load_best_model_at_end: bool = True
     metric_for_best_model: str = "eval_normalized_match"
     greater_is_better: bool = True
+    generation_num_beams: int = 1
     
     # Early stopping
     early_stopping_patience: int = 3
@@ -251,6 +275,14 @@ class TrainingConfig:
     max_output_length: int = 1024
     num_workers: int = 4
     
+    # MCP documentation enrichment
+    # When enabled, each training sample's input is augmented with live
+    # command syntax, flags, and examples fetched from the MCP server.
+    # This teaches the model to generate commands grounded in real docs.
+    use_mcp: bool = False
+    mcp_url: str = "http://localhost:11435"
+    mcp_timeout: int = 10
+
     # Metrics thresholds (from requirements)
     target_exact_match: float = 0.70
     target_normalized_match: float = 0.85
@@ -282,6 +314,15 @@ class TrainingConfig:
             "fp16": self.fp16,
             "bf16": self.bf16,
             "optim": self.optim,
+            "gradient_checkpointing": self.gradient_checkpointing,
+            "use_qlora": self.use_qlora,
+            "qlora_r": self.qlora_r,
+            "qlora_alpha": self.qlora_alpha,
+            "qlora_dropout": self.qlora_dropout,
+            "qlora_target_modules": self.qlora_target_modules,
+            "qlora_compute_dtype": self.qlora_compute_dtype,
+            "qlora_quant_type": self.qlora_quant_type,
+            "qlora_double_quant": self.qlora_double_quant,
             "seed": self.seed,
             "eval_strategy": self.eval_strategy,
             "eval_steps": self.eval_steps,
@@ -292,11 +333,15 @@ class TrainingConfig:
             "load_best_model_at_end": self.load_best_model_at_end,
             "metric_for_best_model": self.metric_for_best_model,
             "greater_is_better": self.greater_is_better,
+            "generation_num_beams": self.generation_num_beams,
             "early_stopping_patience": self.early_stopping_patience,
             "early_stopping_threshold": self.early_stopping_threshold,
             "max_input_length": self.max_input_length,
             "max_output_length": self.max_output_length,
             "num_workers": self.num_workers,
+            "use_mcp": self.use_mcp,
+            "mcp_url": self.mcp_url,
+            "mcp_timeout": self.mcp_timeout,
         }
 
     @classmethod

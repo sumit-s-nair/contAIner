@@ -17,20 +17,24 @@
     "entities": {
       "type": "object",
       "description": "Extracted entities from the instruction",
-      "required": ["runtime", "package", "version"],
+      "required": ["software", "version", "project", "file"],
       "additionalProperties": false,
       "properties": {
-        "runtime": {
+        "software": {
           "type": ["string", "null"],
-          "description": "Runtime/language (e.g., python, node)"
-        },
-        "package": {
-          "type": ["string", "null"],
-          "description": "Package name"
+          "description": "Target software/runtime/package manager (e.g., python, node, npm)"
         },
         "version": {
           "type": ["string", "null"],
           "description": "Version specifier"
+        },
+        "project": {
+          "type": ["string", "null"],
+          "description": "Project or environment name"
+        },
+        "file": {
+          "type": ["string", "null"],
+          "description": "File or path reference"
         }
       }
     },
@@ -39,19 +43,25 @@
       "description": "Character spans for extracted entities",
       "additionalProperties": false,
       "properties": {
-        "runtime": {
-          "oneOf": [
-            { "$ref": "#/definitions/span" },
-            { "type": "null" }
-          ]
-        },
-        "package": {
+        "software": {
           "oneOf": [
             { "$ref": "#/definitions/span" },
             { "type": "null" }
           ]
         },
         "version": {
+          "oneOf": [
+            { "$ref": "#/definitions/span" },
+            { "type": "null" }
+          ]
+        },
+        "project": {
+          "oneOf": [
+            { "$ref": "#/definitions/span" },
+            { "type": "null" }
+          ]
+        },
+        "file": {
           "oneOf": [
             { "$ref": "#/definitions/span" },
             { "type": "null" }

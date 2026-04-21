@@ -1,13 +1,15 @@
 """Training entrypoint for System 2 command-generation models.
 
 This module orchestrates data loading, model initialization, training,
-evaluation, and checkpointing for CodeT5+ and FLAN-T5 experiments using the
+evaluation, and checkpointing for CodeT5+ and Qwen2.5-Coder-1.5B experiments using the
 command-dataset schema.
 """
 
 import os
 import sys
 import json
+import inspect
+import importlib.util
 import argparse
 import logging
 from datetime import datetime
@@ -19,7 +21,7 @@ from torch.utils.data import DataLoader
 from transformers import (
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
-    DataCollatorForSeq2Seq,
+    BitsAndBytesConfig,
     EarlyStoppingCallback,
     TrainerCallback,
     TrainerState,
@@ -28,30 +30,80 @@ from transformers import (
 from datasets import DatasetDict
 
 # Local imports
-from .config import (
-    TrainingConfig,
-    ModelType,
-    MODEL_CONFIGS,
-)
-from .data_preprocessing import (
-    CommandDataProcessor,
-    CommandGenerationDataset,
-    parse_model_output,
-    format_input,
-    format_output,
-)
-from .models import (
-    CommandGenerationModel,
-    create_model,
-    load_tokenizer,
-    load_model,
-)
-from .metrics import (
-    CommandMetrics,
-    MetricResults,
-    check_exit_criteria,
-    compute_metrics_for_trainer,
-)
+try:
+    from .config import (
+        TrainingConfig,
+        ModelType,
+        MODEL_CONFIGS,
+    )
+    from .data_preprocessing import (
+        CommandDataProcessor,
+        CommandGenerationDataset,
+        MCPClient,
+        parse_model_output,
+        format_input,
+        format_output,
+    )
+    from .models import (
+        CommandGenerationModel,
+        create_model,
+        load_tokenizer,
+        load_model,
+    )
+    from .metrics import (
+        CommandMetrics,
+        MetricResults,
+        check_exit_criteria,
+        compute_metrics_for_trainer,
+    )
+except ImportError as exc:
+    # Allow `python src/system2_command_generation/train.py` in addition to
+    # module execution (`python -m src.system2_command_generation.train`).
+    if "attempted relative import with no known parent package" not in str(exc):
+        raise
+
+    src_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if src_root not in sys.path:
+        sys.path.insert(0, src_root)
+
+    from system2_command_generation.config import (  # type: ignore
+        TrainingConfig,
+        ModelType,
+        MODEL_CONFIGS,
+    )
+    from system2_command_generation.data_preprocessing import (  # type: ignore
+        CommandDataProcessor,
+        CommandGenerationDataset,
+        MCPClient,
+        parse_model_output,
+        format_input,
+        format_output,
+    )
+    from system2_command_generation.models import (  # type: ignore
+        CommandGenerationModel,
+        create_model,
+        load_tokenizer,
+        load_model,
+    )
+    from system2_command_generation.metrics import (  # type: ignore
+        CommandMetrics,
+        MetricResults,
+        check_exit_criteria,
+        compute_metrics_for_trainer,
+    )
+
+try:
+    from peft import (
+        LoraConfig,
+        TaskType,
+        get_peft_model,
+        prepare_model_for_kbit_training,
+    )
+except ImportError:
+    LoraConfig = None
+    TaskType = None
+    get_peft_model = None
+    prepare_model_for_kbit_training = None
 
 
 # =============================================================================
@@ -87,6 +139,96 @@ def setup_logging(output_dir: str, level: int = logging.INFO) -> logging.Logger:
     logger.addHandler(file_handler)
     
     return logger
+
+
+def _cli_option_provided(option: str) -> bool:
+    """Return True if a CLI option was explicitly provided."""
+    prefix = f"{option}="
+    return any(arg == option or arg.startswith(prefix) for arg in sys.argv[1:])
+
+
+def _auto_tune_for_low_vram(config: TrainingConfig) -> List[str]:
+    """Apply conservative Qwen settings on lower-memory GPUs."""
+    if config.model_type != ModelType.QWEN2_5_CODER_1_5B:
+        return []
+
+    if not torch.cuda.is_available():
+        return []
+
+    props = torch.cuda.get_device_properties(0)
+    total_vram_gb = props.total_memory / (1024 ** 3)
+
+    profile: Optional[Dict[str, int]] = None
+    if total_vram_gb <= 10:
+        profile = {
+            "batch_size": 1,
+            "eval_batch_size": 1,
+            "max_input_length": 192,
+            "max_output_length": 192,
+            "gradient_accumulation_steps": 24,
+        }
+    elif total_vram_gb <= 14:
+        profile = {
+            "batch_size": 1,
+            "eval_batch_size": 1,
+            "max_input_length": 256,
+            "max_output_length": 256,
+            "gradient_accumulation_steps": 16,
+        }
+    elif total_vram_gb <= 20:
+        profile = {
+            "batch_size": 1,
+            "eval_batch_size": 1,
+            "max_input_length": 320,
+            "max_output_length": 320,
+            "gradient_accumulation_steps": 12,
+        }
+    elif total_vram_gb <= 24:
+        profile = {
+            "batch_size": 2,
+            "eval_batch_size": 2,
+            "max_input_length": 384,
+            "max_output_length": 384,
+            "gradient_accumulation_steps": 8,
+        }
+
+    if profile is None:
+        return []
+
+    changes = [f"Detected GPU memory: {total_vram_gb:.1f} GB"]
+
+    def _cap(attr: str, target: int):
+        current = getattr(config, attr)
+        if current > target:
+            setattr(config, attr, target)
+            changes.append(f"{attr}: {current} -> {target}")
+
+    _cap("batch_size", profile["batch_size"])
+    _cap("eval_batch_size", profile["eval_batch_size"])
+    _cap("max_input_length", profile["max_input_length"])
+    _cap("max_output_length", profile["max_output_length"])
+
+    if config.gradient_accumulation_steps < profile["gradient_accumulation_steps"]:
+        old = config.gradient_accumulation_steps
+        config.gradient_accumulation_steps = profile["gradient_accumulation_steps"]
+        changes.append(
+            "gradient_accumulation_steps: "
+            f"{old} -> {config.gradient_accumulation_steps}"
+        )
+
+    if config.generation_num_beams > 1:
+        old = config.generation_num_beams
+        config.generation_num_beams = 1
+        changes.append(f"generation_num_beams: {old} -> 1")
+
+    if not config.gradient_checkpointing:
+        config.gradient_checkpointing = True
+        changes.append("gradient_checkpointing: False -> True")
+
+    if len(changes) == 1:
+        return []
+
+    return changes
 
 
 # =============================================================================
@@ -156,6 +298,52 @@ class ExitCriteriaCallback(TrainerCallback):
             self.logger.info(f"Exit criteria not yet met. Failures: {failures}")
 
 
+class MCPHealthCheckCallback(TrainerCallback):
+    """Callback that explains MCP's role and verifies server connectivity.
+
+    Fires once at the start of training and again at each evaluation so you
+    can see that documentation context is actively being used.
+    """
+
+    def __init__(self, mcp_client: MCPClient, logger: logging.Logger):
+        self.mcp_client = mcp_client
+        self.logger = logger
+        self._server_online: Optional[bool] = None
+
+    def on_train_begin(self, args, state: TrainerState, control: TrainerControl, **kwargs):
+        online = self.mcp_client.is_available()
+        self._server_online = online
+
+        self.logger.info("=" * 60)
+        self.logger.info("[MCP] Documentation enrichment — status report")
+        self.logger.info("=" * 60)
+        if online:
+            self.logger.info("  Server : ONLINE  (%s)", self.mcp_client.base_url)
+            self.logger.info("  Status : Training inputs contain live documentation.")
+        else:
+            self.logger.warning("  Server : OFFLINE (%s)", self.mcp_client.base_url)
+            self.logger.warning("  Status : Stub fallbacks were used during pre-fetch.")
+            self.logger.warning("  Tip    : python src/mcp/server.py --port 11435")
+
+        self.logger.info("")
+        self.logger.info("  How MCP enrichment works during training:")
+        self.logger.info("    1. Each sample's intent_type + entities.runtime →")
+        self.logger.info("       (tool, operation) pair  e.g. python/install_package → pip/install")
+        self.logger.info("    2. POST /fetch_docs  →  DocChunk with real command syntax,")
+        self.logger.info("       key flags, a working example, and OS-specific notes")
+        self.logger.info("    3. DocChunk injected into <docs>…</docs> block in the input")
+        self.logger.info("    4. Model learns to generate commands *grounded in actual docs*")
+        self.logger.info("       rather than just from training-set patterns")
+        self.logger.info("=" * 60)
+
+    def on_evaluate(self, args, state: TrainerState, control: TrainerControl, **kwargs):
+        if self._server_online:
+            self.logger.info(
+                "[MCP] Eval step %d — inputs were doc-enriched via %s",
+                state.global_step, self.mcp_client.base_url,
+            )
+
+
 # =============================================================================
 # Trainer Class
 # =============================================================================
@@ -204,17 +392,152 @@ class CommandGenerationTrainer:
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
         self.logger.info(f"Random seed set to {seed}")
+
+    def _should_use_qlora(self) -> bool:
+        """Return True when QLoRA should be applied for this run."""
+        return (
+            self.config.use_qlora
+            and self.config.model_type == ModelType.QWEN2_5_CODER_1_5B
+            and torch.cuda.is_available()
+        )
+
+    def _resolve_qlora_compute_dtype(self) -> torch.dtype:
+        """Resolve configured QLoRA compute dtype to a torch dtype."""
+        dtype_name = str(self.config.qlora_compute_dtype).lower()
+        mapping: Dict[str, torch.dtype] = {
+            "float16": torch.float16,
+            "fp16": torch.float16,
+            "bfloat16": torch.bfloat16,
+            "bf16": torch.bfloat16,
+            "float32": torch.float32,
+            "fp32": torch.float32,
+        }
+        dtype = mapping.get(dtype_name)
+        if dtype is None:
+            self.logger.warning(
+                "Unknown qlora_compute_dtype '%s'; using float16.",
+                self.config.qlora_compute_dtype,
+            )
+            return torch.float16
+
+        if dtype == torch.bfloat16 and not torch.cuda.is_bf16_supported():
+            self.logger.warning(
+                "bf16 not supported on this GPU; falling back to float16 for QLoRA."
+            )
+            return torch.float16
+
+        return dtype
+
+    def _create_qlora_quantization_config(self) -> BitsAndBytesConfig:
+        """Build bitsandbytes quantization settings for QLoRA."""
+        return BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type=self.config.qlora_quant_type,
+            bnb_4bit_use_double_quant=self.config.qlora_double_quant,
+            bnb_4bit_compute_dtype=self._resolve_qlora_compute_dtype(),
+        )
+
+    def _apply_qlora_adapters(self, model):
+        """Attach LoRA adapters to a k-bit base model."""
+        if (
+            LoraConfig is None
+            or TaskType is None
+            or get_peft_model is None
+            or prepare_model_for_kbit_training is None
+        ):
+            raise RuntimeError(
+                "QLoRA requested but peft is not installed. "
+                "Install dependencies from src/system2_command_generation/requirements.txt"
+            )
+
+        if not self.config.qlora_target_modules:
+            raise ValueError("qlora_target_modules cannot be empty when QLoRA is enabled")
+
+        model = prepare_model_for_kbit_training(
+            model,
+            use_gradient_checkpointing=self.config.gradient_checkpointing,
+        )
+
+        lora_config = LoraConfig(
+            r=self.config.qlora_r,
+            lora_alpha=self.config.qlora_alpha,
+            lora_dropout=self.config.qlora_dropout,
+            target_modules=self.config.qlora_target_modules,
+            bias="none",
+            task_type=TaskType.CAUSAL_LM,
+        )
+
+        model = get_peft_model(model, lora_config)
+
+        trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        total_params = sum(p.numel() for p in model.parameters())
+        trainable_pct = 100 * trainable_params / total_params if total_params else 0.0
+        self.logger.info(
+            "QLoRA adapters attached: trainable params=%s / total params=%s (%.4f%%)",
+            f"{trainable_params:,}",
+            f"{total_params:,}",
+            trainable_pct,
+        )
+
+        return model
     
     @property
     def model(self) -> CommandGenerationModel:
         """Lazy-load the model."""
         if self._model is None:
             self.logger.info(f"Loading model: {self.config.model_type.value}")
-            self._model = create_model(
+
+            if self.config.use_qlora and self.config.model_type != ModelType.QWEN2_5_CODER_1_5B:
+                self.logger.warning(
+                    "QLoRA requested but model type is %s. QLoRA is only applied for qwen2_5_coder_1_5b.",
+                    self.config.model_type.value,
+                )
+            if self.config.use_qlora and not torch.cuda.is_available():
+                self.logger.warning(
+                    "QLoRA requested but CUDA is unavailable; falling back to non-QLoRA model loading."
+                )
+
+            wrapper = create_model(
                 self.config.model_type,
                 self.config,
-                load_pretrained=True,
+                load_pretrained=False,
             )
+            model_config = self.config.get_model_config()
+            tokenizer = load_tokenizer(
+                model_config,
+                cache_dir=self.config.cache_dir,
+            )
+
+            if self._should_use_qlora():
+                if importlib.util.find_spec("bitsandbytes") is None:
+                    raise RuntimeError(
+                        "QLoRA requires bitsandbytes, but it is not installed in this environment."
+                    )
+
+                self.logger.info(
+                    "Using QLoRA: 4-bit base model + LoRA adapters (r=%d, alpha=%d, dropout=%.3f)",
+                    self.config.qlora_r,
+                    self.config.qlora_alpha,
+                    self.config.qlora_dropout,
+                )
+
+                model = load_model(
+                    model_config,
+                    cache_dir=self.config.cache_dir,
+                    device_map="auto",
+                    torch_dtype=self._resolve_qlora_compute_dtype(),
+                    quantization_config=self._create_qlora_quantization_config(),
+                )
+                model = self._apply_qlora_adapters(model)
+            else:
+                model = load_model(
+                    model_config,
+                    cache_dir=self.config.cache_dir,
+                )
+
+            wrapper.tokenizer = tokenizer
+            wrapper.model = model
+            self._model = wrapper
         return self._model
     
     @property
@@ -224,11 +547,18 @@ class CommandGenerationTrainer:
     
     @property
     def data_processor(self) -> CommandDataProcessor:
-        """Lazy-load the data processor."""
+        """Lazy-load the data processor (with optional MCP client from config)."""
         if self._data_processor is None:
+            mcp_client = None
+            if self.config.use_mcp:
+                mcp_client = MCPClient(
+                    url=self.config.mcp_url,
+                    timeout=self.config.mcp_timeout,
+                )
             self._data_processor = CommandDataProcessor(
                 tokenizer=self.tokenizer,
                 config=self.config,
+                mcp_client=mcp_client,
             )
         return self._data_processor
     
@@ -327,53 +657,96 @@ class CommandGenerationTrainer:
     
     def _get_training_args(self) -> Seq2SeqTrainingArguments:
         """Create HuggingFace training arguments."""
-        return Seq2SeqTrainingArguments(
-            output_dir=self.config.output_dir,
-            
-            # Training settings
-            num_train_epochs=self.config.num_epochs,
-            per_device_train_batch_size=self.config.batch_size,
-            per_device_eval_batch_size=self.config.eval_batch_size,
-            gradient_accumulation_steps=self.config.gradient_accumulation_steps,
-            
-            # Optimization
-            learning_rate=self.config.learning_rate,
-            weight_decay=self.config.weight_decay,
-            warmup_ratio=self.config.warmup_ratio,
-            max_grad_norm=self.config.max_grad_norm,
-            optim=self.config.optim,
-            
-            # Precision
-            fp16=self.config.fp16 and torch.cuda.is_available(),
-            bf16=self.config.bf16 and torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
-            
-            # Evaluation
-            eval_strategy=self.config.eval_strategy,
-            eval_steps=self.config.eval_steps,
-            
-            # Checkpointing
-            save_strategy=self.config.save_strategy,
-            save_steps=self.config.save_steps,
-            save_total_limit=self.config.save_total_limit,
-            load_best_model_at_end=self.config.load_best_model_at_end,
-            metric_for_best_model=self.config.metric_for_best_model,
-            greater_is_better=self.config.greater_is_better,
-            
-            # Logging
-            logging_dir=self.config.logging_dir,
-            logging_steps=self.config.logging_steps,
-            report_to=["tensorboard"],
-            
-            # Generation settings for evaluation
-            predict_with_generate=True,
-            generation_max_length=self.config.max_output_length,
-            generation_num_beams=4,
-            
-            # Misc
-            seed=self.config.seed,
-            dataloader_num_workers=self.config.num_workers,
-            remove_unused_columns=False,
+        model_config = MODEL_CONFIGS[self.config.model_type]
+        generation_max_length = (
+            self.config.max_output_length
+            if model_config.is_encoder_decoder
+            else self.config.max_input_length + self.config.max_output_length
         )
+
+        has_tensorboard = (
+            importlib.util.find_spec("tensorboard") is not None
+            or importlib.util.find_spec("tensorboardX") is not None
+        )
+        report_to = ["tensorboard"] if has_tensorboard else []
+
+        if not has_tensorboard:
+            self.logger.warning(
+                "TensorBoard not installed; disabling Trainer metric reporting. "
+                "Install tensorboard or tensorboardX to enable it."
+            )
+
+        qlora_enabled = self._should_use_qlora()
+        optim_name = self.config.optim
+        if qlora_enabled and self.config.optim == "adamw_torch":
+            optim_name = "paged_adamw_8bit"
+
+        if qlora_enabled:
+            self.logger.info(
+                "QLoRA enabled: disabling Trainer fp16/bf16 AMP scaler to avoid k-bit gradient unscale issues."
+            )
+
+        use_fp16 = self.config.fp16 and torch.cuda.is_available() and not qlora_enabled
+        use_bf16 = (
+            self.config.bf16
+            and torch.cuda.is_available()
+            and torch.cuda.is_bf16_supported()
+            and not qlora_enabled
+        )
+
+        training_kwargs: Dict[str, Any] = {
+            "output_dir": self.config.output_dir,
+
+            # Training settings
+            "num_train_epochs": self.config.num_epochs,
+            "per_device_train_batch_size": self.config.batch_size,
+            "per_device_eval_batch_size": self.config.eval_batch_size,
+            "gradient_accumulation_steps": self.config.gradient_accumulation_steps,
+
+            # Optimization
+            "learning_rate": self.config.learning_rate,
+            "weight_decay": self.config.weight_decay,
+            "max_grad_norm": self.config.max_grad_norm,
+            "optim": optim_name,
+            "gradient_checkpointing": self.config.gradient_checkpointing,
+
+            # Precision
+            "fp16": use_fp16,
+            "bf16": use_bf16,
+
+            # Evaluation
+            "eval_strategy": self.config.eval_strategy,
+            "eval_steps": self.config.eval_steps,
+
+            # Checkpointing
+            "save_strategy": self.config.save_strategy,
+            "save_steps": self.config.save_steps,
+            "save_total_limit": self.config.save_total_limit,
+            "load_best_model_at_end": self.config.load_best_model_at_end,
+            "metric_for_best_model": self.config.metric_for_best_model,
+            "greater_is_better": self.config.greater_is_better,
+
+            # Logging
+            "logging_steps": self.config.logging_steps,
+            "report_to": report_to,
+
+            # Generation settings for evaluation
+            "predict_with_generate": True,
+            "generation_max_length": generation_max_length,
+            "generation_num_beams": self.config.generation_num_beams,
+
+            # Misc
+            "seed": self.config.seed,
+            "dataloader_num_workers": self.config.num_workers,
+            "remove_unused_columns": False,
+        }
+
+        if self.config.warmup_steps > 0:
+            training_kwargs["warmup_steps"] = self.config.warmup_steps
+        else:
+            training_kwargs["warmup_ratio"] = self.config.warmup_ratio
+
+        return Seq2SeqTrainingArguments(**training_kwargs)
     
     def train(
         self,
@@ -408,13 +781,9 @@ class CommandGenerationTrainer:
         # Get training arguments
         training_args = self._get_training_args()
         
-        # Create data collator
-        data_collator = DataCollatorForSeq2Seq(
-            tokenizer=self.tokenizer,
-            model=self.model.model,
-            padding=True,
-            max_length=self.config.max_output_length,
-        )
+        # Datasets already return fixed-size tensors; simple stack avoids
+        # architecture-specific truncation issues between seq2seq and causal LMs.
+        data_collator = self.data_processor.get_data_collator()
         
         # Create callbacks
         callbacks = [
@@ -425,18 +794,42 @@ class CommandGenerationTrainer:
                 early_stopping_threshold=self.config.early_stopping_threshold,
             ),
         ]
+
+        # Add MCP callback when enrichment is enabled
+        if self.config.use_mcp and self.data_processor.mcp_client is not None:
+            callbacks.append(
+                MCPHealthCheckCallback(self.data_processor.mcp_client, self.logger)
+            )
         
         # Create trainer
-        self._trainer = Seq2SeqTrainer(
-            model=self.model.model,
-            args=training_args,
-            train_dataset=self._datasets.get("train"),
-            eval_dataset=self._datasets.get("validation"),
-            data_collator=data_collator,
-            tokenizer=self.tokenizer,
-            compute_metrics=self._create_compute_metrics(),
-            callbacks=callbacks,
-        )
+        model_for_training = self.model.model
+        if self.config.gradient_checkpointing:
+            if hasattr(model_for_training, "gradient_checkpointing_enable"):
+                model_for_training.gradient_checkpointing_enable()
+            if hasattr(model_for_training, "config") and hasattr(model_for_training.config, "use_cache"):
+                model_for_training.config.use_cache = False
+
+        trainer_kwargs = {
+            "model": model_for_training,
+            "args": training_args,
+            "train_dataset": self._datasets.get("train"),
+            "eval_dataset": self._datasets.get("validation"),
+            "data_collator": data_collator,
+            "compute_metrics": self._create_compute_metrics(),
+            "callbacks": callbacks,
+        }
+
+        # Transformers >=5 moved tokenizer -> processing_class.
+        trainer_init_params = inspect.signature(Seq2SeqTrainer.__init__).parameters
+        if "processing_class" in trainer_init_params:
+            trainer_kwargs["processing_class"] = self.tokenizer
+        elif "tokenizer" in trainer_init_params:
+            trainer_kwargs["tokenizer"] = self.tokenizer
+
+        self._trainer = Seq2SeqTrainer(**trainer_kwargs)
+
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         
         # Train
         self.logger.info("Starting training loop...")
@@ -565,21 +958,25 @@ class CommandGenerationTrainer:
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Train command generation models (CodeT5+ or FLAN-T5)"
+        description="Train command generation models (CodeT5+ or Qwen2.5-Coder-1.5B)"
     )
     
     # Model selection
     parser.add_argument(
         "--model",
         type=str,
-        choices=["codet5plus", "flan_t5"],
-        default="codet5plus",
-        help="Model to train (default: codet5plus)"
+        choices=["codet5plus", "qwen2_5_coder_1_5b"],
+        default="qwen2_5_coder_1_5b",
+        help=(
+            "Model to train (default: qwen2_5_coder_1_5b). "
+            "Qwen2.5-Coder-1.5B is recommended for stronger code generation and "
+            "better instruction-following on command planning tasks."
+        ),
     )
     parser.add_argument(
         "--baseline",
         action="store_true",
-        help="Train FLAN-T5 as baseline comparison"
+        help="Train CodeT5+ as baseline comparison"
     )
     
     # Data source
@@ -629,6 +1026,52 @@ def parse_args() -> argparse.Namespace:
         help="Training batch size"
     )
     parser.add_argument(
+        "--eval-batch-size",
+        type=int,
+        default=16,
+        help="Evaluation batch size"
+    )
+    parser.add_argument(
+        "--grad-accum-steps",
+        type=int,
+        default=4,
+        help="Gradient accumulation steps"
+    )
+    parser.add_argument(
+        "--max-input-length",
+        type=int,
+        default=512,
+        help="Maximum encoder/prompt length"
+    )
+    parser.add_argument(
+        "--max-output-length",
+        type=int,
+        default=1024,
+        help="Maximum target/completion length"
+    )
+    parser.add_argument(
+        "--generation-num-beams",
+        type=int,
+        default=1,
+        help="Beam count during evaluation generation"
+    )
+    parser.add_argument(
+        "--warmup-steps",
+        type=int,
+        default=0,
+        help="Warmup steps (overrides warmup_ratio when > 0)"
+    )
+    parser.add_argument(
+        "--no-gradient-checkpointing",
+        action="store_true",
+        help="Disable gradient checkpointing"
+    )
+    parser.add_argument(
+        "--disable-auto-memory-tuning",
+        action="store_true",
+        help="Disable automatic low-VRAM safety tuning for Qwen training"
+    )
+    parser.add_argument(
         "--learning-rate",
         type=float,
         default=5e-5,
@@ -640,7 +1083,89 @@ def parse_args() -> argparse.Namespace:
         default=42,
         help="Random seed for reproducibility"
     )
+
+    # QLoRA configuration
+    qlora_group = parser.add_mutually_exclusive_group()
+    qlora_group.add_argument(
+        "--use-qlora",
+        action="store_true",
+        help="Enable QLoRA (4-bit quantized base model + LoRA adapters)",
+    )
+    qlora_group.add_argument(
+        "--no-qlora",
+        action="store_true",
+        help="Disable QLoRA and train full model weights",
+    )
+    parser.add_argument(
+        "--lora-r",
+        type=int,
+        default=16,
+        help="LoRA rank (r)",
+    )
+    parser.add_argument(
+        "--lora-alpha",
+        type=int,
+        default=32,
+        help="LoRA alpha scaling",
+    )
+    parser.add_argument(
+        "--lora-dropout",
+        type=float,
+        default=0.05,
+        help="LoRA dropout",
+    )
+    parser.add_argument(
+        "--lora-target-modules",
+        nargs="+",
+        default=[
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
+        ],
+        help="Target modules to apply LoRA adapters to",
+    )
+    parser.add_argument(
+        "--qlora-compute-dtype",
+        type=str,
+        choices=["float16", "bfloat16", "float32"],
+        default="float16",
+        help="Compute dtype used by 4-bit QLoRA kernels",
+    )
+    parser.add_argument(
+        "--qlora-quant-type",
+        type=str,
+        choices=["nf4", "fp4"],
+        default="nf4",
+        help="4-bit quantization type",
+    )
+    parser.add_argument(
+        "--qlora-no-double-quant",
+        action="store_true",
+        help="Disable nested (double) quantization for QLoRA",
+    )
     
+    # MCP documentation enrichment
+    parser.add_argument(
+        "--use-mcp",
+        action="store_true",
+        help=(
+            "Enrich training inputs with live documentation from the MCP server. "
+            "Each sample's input will include the real command syntax, key flags, "
+            "and an example fetched from the relevant package manager (pip, npm, apt, …). "
+            "Start the server first: python src/mcp/server.py --port 11435"
+        ),
+    )
+    parser.add_argument(
+        "--mcp-url",
+        type=str,
+        default="http://localhost:11435",
+        help="MCP server base URL (default: http://localhost:11435)",
+    )
+
     # Resume training
     parser.add_argument(
         "--resume",
@@ -668,30 +1193,126 @@ def parse_args() -> argparse.Namespace:
 def main():
     """Main entry point for training."""
     args = parse_args()
+
+    # Load config first to support config-file-first behavior.
+    config = TrainingConfig.load(args.config) if args.config else None
     
     # Determine model type
-    if args.baseline:
-        model_type = ModelType.FLAN_T5
+    if config is not None and not args.baseline and not _cli_option_provided("--model"):
+        model_type = config.model_type
     else:
-        model_type = ModelType.CODET5_PLUS if args.model == "codet5plus" else ModelType.FLAN_T5
-    
+        if args.baseline:
+            model_type = ModelType.CODET5_PLUS
+        else:
+            model_map = {
+                "codet5plus": ModelType.CODET5_PLUS,
+                "qwen2_5_coder_1_5b": ModelType.QWEN2_5_CODER_1_5B,
+            }
+            model_type = model_map.get(args.model, ModelType.QWEN2_5_CODER_1_5B)
+
+    default_use_qlora = model_type == ModelType.QWEN2_5_CODER_1_5B
+    if args.use_qlora:
+        use_qlora = True
+    elif args.no_qlora:
+        use_qlora = False
+    else:
+        use_qlora = default_use_qlora
+
     # Create or load configuration
-    if args.config:
-        config = TrainingConfig.load(args.config)
-    else:
+    if config is None:
         config = TrainingConfig(
             model_type=model_type,
             output_dir=args.output_dir,
             num_epochs=args.epochs,
             batch_size=args.batch_size,
+            eval_batch_size=args.eval_batch_size,
+            gradient_accumulation_steps=args.grad_accum_steps,
             learning_rate=args.learning_rate,
+            warmup_steps=args.warmup_steps,
+            max_input_length=args.max_input_length,
+            max_output_length=args.max_output_length,
+            generation_num_beams=args.generation_num_beams,
+            gradient_checkpointing=not args.no_gradient_checkpointing,
             seed=args.seed,
+            use_qlora=use_qlora,
+            qlora_r=args.lora_r,
+            qlora_alpha=args.lora_alpha,
+            qlora_dropout=args.lora_dropout,
+            qlora_target_modules=args.lora_target_modules,
+            qlora_compute_dtype=args.qlora_compute_dtype,
+            qlora_quant_type=args.qlora_quant_type,
+            qlora_double_quant=not args.qlora_no_double_quant,
+            use_mcp=args.use_mcp,
+            mcp_url=args.mcp_url,
         )
+
+    # Explicit CLI overrides for config-file runs.
+    if args.config:
+        if _cli_option_provided("--model") or args.baseline:
+            config.model_type = model_type
+        if _cli_option_provided("--output-dir"):
+            config.output_dir = args.output_dir
+        if _cli_option_provided("--epochs"):
+            config.num_epochs = args.epochs
+        if _cli_option_provided("--batch-size"):
+            config.batch_size = args.batch_size
+        if _cli_option_provided("--eval-batch-size"):
+            config.eval_batch_size = args.eval_batch_size
+        if _cli_option_provided("--grad-accum-steps"):
+            config.gradient_accumulation_steps = args.grad_accum_steps
+        if _cli_option_provided("--learning-rate"):
+            config.learning_rate = args.learning_rate
+        if _cli_option_provided("--seed"):
+            config.seed = args.seed
+        if _cli_option_provided("--max-input-length"):
+            config.max_input_length = args.max_input_length
+        if _cli_option_provided("--max-output-length"):
+            config.max_output_length = args.max_output_length
+        if _cli_option_provided("--generation-num-beams"):
+            config.generation_num_beams = args.generation_num_beams
+        if _cli_option_provided("--warmup-steps"):
+            config.warmup_steps = args.warmup_steps
+        if _cli_option_provided("--use-mcp"):
+            config.use_mcp = args.use_mcp
+        if _cli_option_provided("--mcp-url"):
+            config.mcp_url = args.mcp_url
+        if _cli_option_provided("--use-qlora"):
+            config.use_qlora = True
+        if _cli_option_provided("--no-qlora"):
+            config.use_qlora = False
+        if _cli_option_provided("--lora-r"):
+            config.qlora_r = args.lora_r
+        if _cli_option_provided("--lora-alpha"):
+            config.qlora_alpha = args.lora_alpha
+        if _cli_option_provided("--lora-dropout"):
+            config.qlora_dropout = args.lora_dropout
+        if _cli_option_provided("--lora-target-modules"):
+            config.qlora_target_modules = args.lora_target_modules
+        if _cli_option_provided("--qlora-compute-dtype"):
+            config.qlora_compute_dtype = args.qlora_compute_dtype
+        if _cli_option_provided("--qlora-quant-type"):
+            config.qlora_quant_type = args.qlora_quant_type
+        if _cli_option_provided("--qlora-no-double-quant"):
+            config.qlora_double_quant = False
+        if args.no_gradient_checkpointing:
+            config.gradient_checkpointing = False
+
+    # Keep config model aligned with selected CLI model in non-config runs.
+    if not args.config:
+        config.model_type = model_type
+
+    if not args.disable_auto_memory_tuning:
+        tuned = _auto_tune_for_low_vram(config)
+        if tuned:
+            print("\n[Auto Memory Tuning] Applied conservative settings:")
+            for line in tuned:
+                print(f"  - {line}")
+            print("  - Use --disable-auto-memory-tuning to keep raw values.\n")
     
     # Update output directory with model name
     config.output_dir = os.path.join(
-        args.output_dir,
-        f"{model_type.value}_{datetime.now():%Y%m%d_%H%M%S}"
+        config.output_dir,
+        f"{config.model_type.value}_{datetime.now():%Y%m%d_%H%M%S}"
     )
     
     # Save configuration
