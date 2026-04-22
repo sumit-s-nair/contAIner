@@ -812,7 +812,7 @@ class CommandGenerationTrainer:
             "report_to": report_to,
 
             # Generation settings for evaluation
-            "predict_with_generate": True,
+            "predict_with_generate": True if model_config.is_encoder_decoder else False,
             "generation_num_beams": self.config.generation_num_beams,
 
             # Misc
@@ -831,6 +831,10 @@ class CommandGenerationTrainer:
                 training_kwargs["generation_max_new_tokens"] = self.config.max_output_length
             else:
                 training_kwargs["generation_max_length"] = generation_max_length
+                
+            # Override metric to eval_loss since predict_with_generate is False for decoder models
+            training_kwargs["metric_for_best_model"] = "eval_loss"
+            training_kwargs["greater_is_better"] = False
 
         if self.config.warmup_steps > 0:
             training_kwargs["warmup_steps"] = self.config.warmup_steps
