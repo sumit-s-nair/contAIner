@@ -153,6 +153,22 @@ python -m src.system2_command_generation.train --config config.json
 python -m src.system2_command_generation.train --resume checkpoint-1000
 ```
 
+Training sessions are saved automatically. Each run creates a timestamped folder
+under `./outputs/system2_command_generation/` (for example,
+`qwen2_5_coder_1_5b_20260421_110607`) containing `config.json`,
+`training_*.log`, `checkpoint-*`, and `final_model/`.
+
+To continue a saved session from a specific checkpoint:
+
+```bash
+python -m src.system2_command_generation.train \
+  --model qwen2_5_coder_1_5b \
+  --resume ./outputs/system2_command_generation/qwen2_5_coder_1_5b_YYYYMMDD_HHMMSS/checkpoint-1000
+```
+
+Pressing `Ctrl+C` during training now triggers an emergency checkpoint save
+before exit, so you can resume from the latest saved state.
+
 ### Command Line Options
 
 | Option | Default | Description |
@@ -170,6 +186,9 @@ python -m src.system2_command_generation.train --resume checkpoint-1000
 | `--max-input-length` | `512` | Maximum prompt/input token length |
 | `--max-output-length` | `1024` | Maximum target/completion token length |
 | `--generation-num-beams` | `1` | Beam width used during evaluation generation |
+| `--eval-steps` | `500` | Run evaluation every N optimizer steps |
+| `--save-steps` | `100` | Save checkpoint every N optimizer steps |
+| `--save-total-limit` | `3` | Maximum number of checkpoints to retain |
 | `--warmup-steps` | `0` | Warmup steps (overrides warmup ratio when > 0) |
 | `--no-gradient-checkpointing` | `false` | Disable gradient checkpointing |
 | `--disable-auto-memory-tuning` | `false` | Disable automatic low-VRAM tuning for Qwen |

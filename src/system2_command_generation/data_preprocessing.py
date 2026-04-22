@@ -100,6 +100,12 @@ _RUNTIME_TO_TOOL: Dict[str, str] = {
     "ruby": "gem",
 }
 
+_SYSTEM_TOOL_BY_OS: Dict[str, str] = {
+    "linux": "apt",
+    "macos": "brew",
+    "windows": "conda",
+}
+
 # Maps intent_type → MCP operation keyword
 _INTENT_TO_OPERATION: Dict[str, str] = {
     "install_package": "install",
@@ -111,6 +117,86 @@ _INTENT_TO_OPERATION: Dict[str, str] = {
     "list_packages": "list",
     "check_version": "show",
 }
+
+
+def _render_key_flags(key_flags: Any) -> str:
+    """Render MCP key_flags as compact prompt text.
+
+    Supports both legacy ``list[str]`` payloads and current
+    ``list[{"flag": ..., "description": ...}]`` payloads.
+    """
+    if key_flags is None:
+        return ""
+
+    if isinstance(key_flags, str):
+        return key_flags.strip()
+
+    if isinstance(key_flags, dict):
+        key_flags = [key_flags]
+
+    if not isinstance(key_flags, list):
+        return str(key_flags).strip()
+
+    rendered: List[str] = []
+    for item in key_flags:
+        if isinstance(item, str):
+            text = item.strip()
+        elif isinstance(item, dict):
+            flag = str(item.get("flag") or item.get("name") or "").strip()
+            description = str(item.get("description") or item.get("desc") or "").strip()
+            if flag and description:
+                text = f"{flag}: {description}"
+            else:
+                text = flag or description
+        else:
+            text = str(item).strip()
+
+        if text:
+            rendered.append(text)
+
+    return ", ".join(rendered)
+
+
+def _doc_chunk_has_context(doc_chunk: Optional[Dict[str, Any]]) -> bool:
+    """Return True when a DocChunk has usable prompt context.
+
+    Some adapters may return a non-empty ``error`` string even when they still
+    provide useful syntax/examples/flags (for example, docs fetch succeeded but
+    registry metadata fetch failed). In that case we still want to inject docs.
+    """
+    if not doc_chunk:
+        return False
+
+    syntax = str(doc_chunk.get("command_syntax") or "").strip()
+    examples = doc_chunk.get("examples") or []
+    key_flags = doc_chunk.get("key_flags") or []
+    return bool(syntax or examples or key_flags)
+
+
+def _resolve_mcp_tool(intent_type: str, runtime: str, os_hint: str) -> str:
+    """Resolve MCP tool from intent, runtime, and OS hint."""
+    intent = (intent_type or "").lower()
+    runtime_name = (runtime or "").lower()
+    os_name = (os_hint or "linux").lower()
+
+    if intent.endswith("_runtime"):
+        return _SYSTEM_TOOL_BY_OS.get(os_name, "")
+
+    return _RUNTIME_TO_TOOL.get(runtime_name, runtime_name)
+
+
+def _resolve_mcp_package(intent_type: str, runtime: str, package: str) -> str:
+    """Resolve package field for MCP lookups.
+
+    Runtime intents are typically package-manager level installs, so when no
+    package is provided, reuse runtime as the package target.
+    """
+    intent = (intent_type or "").lower()
+    if package:
+        return package
+    if intent.endswith("_runtime"):
+        return runtime
+    return package
 
 
 # =============================================================================
@@ -214,7 +300,7 @@ def format_input(
     """
     entities_str = json.dumps(row["entities"], separators=(",", ":"))
 
-    if doc_chunk and not doc_chunk.get("error"):
+    if _doc_chunk_has_context(doc_chunk):
         examples = doc_chunk.get("examples") or []
         return INPUT_TEMPLATE_WITH_MCP.format(
             intent_type=row["intent_type"],
@@ -222,7 +308,7 @@ def format_input(
             os=row["os"],
             shell=row["shell"],
             command_syntax=doc_chunk.get("command_syntax", ""),
-            key_flags=", ".join(doc_chunk.get("key_flags") or []),
+            key_flags=_render_key_flags(doc_chunk.get("key_flags")),
             example=examples[0] if examples else "",
             os_notes=doc_chunk.get("os_specific_notes", ""),
         )
@@ -574,19 +660,20 @@ class CommandDataProcessor:
             os_hint = row.get("os") or "linux"
             intent_type = row.get("intent_type") or ""
 
-            tool = _RUNTIME_TO_TOOL.get(runtime, runtime)
+            tool = _resolve_mcp_tool(intent_type, runtime, os_hint)
             operation = _INTENT_TO_OPERATION.get(intent_type, "install")
+            lookup_package = _resolve_mcp_package(intent_type, runtime, package)
 
             if tool and operation:
                 chunk = self.mcp_client.fetch_docs(
                     tool=tool,
                     operation=operation,
-                    package=package,
+                    package=lookup_package,
                     os_hint=os_hint,
                     runtime=runtime,
                     version=version,
                 )
-                if not chunk.get("error"):
+                if _doc_chunk_has_context(chunk):
                     hits += 1
                 doc_chunks.append(chunk)
             else:

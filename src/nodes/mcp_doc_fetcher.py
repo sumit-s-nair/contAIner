@@ -40,6 +40,12 @@ _STUB_TEMPLATES: dict[str, dict[str, str]] = {
     "maven":  {"add": "<dependency>...</dependency>"},
 }
 
+_SYSTEM_TOOL_BY_OS: dict[str, str] = {
+    "linux": "apt",
+    "macos": "brew",
+    "windows": "conda",
+}
+
 
 def _intent_to_tool(intent_type: str) -> str:
     """Heuristically map an intent_type to a tool name.
@@ -57,24 +63,36 @@ def _intent_to_tool(intent_type: str) -> str:
 def _build_request(state: PipelineState) -> dict[str, Any]:
     """Convert ``PipelineState`` fields into a /fetch_docs request body."""
     entities = state.entities or {}
+    os_hint = state.os_hint or "linux"
+    runtime = entities.get("runtime", "")
+    package = entities.get("package", "")
 
     # Resolve tool from entities
     tool = entities.get("tool", "")
     if not tool:
-        runtime = entities.get("runtime", "")
-        tool = _runtime_to_tool(runtime)
+        tool = _resolve_tool(state.intent_type, runtime, os_hint)
 
     # Resolve operation from intent_type
     operation = _intent_to_operation(state.intent_type)
 
+    if state.intent_type.endswith("_runtime") and not package:
+        package = runtime
+
     return {
         "tool": tool,
         "operation": operation,
-        "package": entities.get("package", ""),
-        "runtime": entities.get("runtime", ""),
-        "os": state.os_hint or "linux",
+        "package": package,
+        "runtime": runtime,
+        "os": os_hint,
         "version": entities.get("version", ""),
     }
+
+
+def _resolve_tool(intent_type: str, runtime: str, os_hint: str) -> str:
+    """Resolve tool from intent/runtime/os."""
+    if intent_type.endswith("_runtime"):
+        return _SYSTEM_TOOL_BY_OS.get((os_hint or "linux").lower(), "")
+    return _runtime_to_tool(runtime)
 
 
 def _runtime_to_tool(runtime: str) -> str:

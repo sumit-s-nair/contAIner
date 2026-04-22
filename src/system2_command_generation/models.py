@@ -233,6 +233,7 @@ class CommandGenerationModel:
         top_p: float = 0.9,
         do_sample: bool = False,
         early_stopping: bool = True,
+        repetition_penalty: float = 1.3,
         **kwargs,
     ) -> torch.Tensor:
         """
@@ -248,6 +249,9 @@ class CommandGenerationModel:
             top_p: Nucleus sampling probability
             do_sample: Whether to use sampling
             early_stopping: Whether to stop early
+            repetition_penalty: Penalty for repeated tokens (>1.0 discourages loops).
+                Default 1.3 prevents the common --flag × N repetition loops seen
+                with undertrained or greedy-decoded causal LMs.
             **kwargs: Additional generation arguments
             
         Returns:
@@ -261,14 +265,21 @@ class CommandGenerationModel:
                 "attention_mask": attention_mask,
                 "num_beams": num_beams,
                 "num_return_sequences": num_return_sequences,
-                "temperature": temperature,
-                "top_p": top_p,
                 "do_sample": do_sample,
-                "early_stopping": early_stopping,
                 "pad_token_id": self.tokenizer.pad_token_id,
                 "eos_token_id": self.tokenizer.eos_token_id,
+                "repetition_penalty": repetition_penalty,
                 **kwargs,
             }
+
+            # Sampling controls are only relevant when sampling is enabled.
+            if do_sample:
+                generation_kwargs["temperature"] = temperature
+                generation_kwargs["top_p"] = top_p
+
+            # early_stopping is intended for beam search in seq2seq models.
+            if self.model_config.is_encoder_decoder:
+                generation_kwargs["early_stopping"] = early_stopping
 
             if self.model_config.is_encoder_decoder:
                 generation_kwargs["max_length"] = max_length
@@ -297,14 +308,36 @@ class CommandGenerationModel:
         Returns:
             Generated text
         """
-        # Tokenize input
-        encoding = self.tokenizer(
-            input_text,
-            max_length=self.model_config.max_input_length,
-            padding="max_length",
-            truncation=True,
-            return_tensors="pt",
+        # Use max_input_length from the training config when available so that
+        # inference uses the same sequence length the model was trained on.
+        # Falling back to the model architecture default (1024 for Qwen) would
+        # force padding far beyond the training distribution (192 tokens).
+        max_tok = (
+            getattr(self.config, "max_input_length", None)
+            or self.model_config.max_input_length
         )
+
+        if self.model_config.is_encoder_decoder:
+            # Seq2seq: padding is required; model attends to full encoder output.
+            encoding = self.tokenizer(
+                input_text,
+                max_length=max_tok,
+                padding="max_length",
+                truncation=True,
+                return_tensors="pt",
+            )
+        else:
+            # Decoder-only (Qwen, GPT-*): do NOT pad at single-sample inference.
+            # Padding inserts EOS tokens (pad==eos for Qwen) which confuse the
+            # model into early-stopping or repetition loops.  No padding needed
+            # for batch_size=1 because there is nothing to align with.
+            encoding = self.tokenizer(
+                input_text,
+                max_length=max_tok,
+                padding=False,
+                truncation=True,
+                return_tensors="pt",
+            )
         
         input_ids = encoding["input_ids"].to(self.device)
         attention_mask = encoding["attention_mask"].to(self.device)

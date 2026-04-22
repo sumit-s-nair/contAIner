@@ -258,7 +258,7 @@ class TrainingConfig:
     eval_strategy: str = "steps"
     eval_steps: int = 500
     save_strategy: str = "steps"
-    save_steps: int = 500
+    save_steps: int = 100
     save_total_limit: int = 3
     logging_steps: int = 100
     load_best_model_at_end: bool = True

@@ -27,6 +27,7 @@ from transformers import (
     TrainerState,
     TrainerControl,
 )
+from transformers.trainer_utils import get_last_checkpoint
 from datasets import DatasetDict
 
 # Local imports
@@ -384,6 +385,69 @@ class CommandGenerationTrainer:
         self._data_processor = None
         self._datasets = None
         self._trainer = None
+
+    def _save_interrupt_checkpoint(self, model_for_training) -> Optional[str]:
+        """Attempt to persist an emergency checkpoint on Ctrl+C.
+
+        Prefer Trainer's internal checkpoint routine so resume works with
+        optimizer/scheduler states when available.
+        """
+        if self._trainer is None:
+            return None
+
+        try:
+            save_checkpoint = getattr(self._trainer, "_save_checkpoint", None)
+            if callable(save_checkpoint):
+                sig = inspect.signature(save_checkpoint)
+                kwargs: Dict[str, Any] = {}
+                if "model" in sig.parameters:
+                    kwargs["model"] = model_for_training
+                if "trial" in sig.parameters:
+                    kwargs["trial"] = None
+                if "metrics" in sig.parameters:
+                    kwargs["metrics"] = None
+
+                if kwargs:
+                    save_checkpoint(**kwargs)
+                else:
+                    save_checkpoint(model_for_training, None)
+
+                checkpoint_path = get_last_checkpoint(self.config.output_dir)
+                if checkpoint_path:
+                    self.logger.warning("Emergency checkpoint saved to: %s", checkpoint_path)
+                    return checkpoint_path
+        except Exception as exc:
+            self.logger.warning("Trainer checkpoint API failed during interrupt save: %s", exc)
+
+        # Fallback path: persist model and training state into a dedicated
+        # interrupt checkpoint directory.
+        interrupt_dir = os.path.join(
+            self.config.output_dir,
+            f"checkpoint-interrupt-{datetime.now():%Y%m%d_%H%M%S}",
+        )
+        os.makedirs(interrupt_dir, exist_ok=True)
+
+        try:
+            self._trainer.save_model(interrupt_dir)
+            self._trainer.save_state()
+
+            if self._trainer.optimizer is not None:
+                torch.save(
+                    self._trainer.optimizer.state_dict(),
+                    os.path.join(interrupt_dir, "optimizer.pt"),
+                )
+
+            if self._trainer.lr_scheduler is not None:
+                torch.save(
+                    self._trainer.lr_scheduler.state_dict(),
+                    os.path.join(interrupt_dir, "scheduler.pt"),
+                )
+
+            self.logger.warning("Emergency fallback checkpoint saved to: %s", interrupt_dir)
+            return interrupt_dir
+        except Exception as exc:
+            self.logger.error("Failed to save emergency checkpoint: %s", exc)
+            return None
     
     def _set_seeds(self, seed: int):
         """Set random seeds for reproducibility."""
@@ -694,6 +758,23 @@ class CommandGenerationTrainer:
             and not qlora_enabled
         )
 
+        load_best_model_at_end = self.config.load_best_model_at_end
+        if (
+            load_best_model_at_end
+            and self.config.eval_strategy == "steps"
+            and self.config.save_strategy == "steps"
+            and self.config.eval_steps > 0
+            and self.config.save_steps > 0
+            and self.config.save_steps % self.config.eval_steps != 0
+        ):
+            self.logger.warning(
+                "Disabling load_best_model_at_end because save_steps (%d) is not a round multiple "
+                "of eval_steps (%d). Set --save-steps to a multiple of --eval-steps to re-enable it.",
+                self.config.save_steps,
+                self.config.eval_steps,
+            )
+            load_best_model_at_end = False
+
         training_kwargs: Dict[str, Any] = {
             "output_dir": self.config.output_dir,
 
@@ -722,7 +803,7 @@ class CommandGenerationTrainer:
             "save_strategy": self.config.save_strategy,
             "save_steps": self.config.save_steps,
             "save_total_limit": self.config.save_total_limit,
-            "load_best_model_at_end": self.config.load_best_model_at_end,
+            "load_best_model_at_end": load_best_model_at_end,
             "metric_for_best_model": self.config.metric_for_best_model,
             "greater_is_better": self.config.greater_is_better,
 
@@ -732,7 +813,6 @@ class CommandGenerationTrainer:
 
             # Generation settings for evaluation
             "predict_with_generate": True,
-            "generation_max_length": generation_max_length,
             "generation_num_beams": self.config.generation_num_beams,
 
             # Misc
@@ -740,6 +820,17 @@ class CommandGenerationTrainer:
             "dataloader_num_workers": self.config.num_workers,
             "remove_unused_columns": False,
         }
+
+        # Prefer max_new_tokens for decoder-only models to avoid conflicts
+        # with model generation configs that may already define max_new_tokens.
+        training_args_init = inspect.signature(Seq2SeqTrainingArguments.__init__).parameters
+        if model_config.is_encoder_decoder:
+            training_kwargs["generation_max_length"] = self.config.max_output_length
+        else:
+            if "generation_max_new_tokens" in training_args_init:
+                training_kwargs["generation_max_new_tokens"] = self.config.max_output_length
+            else:
+                training_kwargs["generation_max_length"] = generation_max_length
 
         if self.config.warmup_steps > 0:
             training_kwargs["warmup_steps"] = self.config.warmup_steps
@@ -803,6 +894,16 @@ class CommandGenerationTrainer:
         
         # Create trainer
         model_for_training = self.model.model
+        model_config = MODEL_CONFIGS[self.config.model_type]
+
+        # Some decoder-only checkpoints include a default generation_config
+        # with max_new_tokens set (for example, 2048). Clear it so Trainer-side
+        # generation length controls are honored and warning spam is avoided.
+        if not model_config.is_encoder_decoder:
+            generation_config = getattr(model_for_training, "generation_config", None)
+            if generation_config is not None and getattr(generation_config, "max_new_tokens", None) is not None:
+                generation_config.max_new_tokens = None
+
         if self.config.gradient_checkpointing:
             if hasattr(model_for_training, "gradient_checkpointing_enable"):
                 model_for_training.gradient_checkpointing_enable()
@@ -833,7 +934,15 @@ class CommandGenerationTrainer:
         
         # Train
         self.logger.info("Starting training loop...")
-        train_result = self._trainer.train(resume_from_checkpoint=resume_from_checkpoint)
+        try:
+            train_result = self._trainer.train(resume_from_checkpoint=resume_from_checkpoint)
+        except KeyboardInterrupt:
+            self.logger.warning("Ctrl+C received. Saving emergency checkpoint before exit...")
+            checkpoint_path = self._save_interrupt_checkpoint(model_for_training)
+            return {
+                "status": "interrupted",
+                "interrupt_checkpoint": checkpoint_path,
+            }
         
         # Save final model
         self.logger.info("Saving final model...")
@@ -1056,6 +1165,24 @@ def parse_args() -> argparse.Namespace:
         help="Beam count during evaluation generation"
     )
     parser.add_argument(
+        "--eval-steps",
+        type=int,
+        default=500,
+        help="Run evaluation every N optimizer steps"
+    )
+    parser.add_argument(
+        "--save-steps",
+        type=int,
+        default=100,
+        help="Save checkpoint every N optimizer steps"
+    )
+    parser.add_argument(
+        "--save-total-limit",
+        type=int,
+        default=3,
+        help="Maximum number of checkpoints to keep"
+    )
+    parser.add_argument(
         "--warmup-steps",
         type=int,
         default=0,
@@ -1229,6 +1356,9 @@ def main():
             gradient_accumulation_steps=args.grad_accum_steps,
             learning_rate=args.learning_rate,
             warmup_steps=args.warmup_steps,
+            eval_steps=args.eval_steps,
+            save_steps=args.save_steps,
+            save_total_limit=args.save_total_limit,
             max_input_length=args.max_input_length,
             max_output_length=args.max_output_length,
             generation_num_beams=args.generation_num_beams,
@@ -1270,6 +1400,12 @@ def main():
             config.max_output_length = args.max_output_length
         if _cli_option_provided("--generation-num-beams"):
             config.generation_num_beams = args.generation_num_beams
+        if _cli_option_provided("--eval-steps"):
+            config.eval_steps = args.eval_steps
+        if _cli_option_provided("--save-steps"):
+            config.save_steps = args.save_steps
+        if _cli_option_provided("--save-total-limit"):
+            config.save_total_limit = args.save_total_limit
         if _cli_option_provided("--warmup-steps"):
             config.warmup_steps = args.warmup_steps
         if _cli_option_provided("--use-mcp"):
@@ -1337,8 +1473,17 @@ def main():
     else:
         # Training mode
         train_results = trainer.train(resume_from_checkpoint=args.resume)
-        
-        if train_results.get("status") != "waiting_for_data":
+
+        if train_results.get("status") == "interrupted":
+            ckpt = train_results.get("interrupt_checkpoint")
+            print("\n⚠️ Training interrupted by user (Ctrl+C).")
+            if ckpt:
+                print(f"   Emergency checkpoint saved: {ckpt}")
+                print(f"   Resume with: python -m src.system2_command_generation.train --resume {ckpt}")
+            else:
+                print("   Could not persist an emergency checkpoint.")
+
+        if train_results.get("status") not in {"waiting_for_data", "interrupted"}:
             # Evaluate on test set
             eval_results = trainer.evaluate(dataset_split="test")
     
