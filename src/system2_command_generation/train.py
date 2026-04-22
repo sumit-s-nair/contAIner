@@ -131,7 +131,7 @@ def setup_logging(output_dir: str, level: int = logging.INFO) -> logging.Logger:
     
     # File handler
     log_file = os.path.join(output_dir, f"training_{datetime.now():%Y%m%d_%H%M%S}.log")
-    file_handler = logging.FileHandler(log_file)
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
     file_handler.setLevel(level)
     file_format = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -316,7 +316,7 @@ class MCPHealthCheckCallback(TrainerCallback):
         self._server_online = online
 
         self.logger.info("=" * 60)
-        self.logger.info("[MCP] Documentation enrichment — status report")
+        self.logger.info("[MCP] Documentation enrichment - status report")
         self.logger.info("=" * 60)
         if online:
             self.logger.info("  Server : ONLINE  (%s)", self.mcp_client.base_url)
@@ -328,11 +328,11 @@ class MCPHealthCheckCallback(TrainerCallback):
 
         self.logger.info("")
         self.logger.info("  How MCP enrichment works during training:")
-        self.logger.info("    1. Each sample's intent_type + entities.runtime →")
-        self.logger.info("       (tool, operation) pair  e.g. python/install_package → pip/install")
-        self.logger.info("    2. POST /fetch_docs  →  DocChunk with real command syntax,")
+        self.logger.info("    1. Each sample's intent_type + entities.runtime ->")
+        self.logger.info("       (tool, operation) pair  e.g. python/install_package -> pip/install")
+        self.logger.info("    2. POST /fetch_docs  ->  DocChunk with real command syntax,")
         self.logger.info("       key flags, a working example, and OS-specific notes")
-        self.logger.info("    3. DocChunk injected into <docs>…</docs> block in the input")
+        self.logger.info("    3. DocChunk injected into <docs>...</docs> block in the input")
         self.logger.info("    4. Model learns to generate commands *grounded in actual docs*")
         self.logger.info("       rather than just from training-set patterns")
         self.logger.info("=" * 60)
@@ -340,7 +340,7 @@ class MCPHealthCheckCallback(TrainerCallback):
     def on_evaluate(self, args, state: TrainerState, control: TrainerControl, **kwargs):
         if self._server_online:
             self.logger.info(
-                "[MCP] Eval step %d — inputs were doc-enriched via %s",
+                "[MCP] Eval step %d - inputs were doc-enriched via %s",
                 state.global_step, self.mcp_client.base_url,
             )
 
