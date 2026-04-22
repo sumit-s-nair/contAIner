@@ -1,0 +1,19 @@
+{
+  "name": "container-demo",
+  "version": "1.0.0",
+  "description": "contAIner — AI Environment Manager Demo",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^30.0.0"
+  },
+  "build": {
+    "appId": "com.container.demo",
+    "productName": "contAIner",
+    "win": { "target": "nsis" }
+  }
+}

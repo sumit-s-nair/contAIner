@@ -1,0 +1,7 @@
+# Python bridge dependencies for contAIner Electron demo
+# Install inside your pyg-pip conda env (WSL):
+#   conda activate pyg-pip
+#   pip install -r electron-app/bridge/requirements.txt
+
+flask>=2.3
+flask-cors>=4.0

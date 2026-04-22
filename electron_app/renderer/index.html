@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; connect-src http://localhost:5050; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;" />
+  <title>contAIner — AI Environment Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Custom title bar (frameless window) -->
+  <div id="titlebar">
+    <div id="titlebar-dots">
+      <span class="dot dot-red"   id="btn-close"   title="Close"></span>
+      <span class="dot dot-amber" id="btn-min"     title="Minimise"></span>
+      <span class="dot dot-green" id="btn-max"     title="Maximise"></span>
+    </div>
+    <span id="titlebar-name">contAIner</span>
+    <div id="status-badge">
+      <span id="status-dot" class="status-dot loading"></span>
+      <span id="status-text">Loading…</span>
+    </div>
+  </div>
+
+  <!-- Main layout -->
+  <div id="app">
+    <!-- Chat history -->
+    <div id="chat-history" aria-live="polite" aria-label="Chat history"></div>
+
+    <!-- Input bar -->
+    <div id="input-area">
+      <div id="input-row">
+        <textarea
+          id="user-input"
+          rows="1"
+          placeholder="Describe what you need… e.g. install requests for python"
+          aria-label="User prompt"
+          autocomplete="off"
+          spellcheck="true"
+        ></textarea>
+        <button id="send-btn" aria-label="Send" title="Send (⏎)">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+            <path d="M2.94 17.06a1 1 0 01-.116-1.329l.116-.127L15.172 10 2.94 4.396a1 1 0 01-.116-1.329l.116-.127a1 1 0 011.329-.116l.127.116 14 7a1 1 0 010 1.72l-14 7a1 1 0 01-1.456-1.6z"/>
+          </svg>
+        </button>
+      </div>
+      <div id="hints">
+        <span>⏎ Send</span>
+        <span>⇧⏎ Newline</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
