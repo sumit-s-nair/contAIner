@@ -9,7 +9,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 
 # ── System 1: Intent Classifier ───────────────────────────────────────────────
 SYSTEM1_MODEL_DIR = os.path.join(
-    PROJECT_ROOT, "outputs", "intent_classifier", "final_model"
+    PROJECT_ROOT, "outputs", "intent_classifier", "final_model_v2"
 )
 
 # ── System 2: Command Generation ──────────────────────────────────────────────
@@ -18,8 +18,8 @@ SYSTEM2_MODEL_PATH = os.path.join(
     PROJECT_ROOT,
     "outputs",
     "system2_command_generation",
-    "qwen2_5_coder_1_5b_20260422_182841",
-    "checkpoint-500",
+    "qwen2_5_coder_1_5b_20260422_232926",
+    "checkpoint-400",
 )
 
 # ── MCP Documentation Server ──────────────────────────────────────────────────
@@ -35,8 +35,9 @@ BRIDGE_PORT = 5050
 
 # ── Grok API ──────────────────────────────────────────────────────────────────
 # Read from .env at project root — never hardcoded here.
-GROK_API_BASE = "https://api.x.ai/v1"
-GROK_MODEL = "grok-3-mini"
+# NOTE: gsk_ prefix = Groq API key (groq.com), not xAI
+GROK_API_BASE = "https://api.groq.com/openai/v1"
+GROK_MODEL    = "llama-3.3-70b-versatile"
 
 # ── Demo thresholds ───────────────────────────────────────────────────────────
 # Intent confidence below this will trigger a Grok clarifying question.

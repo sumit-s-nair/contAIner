@@ -208,3 +208,9 @@ __marimo__/
 
 outputs/
 cache/
+sample*.json
+
+# Models and Archives
+archive/
+*.safetensors
+*.bin

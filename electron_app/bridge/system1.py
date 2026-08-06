@@ -10,7 +10,13 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Optional
+
+import sys
+import os
+# Add the src directory to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "src", "system1_intent_understanding")))
+from ner_utils import extract_entities_from_offsets
 
 import torch
 import torch.nn as nn
@@ -78,9 +84,9 @@ class System1Predictor:
             self.id_to_ner = {int(k): v for k, v in ner_map.get("id2label", {}).items()}
         else:
             labels = ["O"] + [f"B-{e}" for e in
-                               ["runtime","package","version","virtual_env","package_manager","project"]] + \
+                               ["software", "version", "project", "file", "runtime", "package", "virtual_env", "package_manager"]] + \
                               [f"I-{e}" for e in
-                               ["runtime","package","version","virtual_env","package_manager","project"]]
+                               ["software", "version", "project", "file", "runtime", "package", "virtual_env", "package_manager"]]
             self.id_to_ner = {i: l for i, l in enumerate(labels)}
 
         cfg_path = model_dir / "training_config.json"
@@ -123,20 +129,7 @@ class System1Predictor:
                      for i in range(len(self.id_to_label))}
 
         # NER entity extraction from offsets
-        entity_chunks: Dict[str, list] = {}
-        for ner_id, (start, end) in zip(ner_ids, offsets):
-            if start == 0 and end == 0:
-                continue
-            tag = self.id_to_ner.get(int(ner_id), "O")
-            if tag == "O" or "-" not in tag:
-                continue
-            _, etype = tag.split("-", 1)
-            token_text = text[start:end].strip()
-            if token_text:
-                entity_chunks.setdefault(etype, []).append(token_text)
-
-        entities = {etype: " ".join(chunks)
-                    for etype, chunks in entity_chunks.items() if chunks}
+        entities = extract_entities_from_offsets(text, ner_ids, offsets, self.id_to_ner)
 
         return {
             "intent": pred_label,

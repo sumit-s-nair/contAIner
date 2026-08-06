@@ -1,0 +1,3177 @@
+{
+  "elixir": [
+    "elixir"
+  ],
+  "nodejs": [
+    "Node.js",
+    "nodejs",
+    "node",
+    "node.js"
+  ],
+  "obs studio": [
+    "obs studio"
+  ],
+  "pip-python": [
+    "pip"
+  ],
+  "python": [
+    "python",
+    "Python",
+    "python3",
+    "PYTHON",
+    "py"
+  ],
+  "fiber go": [
+    "fiber go"
+  ],
+  "lighthouse": [
+    "lighthouse"
+  ],
+  "ltrace": [
+    "ltrace"
+  ],
+  "dart": [
+    "dart"
+  ],
+  "3.0": [
+    "3.0"
+  ],
+  "objdump": [
+    "objdump"
+  ],
+  "confluence": [
+    "confluence"
+  ],
+  "this project": [
+    "this project"
+  ],
+  "docker": [
+    "docker"
+  ],
+  "README.md": [
+    "README.md"
+  ],
+  "java": [
+    "java",
+    "JAVA",
+    "jdk",
+    "Java",
+    "openjdk"
+  ],
+  "github-cli": [
+    "gh",
+    "github cli"
+  ],
+  "laravel": [
+    "laravel"
+  ],
+  "android-studio": [
+    "android studio"
+  ],
+  "my project": [
+    "my project"
+  ],
+  "statsmodels": [
+    "statsmodels"
+  ],
+  "wget-cli": [
+    "wget"
+  ],
+  "apache-flink": [
+    "flink",
+    "apache flink"
+  ],
+  "rust": [
+    "rust",
+    "rustlang"
+  ],
+  "python project": [
+    "python project"
+  ],
+  "jira": [
+    "jira"
+  ],
+  "20": [
+    "20"
+  ],
+  "node app": [
+    "node app"
+  ],
+  "apt-get": [
+    "apt-get"
+  ],
+  "7zip": [
+    "7zip",
+    "7z",
+    "7-zip"
+  ],
+  "next.js": [
+    "next.js"
+  ],
+  "php": [
+    "php",
+    "PHP"
+  ],
+  "nextjs": [
+    "nextjs",
+    "next.js"
+  ],
+  "powertoys": [
+    "powertoys"
+  ],
+  "etcher": [
+    "balena etcher"
+  ],
+  "micro": [
+    "micro editor"
+  ],
+  "vuejs": [
+    "vuejs"
+  ],
+  "vlc": [
+    "vlc media player",
+    "VLC",
+    "vlc"
+  ],
+  "r": [
+    "r"
+  ],
+  "kotlin": [
+    "Kotlin",
+    "kotlin"
+  ],
+  "miniconda": [
+    "miniconda"
+  ],
+  "23.11": [
+    "23.11"
+  ],
+  "pnpm": [
+    "pnpm"
+  ],
+  "environment.yml": [
+    "environment.yml"
+  ],
+  "tcpflow": [
+    "tcpflow"
+  ],
+  "zed": [
+    "zed editor"
+  ],
+  "lldb": [
+    "lldb"
+  ],
+  "18": [
+    "18"
+  ],
+  "elasticsearch": [
+    "elasticsearch"
+  ],
+  "delta lake": [
+    "delta lake"
+  ],
+  "typescript": [
+    "typescript"
+  ],
+  "awscli": [
+    "awscli"
+  ],
+  "nestjs-cli": [
+    "nestjs cli"
+  ],
+  "virtualenv": [
+    "virtualenv"
+  ],
+  "19": [
+    "19"
+  ],
+  "ghidra": [
+    "ghidra"
+  ],
+  "curl": [
+    "Curl",
+    "cURL",
+    "curl"
+  ],
+  "Pipfile": [
+    "Pipfile"
+  ],
+  "csharp": [
+    "csharp",
+    "c#"
+  ],
+  "9": [
+    "9"
+  ],
+  "audacity": [
+    "audacity"
+  ],
+  "3.5": [
+    "3.5"
+  ],
+  "valgrind": [
+    "valgrind"
+  ],
+  "3.23": [
+    "3.23"
+  ],
+  "python3": [
+    "python3"
+  ],
+  "3.11": [
+    "3.11"
+  ],
+  "nmap": [
+    "nmap"
+  ],
+  "py": [
+    "py"
+  ],
+  "conda": [
+    "conda",
+    "miniconda",
+    "anaconda"
+  ],
+  "django project": [
+    "django project"
+  ],
+  "zap": [
+    "owasp zap",
+    "zap"
+  ],
+  "apache superset": [
+    "apache superset"
+  ],
+  "ruby": [
+    "ruby",
+    "Ruby",
+    "ruby interpreter"
+  ],
+  "kubernetes": [
+    "Kubernetes",
+    "kubernetes",
+    "k8s"
+  ],
+  "apache-spark": [
+    "apache spark",
+    "spark"
+  ],
+  "terraform": [
+    "tf",
+    "terraform"
+  ],
+  "1.8": [
+    "1.8"
+  ],
+  "android studio": [
+    "android studio"
+  ],
+  "react": [
+    "react"
+  ],
+  "nestjs": [
+    "nestjs"
+  ],
+  "minikube": [
+    "minikube"
+  ],
+  "neovim": [
+    "neovim"
+  ],
+  "axios": [
+    "axios"
+  ],
+  "balena etcher": [
+    "balena etcher"
+  ],
+  "frontend app": [
+    "frontend app"
+  ],
+  "vite": [
+    "vite"
+  ],
+  "kafka": [
+    "kafka"
+  ],
+  "sqlite3": [
+    "sqlite3"
+  ],
+  "dbt core": [
+    "dbt core"
+  ],
+  "1.7": [
+    "1.7"
+  ],
+  "helm": [
+    "helm"
+  ],
+  "microsoft-edge": [
+    "edge",
+    "ms edge"
+  ],
+  "ssh": [
+    "SSH",
+    "ssh",
+    "openssh"
+  ],
+  "atom": [
+    "Atom",
+    "atom editor"
+  ],
+  "firefox": [
+    "firefox"
+  ],
+  "insomnia": [
+    "insomnia"
+  ],
+  "gedit": [
+    "gedit"
+  ],
+  "kafka connect": [
+    "kafka connect"
+  ],
+  "express-generator": [
+    "express generator"
+  ],
+  "ffmpeg": [
+    "ffmpeg"
+  ],
+  "virtualbox": [
+    "virtualbox"
+  ],
+  "burpsuite": [
+    "burp suite",
+    "burp",
+    "burpsuite"
+  ],
+  "wireshark": [
+    "wireshark"
+  ],
+  "opera": [
+    "opera"
+  ],
+  "react app": [
+    "react app"
+  ],
+  "make": [
+    "make"
+  ],
+  "httpie": [
+    "httpie"
+  ],
+  "rabbitmq": [
+    "rabbitmq"
+  ],
+  "backend service": [
+    "backend service"
+  ],
+  "swift": [
+    "swift"
+  ],
+  "pycharm": [
+    "pycharm"
+  ],
+  "openssh": [
+    "openssh"
+  ],
+  "kubectl": [
+    "kubectl"
+  ],
+  "gin golang": [
+    "gin golang"
+  ],
+  "atom editor": [
+    "atom editor"
+  ],
+  "vivaldi": [
+    "vivaldi"
+  ],
+  "gdb": [
+    "gdb"
+  ],
+  "vagrant": [
+    "vagrant"
+  ],
+  "google-chrome": [
+    "chrome",
+    "Google Chrome",
+    "google chrome"
+  ],
+  "jvm": [
+    "java virtual machine",
+    "jvm"
+  ],
+  "java virtual machine": [
+    "java virtual machine"
+  ],
+  "gradle": [
+    "gradle"
+  ],
+  "nodejs-npm": [
+    "node npm",
+    "npm"
+  ],
+  "3.3": [
+    "3.3"
+  ],
+  "express generator": [
+    "express generator"
+  ],
+  "postman": [
+    "postman"
+  ],
+  "chakra ui": [
+    "chakra ui"
+  ],
+  "2.8": [
+    "2.8"
+  ],
+  "grafana": [
+    "grafana"
+  ],
+  "flask": [
+    "flask"
+  ],
+  "influxdb": [
+    "influxdb"
+  ],
+  "gzip": [
+    "gzip"
+  ],
+  "yarn": [
+    "yarn"
+  ],
+  "shellcheck": [
+    "shellcheck"
+  ],
+  "pytorch": [
+    "pytorch",
+    "torch"
+  ],
+  "2.1": [
+    "2.1"
+  ],
+  "notion": [
+    "notion"
+  ],
+  "pycharm community": [
+    "pycharm community"
+  ],
+  "2024": [
+    "2024"
+  ],
+  "postman-app": [
+    "postman"
+  ],
+  "suricata": [
+    "suricata"
+  ],
+  "pip": [
+    "pip",
+    "pip3"
+  ],
+  "gcloud": [
+    "gcloud"
+  ],
+  "ansible": [
+    "ansible"
+  ],
+  "postgres": [
+    "postgres"
+  ],
+  "kind": [
+    "kind"
+  ],
+  "notepad-plus-plus": [
+    "notepad++"
+  ],
+  "rufus": [
+    "rufus"
+  ],
+  "eclipse": [
+    "eclipse"
+  ],
+  "inkscape": [
+    "inkscape"
+  ],
+  "openssl": [
+    "openssl"
+  ],
+  "tor": [
+    "tor"
+  ],
+  "nestjs cli": [
+    "nestjs cli"
+  ],
+  "zoom": [
+    "zoom"
+  ],
+  "angular-cli": [
+    "angular cli",
+    "ng"
+  ],
+  "mysql-client": [
+    "mysql-client"
+  ],
+  "vite react": [
+    "vite react"
+  ],
+  "git": [
+    "Git",
+    "git"
+  ],
+  "nano": [
+    "nano"
+  ],
+  "visual studio": [
+    "visual studio"
+  ],
+  "curl-cli": [
+    "curl"
+  ],
+  "slack": [
+    "slack"
+  ],
+  "redis-server": [
+    "redis"
+  ],
+  "pyproject.toml": [
+    "pyproject.toml"
+  ],
+  "winrar": [
+    "winrar"
+  ],
+  "my app": [
+    "my app"
+  ],
+  "clang-tidy": [
+    "clang-tidy"
+  ],
+  "file command": [
+    "file command"
+  ],
+  "package.json": [
+    "package.json"
+  ],
+  "fastapi": [
+    "fastapi"
+  ],
+  "brave-browser": [
+    "brave"
+  ],
+  "7-zip": [
+    "7-zip"
+  ],
+  "24.01": [
+    "24.01"
+  ],
+  "fdisk": [
+    "fdisk"
+  ],
+  "2.38": [
+    "2.38"
+  ],
+  "argo cd": [
+    "argo cd"
+  ],
+  "seaborn": [
+    "seaborn"
+  ],
+  "insomnia-app": [
+    "insomnia"
+  ],
+  "numpy": [
+    "NumPy",
+    "numpy"
+  ],
+  "powershell": [
+    "powershell"
+  ],
+  "vue": [
+    "vue",
+    "vuejs"
+  ],
+  "cpplint": [
+    "cpplint"
+  ],
+  "sentence-transformers": [
+    "sentence transformers"
+  ],
+  "rustlang": [
+    "rustlang"
+  ],
+  "jenkins": [
+    "jenkins"
+  ],
+  "openjdk": [
+    "openjdk"
+  ],
+  "xcode": [
+    "xcode"
+  ],
+  "docker desktop": [
+    "docker desktop"
+  ],
+  "snort": [
+    "snort"
+  ],
+  "apache-httpd": [
+    "httpd",
+    "apache"
+  ],
+  "create react app": [
+    "create react app"
+  ],
+  "thunderbird": [
+    "thunderbird"
+  ],
+  "apt": [
+    "apt",
+    "apt-get"
+  ],
+  "pandas": [
+    "pandas"
+  ],
+  "tensorrt": [
+    "tensorrt"
+  ],
+  "8.13": [
+    "8.13"
+  ],
+  "8.1": [
+    "8.1"
+  ],
+  "cmake": [
+    "cmake"
+  ],
+  "ruby interpreter": [
+    "ruby interpreter"
+  ],
+  "requirements.txt": [
+    "requirements.txt"
+  ],
+  "google chrome": [
+    "google chrome"
+  ],
+  "1.89": [
+    "1.89"
+  ],
+  "node.js": [
+    "Node.js",
+    "node.js"
+  ],
+  "node": [
+    "Node",
+    "node"
+  ],
+  "vim": [
+    "vim"
+  ],
+  "mlflow": [
+    "mlflow"
+  ],
+  "helm-cli": [
+    "helm"
+  ],
+  "ngrok": [
+    "ngrok"
+  ],
+  "1.19": [
+    "1.19"
+  ],
+  "angular cli": [
+    "angular cli"
+  ],
+  "spring boot": [
+    "spring boot"
+  ],
+  "lodash": [
+    "lodash"
+  ],
+  "4.3": [
+    "4.3"
+  ],
+  "everything search": [
+    "everything search"
+  ],
+  "1.4": [
+    "1.4"
+  ],
+  "terraform-docs": [
+    "terraform-docs"
+  ],
+  "nodemon": [
+    "nodemon"
+  ],
+  "django": [
+    "django"
+  ],
+  "2.10": [
+    "2.10"
+  ],
+  "opencv": [
+    "opencv"
+  ],
+  "cassandra": [
+    "cassandra"
+  ],
+  "postgresql": [
+    "postgres",
+    "postgresql"
+  ],
+  "apache maven": [
+    "apache maven"
+  ],
+  "nuxt": [
+    "nuxt"
+  ],
+  "owasp zap": [
+    "owasp zap"
+  ],
+  "k8s": [
+    "k8s"
+  ],
+  "1.30": [
+    "1.30"
+  ],
+  "4.0": [
+    "4.0"
+  ],
+  "mariadb": [
+    "mariadb"
+  ],
+  "netcat": [
+    "nc",
+    "netcat"
+  ],
+  "micro editor": [
+    "micro editor"
+  ],
+  "which": [
+    "which"
+  ],
+  "cra": [
+    "cra"
+  ],
+  "everything": [
+    "everything search"
+  ],
+  "docker-compose": [
+    "docker compose",
+    "docker-compose"
+  ],
+  "express": [
+    "express"
+  ],
+  "tempo": [
+    "tempo"
+  ],
+  "5.0": [
+    "5.0"
+  ],
+  "packer": [
+    "packer"
+  ],
+  "1.9": [
+    "1.9"
+  ],
+  "accelerate": [
+    "accelerate"
+  ],
+  "0.10": [
+    "0.10"
+  ],
+  "chrome": [
+    "chrome",
+    "google chrome"
+  ],
+  "blender": [
+    "Blender",
+    "blender"
+  ],
+  "edge": [
+    "edge"
+  ],
+  "dbt-core": [
+    "dbt",
+    "dbt core"
+  ],
+  "opera-browser": [
+    "opera"
+  ],
+  "pycharm-community": [
+    "pycharm community"
+  ],
+  "tree": [
+    "tree"
+  ],
+  "strace-ng": [
+    "strace-ng"
+  ],
+  "5.9": [
+    "5.9"
+  ],
+  "tensorflow": [
+    "tensorflow"
+  ],
+  "2.16": [
+    "2.16"
+  ],
+  "hadoop": [
+    "hadoop"
+  ],
+  "brave": [
+    "brave"
+  ],
+  "tcpdump": [
+    "tcpdump"
+  ],
+  "strace": [
+    "strace"
+  ],
+  "matplotlib": [
+    "matplotlib"
+  ],
+  "wget": [
+    "wget"
+  ],
+  "6.1": [
+    "6.1"
+  ],
+  "npm": [
+    "npm"
+  ],
+  "3.2": [
+    "3.2"
+  ],
+  "argo-cd": [
+    "argo cd"
+  ],
+  "gin": [
+    "gin golang"
+  ],
+  "scipy": [
+    "scipy"
+  ],
+  "mysql": [
+    "MySQL",
+    "mysql"
+  ],
+  "21": [
+    "21"
+  ],
+  "kafka-connect": [
+    "kafka connect"
+  ],
+  "kubernetes-cli": [
+    "kubectl"
+  ],
+  "gcc": [
+    "gnu compiler",
+    "gcc"
+  ],
+  "svelte": [
+    "svelte"
+  ],
+  "4": [
+    "4"
+  ],
+  "conda-miniconda": [
+    "conda",
+    "miniconda"
+  ],
+  "visual-studio-code": [
+    "visual studio code",
+    "VSCode",
+    "vs code",
+    "vscode"
+  ],
+  "prettier": [
+    "prettier"
+  ],
+  "intellij community": [
+    "intellij community"
+  ],
+  "tokenizers": [
+    "tokenizers"
+  ],
+  "superset": [
+    "apache superset"
+  ],
+  "brackets": [
+    "brackets"
+  ],
+  "mui": [
+    "material ui",
+    "mui"
+  ],
+  "zsh": [
+    "zsh"
+  ],
+  "create-react-app": [
+    "cra",
+    "create react app"
+  ],
+  "intellij-community": [
+    "intellij community"
+  ],
+  "3.6": [
+    "3.6"
+  ],
+  "azure cli": [
+    "azure cli"
+  ],
+  "2.60": [
+    "2.60"
+  ],
+  "postgresql-server": [
+    "postgres",
+    "postgresql"
+  ],
+  "obs": [
+    "obs",
+    "obs studio"
+  ],
+  "pyright": [
+    "pyright"
+  ],
+  "mattermost": [
+    "mattermost"
+  ],
+  "tor browser": [
+    "tor browser"
+  ],
+  "sqlite-cli": [
+    "sqlite3"
+  ],
+  "signal": [
+    "signal"
+  ],
+  "spark": [
+    "spark"
+  ],
+  "notepad++": [
+    "notepad++"
+  ],
+  "jdk": [
+    "jdk"
+  ],
+  "wireguard": [
+    "wireguard"
+  ],
+  "azcli": [
+    "azure cli",
+    "az"
+  ],
+  "gimp": [
+    "gimp"
+  ],
+  "ng": [
+    "ng"
+  ],
+  "vs code": [
+    "vs code"
+  ],
+  "gh": [
+    "gh"
+  ],
+  "2.48": [
+    "2.48"
+  ],
+  "aircrack-ng": [
+    "aircrack ng"
+  ],
+  "terraform-cli": [
+    "terraform"
+  ],
+  "tar": [
+    "tar"
+  ],
+  "git-cli": [
+    "git"
+  ],
+  "10": [
+    "10"
+  ],
+  "rocket chat": [
+    "rocket chat"
+  ],
+  "vagrant-cli": [
+    "vagrant"
+  ],
+  "docker compose": [
+    "docker compose"
+  ],
+  "1.26": [
+    "1.26"
+  ],
+  "jupyter notebook": [
+    "jupyter notebook"
+  ],
+  "prefect": [
+    "prefect"
+  ],
+  "2.14": [
+    "2.14"
+  ],
+  "2.4": [
+    "2.4"
+  ],
+  "metabase": [
+    "metabase"
+  ],
+  "huggingface datasets": [
+    "huggingface datasets"
+  ],
+  "apache": [
+    "Apache",
+    "apache"
+  ],
+  "file": [
+    "file command"
+  ],
+  "openvpn": [
+    "openvpn"
+  ],
+  "2.15": [
+    "2.15"
+  ],
+  "pip3": [
+    "pip3"
+  ],
+  "8.7": [
+    "8.7"
+  ],
+  "keras": [
+    "keras"
+  ],
+  "react-dom": [
+    "react-dom"
+  ],
+  "redis": [
+    "redis"
+  ],
+  "17": [
+    "17"
+  ],
+  "redis-cli": [
+    "redis-cli"
+  ],
+  "heaptrack": [
+    "heaptrack"
+  ],
+  "emacs": [
+    "emacs",
+    "Emacs"
+  ],
+  "watch": [
+    "watch"
+  ],
+  "eslint": [
+    "eslint"
+  ],
+  "material ui": [
+    "material ui"
+  ],
+  "dynamodb": [
+    "dynamodb local"
+  ],
+  "3.12": [
+    "v3.12",
+    "3.12"
+  ],
+  "chakra-ui": [
+    "chakra ui"
+  ],
+  "binwalk": [
+    "binwalk"
+  ],
+  "visualstudio": [
+    "vs",
+    "visual studio"
+  ],
+  "ninja": [
+    "ninja",
+    "ninja-build"
+  ],
+  "docker-desktop": [
+    "docker desktop"
+  ],
+  "ant": [
+    "ant",
+    "apache ant"
+  ],
+  "gitlab runner": [
+    "gitlab runner"
+  ],
+  "pipenv": [
+    "pipenv"
+  ],
+  "sqlite-tools": [
+    "sqlite3"
+  ],
+  "apache flink": [
+    "apache flink"
+  ],
+  "loki": [
+    "loki"
+  ],
+  "9.4": [
+    "9.4"
+  ],
+  "5.1": [
+    "5.1"
+  ],
+  "11": [
+    "11"
+  ],
+  "sonarqube": [
+    "sonarqube"
+  ],
+  "gnu compiler": [
+    "gnu compiler"
+  ],
+  "timescaledb": [
+    "timescaledb"
+  ],
+  "bootstrap": [
+    "bootstrap"
+  ],
+  "5.8": [
+    "5.8"
+  ],
+  "pytest": [
+    "pytest"
+  ],
+  "jupyterlab": [
+    "jupyter lab"
+  ],
+  "jupyter lab": [
+    "jupyter lab"
+  ],
+  "llvm": [
+    "LLVM",
+    "llvm"
+  ],
+  "nginx": [
+    "nginx"
+  ],
+  "visual-studio": [
+    "visual studio"
+  ],
+  "mongodb": [
+    "mongodb",
+    "mongo"
+  ],
+  "sublime text": [
+    "sublime text"
+  ],
+  "nc": [
+    "nc"
+  ],
+  "zed editor": [
+    "zed editor"
+  ],
+  "3.29": [
+    "3.29"
+  ],
+  "psql": [
+    "postgresql-client",
+    "psql"
+  ],
+  "mongodb-server": [
+    "mongodb",
+    "mongo"
+  ],
+  "apache spark": [
+    "apache spark"
+  ],
+  "7.2": [
+    "7.2"
+  ],
+  "gnu make": [
+    "gnu make"
+  ],
+  "7.0": [
+    "7.0"
+  ],
+  "5": [
+    "5"
+  ],
+  "teams": [
+    "microsoft teams",
+    "teams"
+  ],
+  "16": [
+    "16"
+  ],
+  "tailwind": [
+    "tailwind"
+  ],
+  "ms edge": [
+    "ms edge"
+  ],
+  "dbt": [
+    "dbt"
+  ],
+  "xgboost": [
+    "xgboost"
+  ],
+  "4.2": [
+    "4.2"
+  ],
+  "visual studio code": [
+    "visual studio code"
+  ],
+  "mozilla-firefox": [
+    "firefox"
+  ],
+  "1.13": [
+    "1.13"
+  ],
+  "sqlite": [
+    "sqlite3",
+    "sqlite"
+  ],
+  "ruby on rails": [
+    "ruby on rails"
+  ],
+  "1.32": [
+    "1.32"
+  ],
+  "lightgbm": [
+    "lightgbm"
+  ],
+  "1.90": [
+    "1.90"
+  ],
+  "yarn-classic": [
+    "yarn"
+  ],
+  "vscode": [
+    "visual studio code",
+    "vscode"
+  ],
+  "1.87": [
+    "1.87"
+  ],
+  "bash": [
+    "BASH",
+    "bash",
+    "Bash"
+  ],
+  "3": [
+    "3"
+  ],
+  "0.14": [
+    "0.14"
+  ],
+  "scikit learn": [
+    "scikit learn"
+  ],
+  "2.11": [
+    "2.11"
+  ],
+  "1.5": [
+    "1.5"
+  ],
+  "trello": [
+    "trello"
+  ],
+  "github cli": [
+    "github cli"
+  ],
+  "vs": [
+    "vs"
+  ],
+  "whois": [
+    "whois"
+  ],
+  "ninja-build": [
+    "ninja-build"
+  ],
+  "7.4": [
+    "7.4"
+  ],
+  "1.15": [
+    "1.15"
+  ],
+  "apache ant": [
+    "apache ant"
+  ],
+  "kate editor": [
+    "kate editor"
+  ],
+  "13": [
+    "13"
+  ],
+  "sublime-text": [
+    "sublime text"
+  ],
+  "7z": [
+    "7z"
+  ],
+  "fail2ban": [
+    "fail2ban"
+  ],
+  "prometheus": [
+    "prometheus"
+  ],
+  "neo4j": [
+    "neo4j"
+  ],
+  "dynamodb local": [
+    "dynamodb local"
+  ],
+  "dayjs": [
+    "dayjs"
+  ],
+  "metasploit": [
+    "msf",
+    "metasploit"
+  ],
+  "0.16": [
+    "0.16"
+  ],
+  "c#": [
+    "c#"
+  ],
+  "rails": [
+    "rails",
+    "ruby on rails"
+  ],
+  "winget": [
+    "winget"
+  ],
+  "hydra": [
+    "hydra",
+    "thc hydra"
+  ],
+  "5.19": [
+    "5.19"
+  ],
+  "sklearn": [
+    "sklearn"
+  ],
+  "great-expectations": [
+    "great expectations"
+  ],
+  "gitlab-runner": [
+    "gitlab runner"
+  ],
+  "clang": [
+    "llvm",
+    "clang"
+  ],
+  "2.27": [
+    "2.27"
+  ],
+  "transformers": [
+    "transformers"
+  ],
+  "maven": [
+    "apache maven",
+    "maven",
+    "Maven"
+  ],
+  "discord": [
+    "discord"
+  ],
+  "angular": [
+    "angular"
+  ],
+  "9.0": [
+    "9.0"
+  ],
+  "4.42": [
+    "4.42"
+  ],
+  "openvino": [
+    "openvino"
+  ],
+  "burp suite": [
+    "burp suite"
+  ],
+  "6": [
+    "6"
+  ],
+  "3.4": [
+    "3.4"
+  ],
+  "great expectations": [
+    "great expectations"
+  ],
+  "6.0": [
+    "6.0"
+  ],
+  "msf": [
+    "msf"
+  ],
+  "24.0": [
+    "24.0"
+  ],
+  "15": [
+    "15"
+  ],
+  "sentence transformers": [
+    "sentence transformers"
+  ],
+  "flink": [
+    "flink"
+  ],
+  "7.1": [
+    "7.1"
+  ],
+  "fiber": [
+    "fiber go"
+  ],
+  "helix": [
+    "helix"
+  ],
+  "chromium": [
+    "chromium"
+  ],
+  "clickhouse": [
+    "clickhouse"
+  ],
+  "1.10": [
+    "1.10"
+  ],
+  "23": [
+    "23"
+  ],
+  "datasets-huggingface": [
+    "huggingface datasets",
+    "datasets"
+  ],
+  "node npm": [
+    "node npm"
+  ],
+  "8.2": [
+    "8.2"
+  ],
+  "tailwindcss": [
+    "tailwindcss",
+    "tailwind"
+  ],
+  "29.3": [
+    "29.3"
+  ],
+  "0.18": [
+    "0.18"
+  ],
+  "1.2": [
+    "1.2"
+  ],
+  "6.4": [
+    "6.4"
+  ],
+  "vite-react": [
+    "vite react"
+  ],
+  "burp": [
+    "burp"
+  ],
+  "tor-browser": [
+    "tor browser"
+  ],
+  "13.2": [
+    "13.2"
+  ],
+  "vlc media player": [
+    "vlc media player"
+  ],
+  "5.44": [
+    "5.44"
+  ],
+  "huggingface-transformers": [
+    "transformers",
+    "huggingface"
+  ],
+  "1.33": [
+    "1.33"
+  ],
+  "jupyter-notebook": [
+    "jupyter",
+    "jupyter notebook"
+  ],
+  "29.2": [
+    "29.2"
+  ],
+  "2023": [
+    "2023"
+  ],
+  "h2 database": [
+    "h2 database"
+  ],
+  "23.3": [
+    "23.3"
+  ],
+  "1.22": [
+    "1.22"
+  ],
+  "aircrack ng": [
+    "aircrack ng"
+  ],
+  "1.6": [
+    "1.6"
+  ],
+  "2.3": [
+    "2.3"
+  ],
+  "scikit-learn": [
+    "sklearn",
+    "scikit learn"
+  ],
+  "4.4": [
+    "4.4"
+  ],
+  "9.3": [
+    "9.3"
+  ],
+  "3.8": [
+    "3.8"
+  ],
+  "2.44": [
+    "2.44"
+  ],
+  "opencv-python": [
+    "opencv-python"
+  ],
+  "4.9": [
+    "4.9"
+  ],
+  "huggingface": [
+    "huggingface"
+  ],
+  "anaconda": [
+    "anaconda"
+  ],
+  "0.100": [
+    "0.100"
+  ],
+  "1.14": [
+    "1.14"
+  ],
+  "9.2": [
+    "9.2"
+  ],
+  "26": [
+    "26"
+  ],
+  "3.1": [
+    "3.1"
+  ],
+  "4.98": [
+    "4.98"
+  ],
+  "microsoft teams": [
+    "microsoft teams"
+  ],
+  "thc hydra": [
+    "thc hydra"
+  ],
+  "postgresql-client": [
+    "postgresql-client"
+  ],
+  "2.7": [
+    "2.7"
+  ],
+  "kate": [
+    "kate editor"
+  ],
+  "2.20": [
+    "2.20"
+  ],
+  "h2": [
+    "h2 database"
+  ],
+  "httpd": [
+    "httpd"
+  ],
+  "23.10": [
+    "23.10"
+  ],
+  "6.2": [
+    "6.2"
+  ],
+  "1.86": [
+    "1.86"
+  ],
+  "mongo": [
+    "mongo"
+  ],
+  "5.18": [
+    "5.18"
+  ],
+  "7.94": [
+    "7.94"
+  ],
+  "5.5": [
+    "5.5"
+  ],
+  "jupyter": [
+    "jupyter",
+    "Jupyter"
+  ],
+  "cockroachdb": [
+    "cockroachdb"
+  ],
+  "1.21": [
+    "1.21"
+  ],
+  "2023.3": [
+    "2023.3"
+  ],
+  "1.11": [
+    "1.11"
+  ],
+  "1.1.352": [
+    "1.1.352"
+  ],
+  "docker-cli": [
+    "docker"
+  ],
+  "torch": [
+    "torch"
+  ],
+  "2022": [
+    "2022"
+  ],
+  "delta-lake": [
+    "delta lake"
+  ],
+  "spring-boot": [
+    "spring boot"
+  ],
+  "2.41": [
+    "2.41"
+  ],
+  "0.17": [
+    "0.17"
+  ],
+  "0.7.3": [
+    "0.7.3"
+  ],
+  "8.6": [
+    "8.6"
+  ],
+  "az": [
+    "az"
+  ],
+  "6.7": [
+    "6.7"
+  ],
+  "2.59": [
+    "2.59"
+  ],
+  "3.45": [
+    "3.45"
+  ],
+  "7.3": [
+    "7.3"
+  ],
+  "0.11": [
+    "0.11"
+  ],
+  "2.13": [
+    "2.13"
+  ],
+  "4.18": [
+    "4.18"
+  ],
+  "2.2": [
+    "2.2"
+  ],
+  "rocketchat": [
+    "rocket chat"
+  ],
+  "2.440": [
+    "2.440"
+  ],
+  "14.2": [
+    "14.2"
+  ],
+  "4.1": [
+    "4.1"
+  ],
+  "0.4.7": [
+    "0.4.7"
+  ],
+  "25": [
+    "25"
+  ],
+  "10.5": [
+    "10.5"
+  ],
+  "mysql-server": [
+    "mysql"
+  ],
+  "0.111": [
+    "0.111"
+  ],
+  "3.7": [
+    "3.7"
+  ],
+  "4.17": [
+    "4.17"
+  ],
+  "1.29": [
+    "1.29"
+  ],
+  "10.4": [
+    "10.4"
+  ],
+  "115": [
+    "115"
+  ],
+  "3.9": [
+    "3.9"
+  ],
+  "10.11": [
+    "10.11"
+  ],
+  "5.3": [
+    "5.3"
+  ],
+  "8.3": [
+    "8.3"
+  ],
+  "1.20": [
+    "1.20"
+  ],
+  "16.11": [
+    "16.11"
+  ],
+  "2.5": [
+    "2.5"
+  ],
+  "3.28": [
+    "3.28"
+  ],
+  "1.12": [
+    "1.12"
+  ],
+  "8.5": [
+    "8.5"
+  ],
+  "7": [
+    "7"
+  ],
+  "2.0": [
+    "2.0"
+  ],
+  "24.1": [
+    "24.1"
+  ],
+  "9.1": [
+    "9.1"
+  ],
+  "2.43": [
+    "2.43"
+  ],
+  "4.28": [
+    "4.28"
+  ],
+  "datasets": [
+    "datasets"
+  ],
+  "2024.1": [
+    "2024.1"
+  ],
+  "6.24": [
+    "6.24"
+  ],
+  "3.14": [
+    "3.14"
+  ],
+  "1.219": [
+    "1.219"
+  ],
+  "17.0": [
+    "17.0"
+  ],
+  "3.13": [
+    "3.13"
+  ],
+  "git-large-file-storage": [
+    "Git-LFS",
+    "git-lfs"
+  ],
+  "javascript": [
+    "javascript",
+    "JavaScript",
+    "js"
+  ],
+  "c-plus-plus": [
+    "cpp"
+  ],
+  "golang": [
+    "golang"
+  ],
+  "obs-studio": [
+    "obs studio"
+  ],
+  "IntelliJ IDEA": [
+    "IntelliJ IDEA"
+  ],
+  "api-service": [
+    "api service"
+  ],
+  "web-app": [
+    "web app"
+  ],
+  "billing-api": [
+    "billing api"
+  ],
+  "docs-site": [
+    "docs site"
+  ],
+  "2": [
+    "2",
+    "v2"
+  ],
+  "infra": [
+    "infra"
+  ],
+  "config.yaml": [
+    "config.yml"
+  ],
+  "tail": [
+    "tail"
+  ],
+  "perl": [
+    "Perl",
+    "perl"
+  ],
+  "bzip2": [
+    "bzip2"
+  ],
+  "awk": [
+    "awk"
+  ],
+  "zip": [
+    "zip"
+  ],
+  "random-bash-command": [
+    "random-bash-command"
+  ],
+  "shuf": [
+    "shuf"
+  ],
+  "grep": [
+    "grep"
+  ],
+  "1.2.3": [
+    "1.2.3"
+  ],
+  "PHP": [
+    "PHP"
+  ],
+  "scala": [
+    "scala",
+    "Scala"
+  ],
+  "foo": [
+    "foo"
+  ],
+  "sort": [
+    "Sort",
+    "sort"
+  ],
+  "find": [
+    "find"
+  ],
+  "split": [
+    "split",
+    "Split"
+  ],
+  "openssl-fips-2.0.1.tar.gz": [
+    "openssl-fips-2.0.1.tar.gz"
+  ],
+  "boost": [
+    "boost"
+  ],
+  "Ruby": [
+    "Ruby"
+  ],
+  "phpmyadmin": [
+    "phpmyadmin"
+  ],
+  "wordpress": [
+    "WordPress"
+  ],
+  "latest": [
+    "latest"
+  ],
+  "rustup": [
+    "rustup"
+  ],
+  "myscript.sh": [
+    "myscript.sh"
+  ],
+  "rsync": [
+    "rsync"
+  ],
+  "master": [
+    "master"
+  ],
+  "gnuplot": [
+    "gnuplot"
+  ],
+  "unzip": [
+    "unzip",
+    "Unzip"
+  ],
+  "xeyes": [
+    "xeyes"
+  ],
+  "0.31.0": [
+    "0.31.0"
+  ],
+  "2.0.0": [
+    "2.0.0"
+  ],
+  "lshw": [
+    "lshw"
+  ],
+  "4.3-14ubuntu1_amd64": [
+    "4.3-14ubuntu1_amd64"
+  ],
+  "libxml2-sources-2.7.7.tar.gz": [
+    "libxml2-sources-2.7.7.tar.gz"
+  ],
+  "$INTERPRETER": [
+    "$INTERPRETER"
+  ],
+  "scriptname": [
+    "scriptname"
+  ],
+  "sox": [
+    "sox"
+  ],
+  "erlang": [
+    "erlang",
+    "Erlang"
+  ],
+  "charm": [
+    "charm"
+  ],
+  "tmux": [
+    "tmux"
+  ],
+  "seq": [
+    "seq"
+  ],
+  "coreutils-8.9": [
+    "coreutils-8.9"
+  ],
+  "virtualenvwrapper.sh": [
+    "virtualenvwrapper.sh"
+  ],
+  "ping": [
+    "ping"
+  ],
+  "1000001": [
+    "1000001"
+  ],
+  "screen": [
+    "screen"
+  ],
+  "aspell": [
+    "aspell"
+  ],
+  "ispell": [
+    "ispell"
+  ],
+  "c++": [
+    "c++"
+  ],
+  "go": [
+    "go",
+    "Go"
+  ],
+  "ipython": [
+    "ipython"
+  ],
+  "10000": [
+    "10000"
+  ],
+  "subversion": [
+    "subversion"
+  ],
+  "phpbb": [
+    "PHPBB"
+  ],
+  "mono-devel": [
+    "mono-devel"
+  ],
+  "packagename": [
+    "packagename"
+  ],
+  "glibc": [
+    "glibc"
+  ],
+  "php-mbstring": [
+    "php-mbstring"
+  ],
+  "php-mssql": [
+    "php-mssql"
+  ],
+  "ffmpeg-2.6.4-1.fc22.x86_64.rpm": [
+    "ffmpeg-2.6.4-1.fc22.x86_64.rpm"
+  ],
+  "packagename.arch.rpm": [
+    "packagename.arch.rpm"
+  ],
+  "devtoolset-3": [
+    "devtoolset-3"
+  ],
+  "Development Tools": [
+    "Development Tools"
+  ],
+  "MYSQL Database Client": [
+    "MYSQL Database Client"
+  ],
+  "dropbox": [
+    "dropbox"
+  ],
+  "Erlang": [
+    "Erlang"
+  ],
+  "caniwrite": [
+    "caniwrite"
+  ],
+  "phantomjs-1.8.1-linux-x86_64.tar.bz2": [
+    "phantomjs-1.8.1-linux-x86_64.tar.bz2"
+  ],
+  "1.8.1": [
+    "1.8.1"
+  ],
+  "gawk": [
+    "gawk"
+  ],
+  "C++": [
+    "C++"
+  ],
+  "geoip-bin": [
+    "geoip-bin"
+  ],
+  "my_program": [
+    "my_program"
+  ],
+  "g++": [
+    "g++"
+  ],
+  "python2.7": [
+    "python2.7"
+  ],
+  "ldconfig": [
+    "ldconfig"
+  ],
+  "oracle": [
+    "oracle"
+  ],
+  "1.0.0": [
+    "1.0.0"
+  ],
+  "2.0.0-p481": [
+    "2.0.0-p481"
+  ],
+  "2.6": [
+    "2.6"
+  ],
+  "Node": [
+    "node"
+  ],
+  "yum": [
+    "yum"
+  ],
+  "bash-completion": [
+    "bash-completion"
+  ],
+  "myprogram": [
+    "myprogram"
+  ],
+  "svn": [
+    "svn"
+  ],
+  "vi": [
+    "vi"
+  ],
+  "Python": [
+    "Python"
+  ],
+  "brew": [
+    "brew"
+  ],
+  "matlab": [
+    "MATLAB"
+  ],
+  "rbenv": [
+    "RBENV"
+  ],
+  "2013.09": [
+    "2013.09"
+  ],
+  "rpmfusion": [
+    "rpmfusion"
+  ],
+  "metaflac": [
+    "metaflac"
+  ],
+  "update-client": [
+    "update-client"
+  ],
+  "pigz": [
+    "pigz"
+  ],
+  "7zhelper.sh": [
+    "7zhelper.sh"
+  ],
+  "pbzip2": [
+    "pbzip2"
+  ],
+  "script.py": [
+    "script.py"
+  ],
+  "recalcitrant.php": [
+    "recalcitrant.php"
+  ],
+  "convert": [
+    "Convert"
+  ],
+  "markdown": [
+    "markdown"
+  ],
+  "phantomjs-1.9.0-linux-x86_64.tar.bz2": [
+    "phantomjs-1.9.0-linux-x86_64.tar.bz2"
+  ],
+  "GNU VERSION": [
+    "GNU VERSION"
+  ],
+  "lighttpd": [
+    "lighttpd"
+  ],
+  "optipng": [
+    "optipng"
+  ],
+  "dbca": [
+    "dbca"
+  ],
+  "shiny": [
+    "shiny"
+  ],
+  "glibc.i686": [
+    "glibc.i686"
+  ],
+  "Joomla": [
+    "Joomla"
+  ],
+  "2048": [
+    "2048"
+  ],
+  "hello-0.2.tar.gz": [
+    "hello-0.2.tar.gz"
+  ],
+  "joomla": [
+    "Joomla"
+  ],
+  "grc": [
+    "grc"
+  ],
+  "pg_dump": [
+    "pg_dump"
+  ],
+  "dropbox-cli": [
+    "dropbox-cli"
+  ],
+  "elinks": [
+    "elinks"
+  ],
+  "killall": [
+    "killall"
+  ],
+  "myscript.rb": [
+    "myscript.rb"
+  ],
+  "parallel": [
+    "parallel"
+  ],
+  "foo.rpm": [
+    "foo.rpm"
+  ],
+  "libstdc++-4.9.2-1.fc21.x86_64.rpm": [
+    "libstdc++-4.9.2-1.fc21.x86_64.rpm"
+  ],
+  "php-5.1.4-1.esp1.x86_64.rpm": [
+    "php-5.1.4-1.esp1.x86_64.rpm"
+  ],
+  "5.1.4": [
+    "5.1.4"
+  ],
+  "mplayer": [
+    "mplayer"
+  ],
+  "virt-viewer": [
+    "virt-viewer"
+  ],
+  "version": [
+    "version"
+  ],
+  "engrampa": [
+    "Engrampa"
+  ],
+  "Ionic": [
+    "Ionic"
+  ],
+  "extensions": [
+    "extensions"
+  ],
+  "gems": [
+    "gems"
+  ],
+  "wal": [
+    "wal"
+  ],
+  "atuin": [
+    "atuin"
+  ],
+  "json": [
+    "JSON"
+  ],
+  "package": [
+    "package"
+  ],
+  "dillo": [
+    "Dillo"
+  ],
+  "all dependencies with postinstall scripts": [
+    "all dependencies with postinstall scripts"
+  ],
+  "postfix": [
+    "Postfix"
+  ],
+  "nixpkgs": [
+    "nixpkgs"
+  ],
+  "pkg": [
+    "pkg"
+  ],
+  "Nix": [
+    "nix"
+  ],
+  "21.05": [
+    "21.05"
+  ],
+  "Golang": [
+    "Golang"
+  ],
+  "Go": [
+    "Go"
+  ],
+  "Kotlin": [
+    "Kotlin"
+  ],
+  "kismet": [
+    "Kismet"
+  ],
+  "rkhunter": [
+    "rkhunter"
+  ],
+  "components": [
+    "components"
+  ],
+  "dolt": [
+    "dolt",
+    "Dolt"
+  ],
+  "PlatformIO": [
+    "PlatformIO"
+  ],
+  "cookbook dependencies": [
+    "cookbook dependencies"
+  ],
+  "transmission": [
+    "transmission"
+  ],
+  "maestral": [
+    "Maestral"
+  ],
+  "cabal-install": [
+    "cabal-install"
+  ],
+  "dependency": [
+    "dependency"
+  ],
+  "conan": [
+    "conan"
+  ],
+  "ncurses": [
+    "ncurses"
+  ],
+  "maza": [
+    "Maza"
+  ],
+  "tlmgr": [
+    "tlmgr"
+  ],
+  "Node.js": [
+    "Node.js"
+  ],
+  "toolchains": [
+    "toolchains"
+  ],
+  "bcachefs": [
+    "bcachefs"
+  ],
+  "the specified ebuild file": [
+    "the specified ebuild file"
+  ],
+  "Debian stable": [
+    "Debian stable"
+  ],
+  "Ubuntu 20.04": [
+    "Ubuntu 20.04"
+  ],
+  "wireplumber": [
+    "WirePlumber"
+  ],
+  "Java": [
+    "java",
+    "Java"
+  ],
+  "rake": [
+    "rake"
+  ],
+  "waydroid": [
+    "Waydroid"
+  ],
+  "photorec": [
+    "PhotoRec"
+  ],
+  "nest": [
+    "nest"
+  ],
+  "Pi-hole": [
+    "Pi-hole"
+  ],
+  "join": [
+    "Join"
+  ],
+  "GRUB": [
+    "GRUB"
+  ],
+  "pre-commit": [
+    "pre-commit"
+  ],
+  "Rust": [
+    "rust",
+    "Rust"
+  ],
+  "Perl": [
+    "Perl",
+    "perl"
+  ],
+  "package(s)": [
+    "package(s)"
+  ],
+  "modules": [
+    "modules"
+  ],
+  "hardinfo": [
+    "hardinfo"
+  ],
+  "qjoypad": [
+    "QJoyPad"
+  ],
+  "script": [
+    "script"
+  ],
+  "nethogs": [
+    "NetHogs"
+  ],
+  "groff": [
+    "groff"
+  ],
+  "application": [
+    "application"
+  ],
+  "cups": [
+    "CUPS"
+  ],
+  "starship": [
+    "starship"
+  ],
+  "cask": [
+    "cask"
+  ],
+  "3.6.6": [
+    "3.6.6"
+  ],
+  "SDKs": [
+    "SDKs"
+  ],
+  "btop": [
+    "btop"
+  ],
+  "specific package": [
+    "specific package"
+  ],
+  "Ghost": [
+    "Ghost"
+  ],
+  "scrot": [
+    "scrot"
+  ],
+  "bleachbit": [
+    "Bleachbit"
+  ],
+  "ember-cli": [
+    "ember-cli"
+  ],
+  "glow": [
+    "glow"
+  ],
+  "keyword": [
+    "keyword"
+  ],
+  "gem": [
+    "gem"
+  ],
+  "DSM": [
+    "DSM"
+  ],
+  "cloudflared": [
+    "cloudflared"
+  ],
+  "nightly toolchain": [
+    "nightly toolchain"
+  ],
+  "BetterDiscord": [
+    "BetterDiscord"
+  ],
+  "Flatpak": [
+    "Flatpak"
+  ],
+  "Corepack": [
+    "Corepack"
+  ],
+  "formula": [
+    "formula"
+  ],
+  "copyq": [
+    "CopyQ"
+  ],
+  "bundle": [
+    "bundle"
+  ],
+  "Dart": [
+    "Dart"
+  ],
+  "2to3": [
+    "2to3"
+  ],
+  "Neovim": [
+    "Neovim"
+  ],
+  "htop": [
+    "htop"
+  ],
+  "WordPress": [
+    "WordPress"
+  ],
+  "plugin": [
+    "plugin"
+  ],
+  "PHP 7.3": [
+    "PHP 7.3"
+  ],
+  "josm": [
+    "JOSM"
+  ],
+  "base": [
+    "base"
+  ],
+  "packages": [
+    "packages"
+  ],
+  "peco": [
+    "peco"
+  ],
+  "image": [
+    "image"
+  ],
+  "Cordova": [
+    "Cordova"
+  ],
+  "generic kernel": [
+    "generic kernel"
+  ],
+  "bzImage|initramfs|kernel|ramdisk": [
+    "bzImage|initramfs|kernel|ramdisk"
+  ],
+  "helm chart": [
+    "helm chart"
+  ],
+  "texdoc": [
+    "texdoc"
+  ],
+  "kernel": [
+    "kernel"
+  ],
+  "kernels": [
+    "kernels"
+  ],
+  "kernel versions": [
+    "kernel versions"
+  ],
+  "SlackBuilds": [
+    "SlackBuilds"
+  ],
+  "latest development": [
+    "latest development"
+  ],
+  "Laravel Jetstream": [
+    "Laravel Jetstream"
+  ],
+  "systemd-firstboot": [
+    "systemd-firstboot"
+  ],
+  "rpm-ostree": [
+    "rpm-ostree"
+  ],
+  "PiVPN": [
+    "PiVPN"
+  ],
+  "slackbuilds": [
+    "slackbuilds"
+  ],
+  "Oracle VM VirtualBox extension packs": [
+    "Oracle VM VirtualBox extension packs"
+  ],
+  "mixxx": [
+    "Mixxx"
+  ],
+  "debtap": [
+    "debtap"
+  ],
+  "Podman": [
+    "Podman"
+  ],
+  "Nimble package": [
+    "Nimble package"
+  ],
+  "Nim": [
+    "Nim"
+  ],
+  "Rails": [
+    "rails"
+  ],
+  "nrepl": [
+    "nREPL"
+  ],
+  "Laravel dependencies": [
+    "Laravel dependencies"
+  ],
+  "pueue": [
+    "pueue"
+  ],
+  "Scala": [
+    "Scala"
+  ],
+  "podman": [
+    "Podman"
+  ],
+  "wine": [
+    "wine"
+  ],
+  "minetest": [
+    "Minetest"
+  ],
+  "logstash": [
+    "Logstash"
+  ],
+  "elm": [
+    "Elm"
+  ],
+  "acpi_call": [
+    "acpi_call"
+  ],
+  "1.2.1": [
+    "1.2.1"
+  ],
+  "btrfs-progs": [
+    "btrfs-progs"
+  ],
+  "tailscale": [
+    "Tailscale"
+  ],
+  "Lua": [
+    "Lua"
+  ],
+  "fprintd": [
+    "fprintd"
+  ],
+  "flutter": [
+    "Flutter"
+  ],
+  "systemd-boot": [
+    "systemd-boot"
+  ],
+  "Octave": [
+    "Octave"
+  ],
+  "phantomjs": [
+    "phantomjs"
+  ],
+  "Homebrew": [
+    "Homebrew"
+  ],
+  "JVM": [
+    "JVM"
+  ],
+  "auto-cpufreq": [
+    "auto-cpufreq"
+  ],
+  "protontricks": [
+    "protontricks"
+  ],
+  "games": [
+    "games"
+  ],
+  "skim": [
+    "skim"
+  ],
+  "pinta": [
+    "Pinta"
+  ],
+  "7+": [
+    "7+"
+  ],
+  "MATE": [
+    "MATE"
+  ],
+  "nightly": [
+    "nightly"
+  ],
+  "firejail": [
+    "firejail"
+  ],
+  "deemix": [
+    "deemix"
+  ],
+  "lynis": [
+    "Lynis"
+  ],
+  "autossh": [
+    "autossh"
+  ],
+  "i7z": [
+    "i7z"
+  ],
+  "ghcid": [
+    "ghcid"
+  ],
+  "cargo": [
+    "Cargo"
+  ],
+  "TeX Live": [
+    "TeX Live"
+  ],
+  "toolchain": [
+    "toolchain"
+  ],
+  "zstd": [
+    "zstd"
+  ],
+  "extension": [
+    "extension"
+  ],
+  "all deployed extensions": [
+    "all deployed extensions"
+  ],
+  "git-extras": [
+    "git-extras"
+  ],
+  "JHipster": [
+    "JHipster"
+  ],
+  "zlib": [
+    "zlib"
+  ],
+  "emscripten": [
+    "emscripten"
+  ],
+  "Racket": [
+    "Racket"
+  ],
+  "racket": [
+    "racket"
+  ],
+  "ibmcloud": [
+    "ibmcloud"
+  ],
+  "Cloud Foundry module": [
+    "Cloud Foundry module"
+  ],
+  "distrobox": [
+    "Distrobox"
+  ],
+  "18.11+": [
+    "18.11+"
+  ],
+  "Bun": [
+    "Bun"
+  ],
+  "component": [
+    "component"
+  ],
+  "subfinder": [
+    "subfinder"
+  ],
+  "ani-cli": [
+    "ani-cli"
+  ],
+  "screenkey": [
+    "screenkey"
+  ],
+  "picom": [
+    "picom"
+  ],
+  "cookbook": [
+    "cookbook"
+  ],
+  "phar": [
+    "Phar"
+  ],
+  "ghc": [
+    "GHC"
+  ],
+  "GHC": [
+    "GHC"
+  ],
+  "ghcup": [
+    "ghcup"
+  ],
+  "SAM board": [
+    "SAM board"
+  ],
+  "Django": [
+    "Django"
+  ],
+  "trayer": [
+    "trayer"
+  ],
+  "crate": [
+    "crate"
+  ],
+  "compiled binaries": [
+    "compiled binaries"
+  ],
+  "Maza": [
+    "Maza"
+  ],
+  "Google Cloud CLI": [
+    "Google Cloud CLI"
+  ],
+  "Haxe libraries": [
+    "Haxe libraries"
+  ],
+  "Haxe": [
+    "Haxe"
+  ],
+  "bazel": [
+    "bazel"
+  ],
+  "zoxide": [
+    "zoxide"
+  ],
+  "sops": [
+    "sops"
+  ],
+  "compiled target": [
+    "compiled target"
+  ],
+  "git-secret": [
+    "git-secret"
+  ],
+  "jwt": [
+    "JWT"
+  ],
+  "fmt": [
+    "fmt"
+  ],
+  "Streamlit": [
+    "Streamlit"
+  ],
+  "TeXLive": [
+    "TeXLive"
+  ],
+  "jars": [
+    "jars"
+  ],
+  "navi": [
+    "navi"
+  ],
+  "v": [
+    "v"
+  ],
+  "TypeScript": [
+    "TypeScript"
+  ],
+  "ts-node": [
+    "TS-Node"
+  ],
+  "chezmoi": [
+    "chezmoi"
+  ],
+  "platformio": [
+    "PlatformIO"
+  ],
+  "Qt": [
+    "Qt"
+  ],
+  "sbt": [
+    "sbt"
+  ],
+  "yacas": [
+    "yacas"
+  ],
+  "virt-manager": [
+    "virt-manager"
+  ],
+  "Bicep CLI": [
+    "Bicep CLI"
+  ],
+  "assimp": [
+    "assimp"
+  ],
+  "frpc": [
+    "frpc"
+  ],
+  "git lfs": [
+    "Git LFS"
+  ],
+  "2.29+": [
+    "2.29+"
+  ],
+  "JDK": [
+    "JDK"
+  ],
+  "jEnv": [
+    "jEnv"
+  ],
+  "gpg-tui": [
+    "gpg-tui"
+  ],
+  "command": [
+    "command"
+  ],
+  "128bit": [
+    "128bit"
+  ],
+  "amass": [
+    "Amass"
+  ],
+  "Truffle Box": [
+    "Truffle Box"
+  ],
+  "sudo": [
+    "sudo"
+  ],
+  "1.8.27": [
+    "1.8.27"
+  ],
+  "pamcrater": [
+    "pamcrater"
+  ],
+  "pamshadedrelief": [
+    "pamshadedrelief"
+  ],
+  "bear": [
+    "bear"
+  ],
+  "minor": [
+    "minor"
+  ],
+  "translation pairs": [
+    "translation pairs"
+  ],
+  "detox": [
+    "detox"
+  ],
+  "sdk": [
+    "SDK"
+  ],
+  "stable": [
+    "stable"
+  ],
+  "target": [
+    "target"
+  ],
+  "ghost": [
+    "Ghost"
+  ],
+  "platform": [
+    "platform"
+  ],
+  "MATLAB": [
+    "MATLAB"
+  ],
+  "xxh": [
+    "xxh"
+  ],
+  "Elixir": [
+    "Elixir"
+  ],
+  "couchdb": [
+    "CouchDB"
+  ],
+  "irssi": [
+    "Irssi"
+  ],
+  "next patch version": [
+    "next patch version"
+  ],
+  ".NET": [
+    ".NET"
+  ],
+  "pnmquant": [
+    "pnmquant"
+  ],
+  "libuser-lid": [
+    "libuser-lid"
+  ],
+  "Crystal": [
+    "Crystal"
+  ],
+  "pacstall": [
+    "pacstall"
+  ],
+  "Cradle's components": [
+    "Cradle's components"
+  ],
+  "development platforms": [
+    "development platforms"
+  ],
+  "toolbox": [
+    "toolbox"
+  ],
+  "forever": [
+    "forever"
+  ],
+  "requests_toolbelt": [
+    "requests_toolbelt"
+  ],
+  "AdGuard Home": [
+    "AdGuard Home"
+  ],
+  "cockpit": [
+    "cockpit"
+  ],
+  "composer": [
+    "composer"
+  ],
+  "yadm": [
+    "yadm"
+  ],
+  "WP-CLI": [
+    "WP-CLI"
+  ],
+  "gnucash": [
+    "GnuCash"
+  ],
+  "subsystem": [
+    "subsystem"
+  ],
+  "plugins": [
+    "plugins"
+  ],
+  "unflatten": [
+    "unflatten"
+  ],
+  "v2": [
+    "v2"
+  ],
+  "CoffeeScript": [
+    "CoffeeScript"
+  ],
+  "Cordova platform": [
+    "Cordova platform"
+  ],
+  "library": [
+    "library"
+  ],
+  "bpftrace": [
+    "bpftrace"
+  ],
+  "topydo": [
+    "topydo"
+  ],
+  "--size": [
+    "--size"
+  ],
+  "wafw00f": [
+    "wafw00f"
+  ],
+  "libgtk-3": [
+    "libgtk-3"
+  ],
+  "Nextflow": [
+    "Nextflow"
+  ],
+  "sphinx-rtd-theme": [
+    "sphinx-rtd-theme"
+  ],
+  "ruff": [
+    "Ruff"
+  ],
+  "duf": [
+    "duf"
+  ],
+  "Picard": [
+    "Picard"
+  ],
+  "ocaml": [
+    "OCaml"
+  ],
+  "scheme": [
+    "scheme"
+  ],
+  "lilypond": [
+    "lilypond"
+  ],
+  "kdesrc-build": [
+    "kdesrc-build"
+  ],
+  "current VMware software version": [
+    "current VMware software version"
+  ],
+  "crane": [
+    "crane"
+  ],
+  "Unity": [
+    "Unity"
+  ],
+  "calc": [
+    "calc"
+  ],
+  "bash-it": [
+    "Bash-it"
+  ],
+  "license": [
+    "license"
+  ],
+  "VirtualBox extension pack": [
+    "VirtualBox extension pack"
+  ],
+  "acyclic": [
+    "acyclic"
+  ],
+  "v1.1": [
+    "v1.1"
+  ],
+  "v0.1": [
+    "v0.1"
+  ],
+  "Drupal": [
+    "Drupal"
+  ],
+  "wpm": [
+    "wpm"
+  ],
+  "pack": [
+    "pack"
+  ],
+  "libtool": [
+    "libtool"
+  ],
+  "fly": [
+    "fly"
+  ],
+  "Elm": [
+    "Elm"
+  ],
+  "Caddy": [
+    "Caddy"
+  ],
+  "specific": [
+    "specific"
+  ],
+  "husky": [
+    "Husky"
+  ],
+  "hatch": [
+    "Hatch"
+  ],
+  "Oh My Zsh": [
+    "Oh My Zsh"
+  ],
+  "nf-core": [
+    "nf-core"
+  ],
+  "RBTool": [
+    "RBTool"
+  ],
+  "mcfly": [
+    "mcfly"
+  ],
+  "Oh My Fish": [
+    "Oh My Fish"
+  ],
+  "current package": [
+    "current package"
+  ],
+  "Azure CLI": [
+    "Azure CLI"
+  ],
+  "Mercurial": [
+    "Mercurial"
+  ],
+  "in2csv": [
+    "in2csv"
+  ],
+  "20.x": [
+    "20.x"
+  ],
+  "asciidoctor-pdf": [
+    "asciidoctor-pdf"
+  ],
+  "6.x": [
+    "6.x"
+  ],
+  "Julia": [
+    "Julia"
+  ],
+  "analytics wrappers": [
+    "analytics wrappers"
+  ],
+  "diskonaut": [
+    "diskonaut"
+  ],
+  "applications": [
+    "applications"
+  ],
+  "pkgctl": [
+    "pkgctl"
+  ],
+  "rclone": [
+    "rclone"
+  ],
+  "pwn": [
+    "Pwn"
+  ],
+  "major": [
+    "major"
+  ],
+  "Flutter SDK": [
+    "Flutter SDK"
+  ],
+  "Flutter": [
+    "Flutter"
+  ],
+  "puppet": [
+    "Puppet"
+  ]
+}

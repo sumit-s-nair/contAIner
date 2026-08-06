@@ -136,12 +136,7 @@ python -m src.system2_command_generation.train \
 python -m src.system2_command_generation.train --model qwen2_5_coder_1_5b
 
 # Recommended on 8-12 GB GPUs: QLoRA + MCP doc enrichment
-python -m src.system2_command_generation.train \
-  --model qwen2_5_coder_1_5b \
-  --use-qlora \
-  --use-mcp \
-  --mcp-url http://localhost:11435 \
-  --output-dir ./outputs/system2_command_generation
+python -m src.system2_command_generation.train --model qwen2_5_coder_1_5b --use-mcp --mcp-url http://localhost:11435 --output-dir ./outputs/system2_command_generation
 
 # Train CodeT5+ (baseline)
 python -m src.system2_command_generation.train --model codet5plus --baseline

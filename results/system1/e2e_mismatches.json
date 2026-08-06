@@ -1,0 +1,56 @@
+[
+  {
+    "instruction": "can you remove r",
+    "entity_type": "software",
+    "expected": "r",
+    "actual": null
+  },
+  {
+    "instruction": "wipe r from system",
+    "entity_type": "software",
+    "expected": "r",
+    "actual": null
+  },
+  {
+    "instruction": "upgrade r on windows",
+    "entity_type": "software",
+    "expected": "r",
+    "actual": null
+  },
+  {
+    "instruction": "could you tell me the version of r",
+    "entity_type": "software",
+    "expected": "r",
+    "actual": null
+  },
+  {
+    "instruction": "could you delete r for me",
+    "entity_type": "software",
+    "expected": "r",
+    "actual": null
+  },
+  {
+    "instruction": "verify r on this machine",
+    "entity_type": "software",
+    "expected": "r",
+    "actual": null
+  },
+  {
+    "instruction": "update my r",
+    "entity_type": "software",
+    "expected": "r",
+    "actual": null
+  },
+  {
+    "instruction": "check whether r is updated",
+    "entity_type": "software",
+    "expected": "r",
+    "actual": null
+  },
+  {
+    "instruction": "environment needs updated r",
+    "entity_type": "software",
+    "expected": "r",
+    "actual": null
+  }
+]

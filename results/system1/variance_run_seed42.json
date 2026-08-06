@@ -1,0 +1,54 @@
+{
+  "n": 980,
+  "intent_accuracy": 0.9948979591836735,
+  "precision": 1.0,
+  "recall": 0.992827868852459,
+  "f1": 0.9963986187099291,
+  "report": {
+    "file": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 22
+    },
+    "project": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 69
+    },
+    "software": {
+      "precision": 1.0,
+      "recall": 0.991494532199271,
+      "f1-score": 0.9957291031116534,
+      "support": 823
+    },
+    "version": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 62
+    },
+    "micro avg": {
+      "precision": 1.0,
+      "recall": 0.992827868852459,
+      "f1-score": 0.996401028277635,
+      "support": 976
+    },
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 0.9978736330498177,
+      "f1-score": 0.9989322757779133,
+      "support": 976
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 0.992827868852459,
+      "f1-score": 0.9963986187099291,
+      "support": 976
+    }
+  },
+  "f1_std_bootstrap": 0.0013496780683711382,
+  "f1_ci95_low": 0.9942188986081839,
+  "f1_ci95_high": 0.9989736458849873
+}

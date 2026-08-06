@@ -1,52 +1,46 @@
 /**
- * contAIner renderer — agent chat logic with SSE pipeline streaming.
+ * contAIner renderer — SSE pipeline consumer matching the macOS-style UI.
  *
- * Flow per message:
- *  1. POST /run  → SSE stream of stage events
- *  2. Each event updates the live "thinking" panel
- *  3. clarify events pause the stream and ask the user a question
- *  4. On clarify answer: POST /run again with clarify_answer
- *  5. system2 done: render the command result card
+ * SSE events from /run:
+ *  system1  running/done  → intent pill + confidence bar
+ *  clarify  running/needed → inline question card
+ *  mcp      running/done/skipped → doc stage card
+ *  system2  running/done  → explanation + steps + code block
+ *  error    done          → error card
  */
-
 'use strict';
 
 const BRIDGE_URL = 'http://localhost:5050';
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let bridgeReady   = false;
-let isProcessing  = false;
+let bridgeReady     = false;
+let isProcessing    = false;
+let abortController = null;
 
-// Pending clarification state
-let pendingClarify = null; // { originalPrompt, question }
-
-// ── DOM refs ──────────────────────────────────────────────────────────────────
+// ── DOM ───────────────────────────────────────────────────────────────────────
 const chatHistory = document.getElementById('chat-history');
 const userInput   = document.getElementById('user-input');
 const sendBtn     = document.getElementById('send-btn');
+const stopBtn     = document.getElementById('stop-btn');
 const statusDot   = document.getElementById('status-dot');
 const statusText  = document.getElementById('status-text');
 
-// ── Title bar controls ────────────────────────────────────────────────────────
-document.getElementById('btn-close').addEventListener('click', () => window.close());
-document.getElementById('btn-min').addEventListener('click',   () => window.electronAPI?.minimise?.());
-document.getElementById('btn-max').addEventListener('click',   () => window.electronAPI?.maximise?.());
+// ── Title bar (macOS style — no ipcRenderer needed for these) ─────────────────
+document.getElementById('btn-close').addEventListener('click', () => window.close?.());
+document.getElementById('btn-min').addEventListener('click',   () => {/* handled by main */});
+document.getElementById('btn-max').addEventListener('click',   () => {/* handled by main */});
 
-// ── Bridge status from main process ──────────────────────────────────────────
+// ── Bridge status from Electron main ─────────────────────────────────────────
 if (window.electronAPI?.onBridgeStatus) {
   window.electronAPI.onBridgeStatus(({ ready, message }) => {
-    setBridgeReady(ready, message || (ready ? 'Connected' : 'Offline'));
+    setBridgeReady(ready, message || (ready ? 'connected' : 'offline'));
   });
 }
 
-// Poll bridge health directly as a fallback (also handles hot-reload in dev)
+// Fallback health poll (also works when loading renderer directly)
 async function pollBridgeHealth() {
   try {
     const r = await fetch(`${BRIDGE_URL}/health`, { signal: AbortSignal.timeout(2000) });
-    if (r.ok) {
-      setBridgeReady(true, 'Connected');
-      return;
-    }
+    if (r.ok) { setBridgeReady(true, 'connected'); return; }
   } catch { /* still loading */ }
   setTimeout(pollBridgeHealth, 2500);
 }
@@ -55,27 +49,28 @@ pollBridgeHealth();
 function setBridgeReady(ready, message) {
   bridgeReady = ready;
   statusDot.className = `status-dot ${ready ? 'ready' : 'error'}`;
-  statusText.textContent = message || (ready ? 'Connected' : 'Offline');
-  userInput.disabled = !ready;
-  sendBtn.disabled   = !ready;
+  statusText.textContent = message || (ready ? 'connected' : 'offline');
+  if (!isProcessing) {
+    userInput.disabled = !ready;
+    sendBtn.disabled   = !ready;
+  }
 }
 
-// ── Auto-resize textarea ──────────────────────────────────────────────────────
+// ── Auto-grow textarea ────────────────────────────────────────────────────────
 userInput.addEventListener('input', () => {
   userInput.style.height = 'auto';
-  userInput.style.height = Math.min(userInput.scrollHeight, 140) + 'px';
+  userInput.style.height = Math.min(userInput.scrollHeight, 130) + 'px';
 });
 
-// ── Send on Enter (shift+enter = newline) ─────────────────────────────────────
 userInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    handleSend();
-  }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
 });
 sendBtn.addEventListener('click', handleSend);
+stopBtn.addEventListener('click', () => {
+  if (abortController) { abortController.abort(); setProcessing(false); }
+});
 
-// ── Initial empty state ───────────────────────────────────────────────────────
+// ── Empty state ───────────────────────────────────────────────────────────────
 function renderEmptyState() {
   const examples = [
     'install requests for python',
@@ -87,10 +82,11 @@ function renderEmptyState() {
   const wrap = document.createElement('div');
   wrap.className = 'empty-state';
   wrap.innerHTML = `
-    <div class="empty-icon">🤖</div>
-    <div class="empty-title">contAIner</div>
-    <div class="empty-sub">Describe what you need for your dev environment.<br>I'll classify the intent and generate the right command.</div>
-    <div class="empty-chips">
+    <div class="empty-ai-row">
+      <div class="ai-avatar">AI</div>
+      <div class="empty-text">Ready. Describe what you need.</div>
+    </div>
+    <div class="example-chips">
       ${examples.map(e => `<span class="chip">${e}</span>`).join('')}
     </div>`;
   chatHistory.appendChild(wrap);
@@ -104,41 +100,39 @@ function renderEmptyState() {
 }
 renderEmptyState();
 
-// ── Main send handler ────────────────────────────────────────────────────────
+// ── Send ──────────────────────────────────────────────────────────────────────
 async function handleSend() {
   const text = userInput.value.trim();
   if (!text || isProcessing || !bridgeReady) return;
 
-  // Clear empty state on first real send
-  const emptyState = chatHistory.querySelector('.empty-state');
-  if (emptyState) emptyState.remove();
+  // remove empty state on first send
+  const empty = chatHistory.querySelector('.empty-state');
+  if (empty) empty.remove();
 
   userInput.value = '';
   userInput.style.height = 'auto';
-
   setProcessing(true);
-  pendingClarify = null;
 
-  // Render user bubble
   appendUserBubble(text);
 
-  // Create thinking panel and result slot
-  const { msgRow, stageContainer, appendResult } = createAssistantRow();
+  const { thinkingPanel, stageContainer, thinkingLabel, aiContent } = createAIRow();
 
-  await runPipeline(text, null, stageContainer, appendResult);
+  await runPipeline(text, null, stageContainer, thinkingPanel, thinkingLabel, aiContent);
 
   setProcessing(false);
 }
 
-// ── Pipeline runner ───────────────────────────────────────────────────────────
-async function runPipeline(prompt, clarifyAnswer, stageContainer, appendResult) {
-  clearStageContainer(stageContainer);
+// ── Pipeline ──────────────────────────────────────────────────────────────────
+async function runPipeline(prompt, clarifyAnswer, stageContainer, thinkingPanel, thinkingLabel, aiContent) {
+  if (abortController) abortController.abort();
+  abortController = new AbortController();
 
   let resp;
   try {
     resp = await fetch(`${BRIDGE_URL}/run`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: abortController.signal,
       body: JSON.stringify({
         prompt,
         os_hint: 'linux',
@@ -147,11 +141,14 @@ async function runPipeline(prompt, clarifyAnswer, stageContainer, appendResult) 
       }),
     });
   } catch (err) {
-    appendResult(renderErrorCard(`Could not reach bridge server: ${err.message}`));
+    if (err.name !== 'AbortError') {
+      appendToAI(aiContent, renderErrorCard(`Could not reach bridge: ${err.message}`));
+    }
+    collapseThinking(thinkingPanel, thinkingLabel, false);
     return;
   }
 
-  const reader = resp.body.getReader();
+  const reader  = resp.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
 
@@ -159,264 +156,275 @@ async function runPipeline(prompt, clarifyAnswer, stageContainer, appendResult) 
     const { done, value } = await reader.read();
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
-
-    // SSE lines are delimited by \n\n
     const parts = buffer.split('\n\n');
-    buffer = parts.pop(); // keep incomplete chunk
-
+    buffer = parts.pop();
     for (const part of parts) {
       const line = part.trim();
       if (!line.startsWith('data:')) continue;
       let event;
-      try {
-        event = JSON.parse(line.slice(5).trim());
-      } catch { continue; }
-
-      handlePipelineEvent(event, stageContainer, appendResult, prompt);
+      try { event = JSON.parse(line.slice(5).trim()); } catch { continue; }
+      handleEvent(event, stageContainer, thinkingPanel, thinkingLabel, aiContent, prompt);
     }
   }
 }
 
 // ── Event dispatch ────────────────────────────────────────────────────────────
-function handlePipelineEvent(event, stageContainer, appendResult, originalPrompt) {
+function handleEvent(event, stageContainer, thinkingPanel, thinkingLabel, aiContent, originalPrompt) {
   const { stage, status } = event;
 
   if (stage === 'system1' && status === 'running') {
-    upsertStageCard(stageContainer, 'system1', 'running',
-      '🔍 Classifying intent…', '');
+    upsertStage(stageContainer, 'system1', 'running', 'Classifying intent…', '');
   }
   else if (stage === 'system1' && status === 'done') {
     const { intent, confidence, entities } = event;
-    const pct = Math.round(confidence * 100);
+    const pct = Math.round((confidence || 0) * 100);
     const entityStr = Object.entries(entities || {})
-      .map(([k, v]) => `<span class="tag">${k}: ${v}</span>`)
-      .join('');
-    upsertStageCard(stageContainer, 'system1', 'done',
+      .map(([k, v]) => `<span class="tag">${k}: ${v}</span>`).join('');
+    // Store for later update when grok extracts better entities
+    stageContainer.dataset.s1Intent  = intent;
+    stageContainer.dataset.s1Pct     = pct;
+    stageContainer.dataset.s1Entities = JSON.stringify(entities || {});
+    upsertStage(stageContainer, 'system1', 'ok',
       `Intent: <strong>${intent}</strong>`,
-      `<div class="prob-bar-wrap">
-         <div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${pct}%"></div></div>
-         <span class="prob-label">${pct}%</span>
-       </div>
-       <div style="margin-top:4px">${entityStr || '<span style="color:var(--muted)">no entities extracted</span>'}</div>`
+      `<div class="conf-badge">confidence <strong>${pct}%</strong></div>
+       ${entityStr ? `<div style="margin-top:4px">${entityStr}</div>` : '<div style="margin-top:4px;color:var(--muted);font-size:12px">no entities — awaiting extraction</div>'}`
     );
   }
   else if (stage === 'clarify' && status === 'running') {
-    upsertStageCard(stageContainer, 'clarify', 'running',
-      '🤔 Confidence too low — asking Grok…', '');
+    upsertStage(stageContainer, 'clarify', 'running', 'Generating clarifying question…', '');
   }
   else if (stage === 'clarify' && status === 'needed') {
-    // Replace spinner with question UI
-    upsertStageCard(stageContainer, 'clarify', 'warn',
-      'Clarification needed', '');
-    appendResult(renderClarifyCard(event.question, originalPrompt, stageContainer, appendResult));
+    upsertStage(stageContainer, 'clarify', 'warn', 'Clarification needed', '');
+    collapseThinking(thinkingPanel, thinkingLabel, false);
+    appendToAI(aiContent, renderClarifyCard(event.question, originalPrompt, stageContainer, thinkingPanel, thinkingLabel, aiContent));
   }
   else if (stage === 'mcp' && status === 'running') {
-    upsertStageCard(stageContainer, 'mcp', 'running',
-      `📚 Fetching docs…`,
+    upsertStage(stageContainer, 'mcp', 'running', 'Fetching documentation…',
       `<span class="tag">${event.tool}</span><span class="tag">${event.operation}</span>`);
   }
   else if (stage === 'mcp' && status === 'done') {
     const { tool, has_docs, doc_chunk } = event;
     const syntax = doc_chunk?.command_syntax || '';
-    upsertStageCard(stageContainer, 'mcp', 'done',
+    upsertStage(stageContainer, 'mcp', 'ok',
       `Docs: <strong>${tool}</strong>`,
       has_docs
-        ? `<span class="tag">syntax</span> ${escHtml(syntax.slice(0, 80))}${syntax.length > 80 ? '…' : ''}`
-        : '<span style="color:var(--muted)">no docs — stub used</span>');
+        ? `<span class="tag">syntax</span> ${escHtml(syntax.slice(0, 90))}${syntax.length > 90 ? '…' : ''}`
+        : '<span style="color:var(--muted)">no docs found</span>');
   }
   else if (stage === 'mcp' && status === 'skipped') {
-    upsertStageCard(stageContainer, 'mcp', 'warn',
-      'MCP skipped', escHtml(event.reason || ''));
+    upsertStage(stageContainer, 'mcp', 'warn', 'MCP skipped', escHtml(event.reason || ''));
   }
   else if (stage === 'system2' && status === 'running') {
-    upsertStageCard(stageContainer, 'system2', 'running',
-      '⚙️ Generating command…', '');
+    upsertStage(stageContainer, 'system2', 'running', 'Generating command…', '');
   }
   else if (stage === 'system2' && status === 'done') {
-    upsertStageCard(stageContainer, 'system2', 'done',
-      'Command generated', '');
-    appendResult(renderCommandCard(event));
+    upsertStage(stageContainer, 'system2', 'ok', 'Command generated', '');
+    collapseThinking(thinkingPanel, thinkingLabel, true);
+
+    // Merge grok entities into system1 card if system1 found none
+    const grokEntities = event.grok_entities || {};
+    const s1Entities   = JSON.parse(stageContainer.dataset.s1Entities || '{}');
+    const mergedEntities = Object.keys(s1Entities).length ? s1Entities : grokEntities;
+    if (Object.keys(grokEntities).length && !Object.keys(s1Entities).length) {
+      const intent = stageContainer.dataset.s1Intent || '';
+      const pct    = stageContainer.dataset.s1Pct    || '';
+      const entityStr = Object.entries(mergedEntities)
+        .map(([k, v]) => `<span class="tag">${k}: ${v}</span>`).join('');
+      upsertStage(stageContainer, 'system1', 'ok',
+        `Intent: <strong>${intent}</strong>`,
+        `<div class="conf-badge">confidence <strong>${pct}%</strong></div>
+         <div style="margin-top:4px">${entityStr}</div>`
+      );
+    }
+
+    const { explanation, steps, command, shell } = event;
+    if (explanation || steps?.length) {
+      appendToAI(aiContent, renderProse(explanation, steps));
+    }
+    if (command) {
+      appendToAI(aiContent, renderCodeBlock(command, shell || 'bash'));
+    }
   }
   else if (stage === 'error') {
-    appendResult(renderErrorCard(event.message || 'Unknown error'));
+    collapseThinking(thinkingPanel, thinkingLabel, false);
+    appendToAI(aiContent, renderErrorCard(event.message || 'Unknown error'));
   }
 }
 
-// ── Stage card upsert ────────────────────────────────────────────────────────
-function upsertStageCard(container, stageId, state, label, detail) {
-  let card = container.querySelector(`[data-stage="${stageId}"]`);
+// ── Stage card ────────────────────────────────────────────────────────────────
+function upsertStage(container, id, state, label, detail) {
+  let card = container.querySelector(`[data-stage="${id}"]`);
   if (!card) {
     card = document.createElement('div');
-    card.className = 'stage-card';
-    card.dataset.stage = stageId;
+    card.dataset.stage = id;
     container.appendChild(card);
-    scrollToBottom();
+    scrollBottom();
   }
-  const iconHtml = state === 'running'
-    ? '<div class="stage-icon spinning"></div>'
-    : state === 'done'    ? '<div class="stage-icon ok">✓</div>'
-    : state === 'warn'    ? '<div class="stage-icon warn">!</div>'
-    : state === 'skipped' ? '<div class="stage-icon warn">–</div>'
-    :                       '<div class="stage-icon fail">✕</div>';
-
+  const iconHTML =
+    state === 'running' ? '<div class="stage-icon spinning"></div>' :
+    state === 'ok'      ? '<div class="stage-icon ok">✓</div>' :
+    state === 'warn'    ? '<div class="stage-icon warn">!</div>' :
+                          '<div class="stage-icon warn">✕</div>';
   card.className = `stage-card ${state}`;
-  card.innerHTML = `
-    ${iconHtml}
-    <div class="stage-body">
-      <div class="stage-label">${label}</div>
-      ${detail ? `<div class="stage-detail">${detail}</div>` : ''}
-    </div>`;
+  card.innerHTML = `${iconHTML}<div class="stage-body">
+    <div class="stage-label">${label}</div>
+    ${detail ? `<div class="stage-detail">${detail}</div>` : ''}
+  </div>`;
+}
+
+// ── Thinking collapse ─────────────────────────────────────────────────────────
+function collapseThinking(panel, label, success) {
+  if (!panel) return;
+  label.textContent = success ? 'Done' : 'Stopped';
+  label.style.color = success ? 'var(--success)' : 'var(--muted)';
+}
+
+// ── Prose card (explanation + numbered steps) ─────────────────────────────────
+function renderProse(explanation, steps) {
+  const div = document.createElement('div');
+  div.className = 'ai-prose';
+  let html = '';
+  if (explanation) html += `<div class="explanation">${escHtml(explanation)}</div>`;
+  if (steps && steps.length) {
+    html += '<div class="ai-steps">';
+    steps.forEach((s, i) => {
+      const num = String(i + 1).padStart(2, '0');
+      html += `<div class="ai-step"><span class="ai-step-num">${num}</span><span>${escHtml(s)}</span></div>`;
+    });
+    html += '</div>';
+  }
+  div.innerHTML = html;
+  return div;
+}
+
+// ── Code block ────────────────────────────────────────────────────────────────
+function renderCodeBlock(command, shell) {
+  const div = document.createElement('div');
+  div.className = 'code-block';
+  div.innerHTML = `
+    <div class="code-header">
+      <span class="code-lang">${escHtml(shell)}</span>
+      <button class="copy-btn">copy</button>
+    </div>
+    <pre class="code-body">${escHtml(command)}</pre>`;
+  div.querySelector('.copy-btn').addEventListener('click', (e) => {
+    navigator.clipboard.writeText(command).then(() => {
+      const btn = e.target;
+      btn.textContent = 'copied';
+      setTimeout(() => { btn.textContent = 'copy'; }, 1500);
+    });
+  });
+  return div;
 }
 
 // ── Clarify card ──────────────────────────────────────────────────────────────
-function renderClarifyCard(question, originalPrompt, stageContainer, appendResult) {
+function renderClarifyCard(question, originalPrompt, stageContainer, thinkingPanel, thinkingLabel, aiContent) {
   const card = document.createElement('div');
   card.className = 'clarify-card';
   card.innerHTML = `
-    <div class="clarify-question">💬 ${escHtml(question)}</div>
+    <div class="clarify-q">${escHtml(question)}</div>
     <div class="clarify-row">
-      <input class="clarify-input" id="clarify-answer-input"
-             type="text" placeholder="Type your answer…" autocomplete="off" />
-      <button class="clarify-submit" id="clarify-submit-btn">Send</button>
+      <input class="clarify-input" type="text" placeholder="Type your answer…" autocomplete="off"/>
+      <button class="clarify-btn">Send</button>
     </div>`;
 
-  const input  = card.querySelector('#clarify-answer-input');
-  const submit = card.querySelector('#clarify-submit-btn');
+  const input = card.querySelector('.clarify-input');
+  const btn   = card.querySelector('.clarify-btn');
 
   const doSubmit = async () => {
     const answer = input.value.trim();
     if (!answer) return;
-    card.innerHTML = `<div style="color:var(--muted);font-size:13px">📝 "${escHtml(answer)}"</div>`;
+    card.innerHTML = `<div style="color:var(--muted);font-size:13px">"${escHtml(answer)}"</div>`;
     appendUserBubble(answer);
     setProcessing(true);
-    await runPipeline(originalPrompt, answer, stageContainer, appendResult);
+    await runPipeline(originalPrompt, answer, stageContainer, thinkingPanel, thinkingLabel, aiContent);
     setProcessing(false);
   };
 
-  submit.addEventListener('click', doSubmit);
+  btn.addEventListener('click', doSubmit);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') doSubmit(); });
   setTimeout(() => input.focus(), 50);
-
   return card;
 }
 
-// ── Command result card ───────────────────────────────────────────────────────
-function renderCommandCard(event) {
-  const plan = event.command_plan;
-  const raw = event.raw || '';
-
-  // Extract the command string from plan
-  let commandStr = '';
-  if (plan) {
-    const steps = plan.steps || [];
-    if (steps.length > 0) {
-      commandStr = steps.map(s => s.command || '').filter(Boolean).join('\n');
-    }
-    if (!commandStr) commandStr = plan.command || plan.primary_command || '';
-  }
-  if (!commandStr && raw) {
-    // Fallback: show raw with JSON syntax
-    commandStr = raw.trim();
-  }
-
-  const meta = plan ? [
-    plan.intent_type && `intent: ${plan.intent_type}`,
-    plan.os          && `os: ${plan.os}`,
-    plan.shell       && `shell: ${plan.shell}`,
-  ].filter(Boolean) : [];
-
-  const card = document.createElement('div');
-  card.className = 'result-card';
-  card.innerHTML = `
-    <div class="result-header">
-      <span>⚡ Generated Command</span>
-      <div class="result-actions">
-        <button class="result-btn" id="copy-btn">Copy</button>
-      </div>
-    </div>
-    <pre class="result-command" id="result-command-text">${escHtml(commandStr || '(empty output)')}</pre>
-    ${meta.length ? `<div class="result-meta">${meta.map(m => `<span><span class="label">${m.split(':')[0]}:</span> ${m.split(':')[1]}</span>`).join('')}</div>` : ''}`;
-
-  card.querySelector('#copy-btn').addEventListener('click', () => {
-    navigator.clipboard.writeText(commandStr).then(() => {
-      const btn = card.querySelector('#copy-btn');
-      btn.textContent = 'Copied!';
-      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
-    });
-  });
-
-  return card;
-}
-
-function renderErrorCard(message) {
-  const card = document.createElement('div');
-  card.className = 'error-card';
-  card.textContent = `⚠️ ${message}`;
-  return card;
+function renderErrorCard(msg) {
+  const d = document.createElement('div');
+  d.className = 'error-card';
+  d.textContent = msg;
+  return d;
 }
 
 // ── DOM helpers ───────────────────────────────────────────────────────────────
 function appendUserBubble(text) {
   const row = document.createElement('div');
-  row.className = 'msg-row';
+  row.className = 'msg-row user-row';
   const bubble = document.createElement('div');
   bubble.className = 'bubble-user';
   bubble.textContent = text;
   row.appendChild(bubble);
   chatHistory.appendChild(row);
-  scrollToBottom();
-  return row;
+  scrollBottom();
 }
 
-function createAssistantRow() {
-  const msgRow = document.createElement('div');
-  msgRow.className = 'msg-row';
+function createAIRow() {
+  const row = document.createElement('div');
+  row.className = 'msg-row ai-row';
 
-  const panel = document.createElement('div');
-  panel.className = 'thinking-panel';
+  const avatar = document.createElement('div');
+  avatar.className = 'ai-avatar';
+  avatar.textContent = 'AI';
 
-  const header = document.createElement('div');
-  header.className = 'thinking-header';
-  header.innerHTML = `<span>⟳ Thinking</span>`;
+  const aiContent = document.createElement('div');
+  aiContent.className = 'ai-content';
+
+  // Thinking panel inside ai-content
+  const thinkingPanel = document.createElement('div');
+  thinkingPanel.className = 'thinking-panel';
+
+  const thinkingLabel = document.createElement('div');
+  thinkingLabel.className = 'thinking-label';
+  thinkingLabel.textContent = 'Thinking';
 
   const stageContainer = document.createElement('div');
-  stageContainer.className = 'thinking-steps';
 
-  panel.appendChild(header);
-  panel.appendChild(stageContainer);
-  msgRow.appendChild(panel);
-  chatHistory.appendChild(msgRow);
-  scrollToBottom();
+  thinkingPanel.appendChild(thinkingLabel);
+  thinkingPanel.appendChild(stageContainer);
+  aiContent.appendChild(thinkingPanel);
 
-  // appendResult: add a DOM element to the row below the panel
-  function appendResult(el) {
-    msgRow.appendChild(el);
-    // Update thinking header once done
-    header.innerHTML = '<span style="color:var(--success)">✓ Done</span>';
-    scrollToBottom();
-  }
+  row.appendChild(avatar);
+  row.appendChild(aiContent);
+  chatHistory.appendChild(row);
+  scrollBottom();
 
-  return { msgRow, stageContainer, appendResult };
+  return { thinkingPanel, stageContainer, thinkingLabel, aiContent };
 }
 
-function clearStageContainer(c) {
-  c.innerHTML = '';
+function appendToAI(aiContent, el) {
+  aiContent.appendChild(el);
+  scrollBottom();
 }
 
-function scrollToBottom() {
+function scrollBottom() {
   chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
 function setProcessing(active) {
   isProcessing = active;
-  sendBtn.disabled   = active || !bridgeReady;
-  userInput.disabled = active || !bridgeReady;
+  if (active) {
+    sendBtn.style.display = 'none';
+    stopBtn.style.display = 'flex';
+    userInput.disabled = true;
+  } else {
+    sendBtn.style.display = 'flex';
+    stopBtn.style.display = 'none';
+    userInput.disabled = !bridgeReady;
+    sendBtn.disabled   = !bridgeReady;
+    abortController    = null;
+  }
 }
 
 function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(str ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

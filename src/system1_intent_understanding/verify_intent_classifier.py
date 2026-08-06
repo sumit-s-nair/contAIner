@@ -11,13 +11,12 @@ import random
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import torch
-import torch.nn as nn
+from ner_utils import extract_entities_from_offsets
+from torch import nn
 from transformers import AutoConfig, AutoModel, AutoTokenizer, PreTrainedModel
 from transformers.modeling_outputs import ModelOutput
-
 
 NER_LABEL_FALLBACK = [
     "O",
@@ -38,9 +37,9 @@ NER_LABEL_FALLBACK = [
 
 @dataclass
 class JointOutput(ModelOutput):
-    loss: Optional[torch.FloatTensor] = None
-    intent_logits: Optional[torch.FloatTensor] = None
-    ner_logits: Optional[torch.FloatTensor] = None
+    loss: torch.FloatTensor | None = None
+    intent_logits: torch.FloatTensor | None = None
+    ner_logits: torch.FloatTensor | None = None
 
 
 class JointIntentNER(PreTrainedModel):
@@ -135,10 +134,7 @@ def load_model(model_dir: str):
     if ner_map_path.exists():
         with open(ner_map_path) as f:
             ner_map = json.load(f)
-        id_to_ner = {
-            int(k): v
-            for k, v in ner_map.get("id2label", {}).items()
-        }
+        id_to_ner = {int(k): v for k, v in ner_map.get("id2label", {}).items()}
     else:
         id_to_ner = {i: label for i, label in enumerate(NER_LABEL_FALLBACK)}
 
@@ -168,7 +164,15 @@ def load_model(model_dir: str):
     print(f"Intent labels: {list(intent_label_map.keys())}")
     print()
 
-    return model, tokenizer, intent_label_map, id_to_label, id_to_ner, device, max_length
+    return (
+        model,
+        tokenizer,
+        intent_label_map,
+        id_to_label,
+        id_to_ner,
+        device,
+        max_length,
+    )
 
 
 # =============================================================================
@@ -180,11 +184,11 @@ def predict(
     text: str,
     model,
     tokenizer,
-    id_to_label: Dict[int, str],
-    id_to_ner: Dict[int, str],
+    id_to_label: dict[int, str],
+    id_to_ner: dict[int, str],
     device: torch.device,
     max_length: int = 128,
-) -> Dict:
+) -> dict:
     """
     Predict intent for a single instruction.
 
@@ -215,24 +219,8 @@ def predict(
     all_probs = {id_to_label[i]: probs[i].item() for i in range(len(id_to_label))}
 
     ner_ids = torch.argmax(ner_logits, dim=-1).squeeze(0).tolist()
-    entity_values: Dict[str, List[str]] = {}
 
-    for ner_id, (start, end) in zip(ner_ids, offsets):
-        if start == 0 and end == 0:
-            continue
-        tag = id_to_ner.get(int(ner_id), "O")
-        if tag == "O" or "-" not in tag:
-            continue
-        _, entity_type = tag.split("-", 1)
-        token_text = text[start:end].strip()
-        if token_text:
-            entity_values.setdefault(entity_type, []).append(token_text)
-
-    entities = {
-        entity_type: " ".join(chunks)
-        for entity_type, chunks in entity_values.items()
-        if chunks
-    }
+    entities = extract_entities_from_offsets(text, ner_ids, offsets, id_to_ner)
 
     return {
         "prediction": pred_label,
@@ -242,7 +230,7 @@ def predict(
     }
 
 
-def format_prediction(text: str, result: Dict, expected: Optional[str] = None) -> str:
+def format_prediction(text: str, result: dict, expected: str | None = None) -> str:
     """Format a prediction result for display."""
     lines = []
     lines.append(f'  Input:      "{text}"')
@@ -336,7 +324,7 @@ def batch_verify(
     device,
     verify_file: str,
     max_length: int,
-    sample_size: Optional[int] = None,
+    sample_size: int | None = None,
     seed: int = 42,
     show_correct: bool = False,
 ):
@@ -370,7 +358,7 @@ def batch_verify(
     # Run predictions
     correct = 0
     incorrect = 0
-    mismatches: List[Dict] = []
+    mismatches: list[dict] = []
 
     for i, row in enumerate(data):
         text = row["instruction"]
@@ -402,6 +390,7 @@ def batch_verify(
                     "predicted": predicted,
                     "confidence": result["confidence"],
                     "probabilities": result["probabilities"],
+                    "entities": result.get("entities", {}),
                 }
             )
 
@@ -429,6 +418,12 @@ def batch_verify(
             )
             prob_str = " | ".join(f"{k}: {v:.4f}" for k, v in sorted_probs)
             print(f"       Probs:     {prob_str}")
+
+            if m.get("entities"):
+                entity_str = ", ".join(
+                    f"{k}={v}" for k, v in sorted(m["entities"].items())
+                )
+                print(f"       Entities:  {entity_str}")
             print()
     else:
         print("\n✓ All samples classified correctly!")
@@ -456,7 +451,7 @@ def parse_args():
     parser.add_argument(
         "--model_dir",
         type=str,
-        default="outputs/intent_classifier/final_model",
+        default="outputs/intent_classifier/final_model_v2",
         help="Path to the saved model directory",
     )
     parser.add_argument(
@@ -490,7 +485,9 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    model, tokenizer, label_map, id_to_label, id_to_ner, device, max_length = load_model(args.model_dir)
+    model, tokenizer, label_map, id_to_label, id_to_ner, device, max_length = (
+        load_model(args.model_dir)
+    )
 
     if args.verify_file:
         batch_verify(

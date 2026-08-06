@@ -54,7 +54,7 @@ BASE_MODEL  = "distilroberta-base"   # small, fast, strong on short instructions
 MAX_LENGTH  = 128                    # instructions are short — 64 would also work
 
 # NER label scheme: BIO tagging for 6 entity types + O
-ENTITY_TYPES = ["runtime", "package", "version", "virtual_env", "package_manager", "project"]
+ENTITY_TYPES = ["software", "version", "project", "file"]
 NER_LABELS   = ["O"] + [f"B-{e}" for e in ENTITY_TYPES] + [f"I-{e}" for e in ENTITY_TYPES]
 NER_LABEL2ID = {l: i for i, l in enumerate(NER_LABELS)}
 NER_ID2LABEL = {i: l for l, i in NER_LABEL2ID.items()}
