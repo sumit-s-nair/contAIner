@@ -23,44 +23,17 @@ class CargoAdapter(BaseAdapter):
     _DOCS_URL = "https://doc.rust-lang.org/cargo/commands/cargo-{operation}.html"
 
     async def fetch(self, request: DocRequest) -> DocChunk:
-        registry_url = self._REGISTRY_URL.format(package=request.package)
         docs_url = self._DOCS_URL.format(operation=request.operation)
 
-        registry_data, docs_html = await asyncio.gather(
-            self._fetch_json(registry_url),
-            self._fetch_html(docs_url),
-            return_exceptions=True,
-        )
+        try:
+            docs_html = await self._fetch_html(docs_url)
+        except Exception as e:
+            docs_html = e
 
-        if isinstance(registry_data, BaseException):
-            registry_data = {}
         if isinstance(docs_html, BaseException):
             docs_html = ""
 
         errors: list[str] = []
-
-        # ── Registry metadata ──────────────────────────────────────────
-        metadata: dict[str, Any] = {}
-        if registry_data and "crate" in registry_data:
-            crate = registry_data["crate"]
-            metadata = {
-                "name": crate.get("name", request.package),
-                "description": crate.get("description", ""),
-                "max_version": crate.get("max_version", ""),
-                "homepage": crate.get("homepage", ""),
-                "repository": crate.get("repository", ""),
-                "downloads": crate.get("downloads", 0),
-                "categories": [
-                    c.get("category", "") for c in
-                    (registry_data.get("categories") or [])
-                ][:5],
-                "keywords": [
-                    k.get("keyword", "") for k in
-                    (registry_data.get("keywords") or [])
-                ][:10],
-            }
-        elif request.package:
-            errors.append("crates.io registry fetch failed")
 
         # ── Docs ───────────────────────────────────────────────────────
         command_syntax = ""
@@ -88,15 +61,12 @@ class CargoAdapter(BaseAdapter):
             examples = [command_syntax]
 
         source_urls = []
-        if registry_data and "crate" in registry_data:
-            source_urls.append(registry_url)
         if docs_html:
             source_urls.append(docs_url)
 
         chunk = DocChunk(
             tool="cargo",
             operation=request.operation,
-            package_metadata=metadata,
             command_syntax=command_syntax,
             key_flags=key_flags,
             examples=examples,

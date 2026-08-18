@@ -29,32 +29,14 @@ class GoAdapter(BaseAdapter):
         docs_url = self._DOCS_URL
 
         # Use Go module proxy for structured metadata
-        proxy_url = self._PROXY_URL.format(package=request.package) if request.package else ""
         module_url = self._MODULE_URL.format(package=request.package) if request.package else ""
 
-        tasks = [self._fetch_html(docs_url)]
-        if proxy_url:
-            tasks.append(self._fetch_json(proxy_url))
-
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        docs_html = results[0] if not isinstance(results[0], BaseException) else ""
-        proxy_data = (results[1] if len(results) > 1 and
-                      not isinstance(results[1], BaseException) else {})
+        try:
+            docs_html = await self._fetch_html(docs_url)
+        except Exception as e:
+            docs_html = e
 
         errors: list[str] = []
-
-        # ── Registry metadata ──────────────────────────────────────────
-        metadata: dict[str, Any] = {}
-        if proxy_data:
-            metadata = {
-                "name": request.package,
-                "version": proxy_data.get("Version", ""),
-                "time": proxy_data.get("Time", ""),
-                "origin": proxy_data.get("Origin", {}),
-                "pkg_go_dev_url": module_url,
-            }
-        elif request.package:
-            errors.append("Go module proxy fetch failed")
 
         # ── Docs — extract the relevant subcommand section ─────────────
         command_syntax = ""
@@ -109,7 +91,7 @@ class GoAdapter(BaseAdapter):
             examples = [command_syntax]
 
         source_urls = []
-        if proxy_data and module_url:
+        if module_url:
             source_urls.append(module_url)
         if docs_html:
             source_urls.append(docs_url)
@@ -117,7 +99,6 @@ class GoAdapter(BaseAdapter):
         chunk = DocChunk(
             tool="go",
             operation=request.operation,
-            package_metadata=metadata,
             command_syntax=command_syntax,
             key_flags=key_flags,
             examples=examples[:5],

@@ -39,8 +39,6 @@ class NpmAdapter(BaseAdapter):
     async def fetch(self, request: DocRequest) -> DocChunk:
         resolved_tool = self._resolve_tool(request)
 
-        registry_url = self._REGISTRY_URL.format(package=request.package)
-
         # Map yarn "install" → "add" in docs URL
         op_for_docs = request.operation
         if resolved_tool == "yarn" and request.operation == "install":
@@ -49,41 +47,15 @@ class NpmAdapter(BaseAdapter):
         docs_template = self._DOCS_URLS.get(resolved_tool, self._DOCS_URLS["npm"])
         docs_url = docs_template.format(operation=op_for_docs)
 
-        registry_data, docs_html = await asyncio.gather(
-            self._fetch_json(registry_url),
-            self._fetch_html(docs_url),
-            return_exceptions=True,
-        )
+        try:
+            docs_html = await self._fetch_html(docs_url)
+        except Exception as e:
+            docs_html = e
 
-        if isinstance(registry_data, BaseException):
-            registry_data = {}
         if isinstance(docs_html, BaseException):
             docs_html = ""
 
         errors: list[str] = []
-
-        # ── Registry metadata ──────────────────────────────────────────
-        metadata: dict[str, Any] = {}
-        if registry_data:
-            latest_version = registry_data.get("dist-tags", {}).get("latest", "")
-            metadata = {
-                "name": registry_data.get("name", request.package),
-                "version": latest_version,
-                "description": registry_data.get("description", ""),
-                "license": registry_data.get("license", ""),
-                "homepage": registry_data.get("homepage", ""),
-                "repository": (registry_data.get("repository") or {}).get("url", ""),
-                "keywords": (registry_data.get("keywords") or [])[:10],
-            }
-            # Dependencies from the latest version
-            versions = registry_data.get("versions", {})
-            if latest_version and latest_version in versions:
-                ver_info = versions[latest_version]
-                metadata["dependencies"] = list(
-                    (ver_info.get("dependencies") or {}).keys()
-                )[:20]
-        else:
-            errors.append("npm registry fetch failed")
 
         # ── Docs ───────────────────────────────────────────────────────
         command_syntax = ""
@@ -112,15 +84,12 @@ class NpmAdapter(BaseAdapter):
             examples = [command_syntax]
 
         source_urls = []
-        if registry_data:
-            source_urls.append(registry_url)
         if docs_html:
             source_urls.append(docs_url)
 
         chunk = DocChunk(
             tool=resolved_tool,
             operation=request.operation,
-            package_metadata=metadata,
             command_syntax=command_syntax,
             key_flags=key_flags,
             examples=examples,

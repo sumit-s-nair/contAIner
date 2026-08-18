@@ -21,40 +21,20 @@ class PipAdapter(BaseAdapter):
     _DOCS_URL = "https://pip.pypa.io/en/stable/cli/pip_{operation}/"
 
     async def fetch(self, request: DocRequest) -> DocChunk:
-        registry_url = self._REGISTRY_URL.format(package=request.package)
         docs_url = self._DOCS_URL.format(operation=request.operation)
 
-        registry_data, docs_html = await asyncio.gather(
-            self._fetch_json(registry_url),
-            self._fetch_html(docs_url),
-            return_exceptions=True,
-        )
+        try:
+            docs_html = await self._fetch_html(docs_url)
+        except Exception as e:
+            docs_html = e
 
         # ── Handle exceptions from gather ──────────────────────────────
-        if isinstance(registry_data, BaseException):
-            registry_data = {}
         if isinstance(docs_html, BaseException):
             docs_html = ""
 
         errors: list[str] = []
 
-        # ── Parse registry ─────────────────────────────────────────────
-        metadata: dict[str, Any] = {}
-        if registry_data:
-            info = registry_data.get("info", {})
-            metadata = {
-                "name": info.get("name", request.package),
-                "version": info.get("version", ""),
-                "summary": info.get("summary", ""),
-                "home_page": info.get("home_page", ""),
-                "license": info.get("license", ""),
-                "requires_python": info.get("requires_python", ""),
-                "requires_dist": (info.get("requires_dist") or [])[:15],
-            }
-        else:
-            errors.append("PyPI registry fetch failed")
-
-        # ── Parse docs ─────────────────────────────────────────────────
+        # ── Docs ─────────────────────────────────────────────────
         command_syntax = ""
         key_flags: list[dict[str, str]] = []
         examples: list[str] = []
@@ -80,15 +60,12 @@ class PipAdapter(BaseAdapter):
 
         # ── Build source URLs ──────────────────────────────────────────
         source_urls = []
-        if registry_data:
-            source_urls.append(registry_url)
         if docs_html:
             source_urls.append(docs_url)
 
         chunk = DocChunk(
             tool="pip",
             operation=request.operation,
-            package_metadata=metadata,
             command_syntax=command_syntax,
             key_flags=key_flags,
             examples=examples,

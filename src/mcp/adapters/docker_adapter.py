@@ -50,49 +50,17 @@ class DockerAdapter(BaseAdapter):
         return self._CLI_DOCS_URL.format(operation=op)
 
     async def fetch(self, request: DocRequest) -> DocChunk:
-        reg_url = self._registry_url(request.package)
         docs_url = self._docs_url(request.operation)
 
-        tasks = []
-        if reg_url:
-            tasks.append(self._fetch_json(reg_url))
-        else:
-            tasks.append(asyncio.coroutine(lambda: {})())  # noqa — placeholder
-
-        tasks.append(self._fetch_html(docs_url))
-
-        # Use gather directly with URL-based tasks
-        if reg_url:
-            registry_data, docs_html = await asyncio.gather(
-                self._fetch_json(reg_url),
-                self._fetch_html(docs_url),
-                return_exceptions=True,
-            )
-        else:
-            registry_data = {}
+        try:
             docs_html = await self._fetch_html(docs_url)
+        except Exception as e:
+            docs_html = e
 
-        if isinstance(registry_data, BaseException):
-            registry_data = {}
         if isinstance(docs_html, BaseException):
             docs_html = ""
 
         errors: list[str] = []
-
-        # ── Registry metadata ──────────────────────────────────────────
-        metadata: dict[str, Any] = {}
-        if registry_data:
-            metadata = {
-                "name": registry_data.get("name", request.package),
-                "namespace": registry_data.get("namespace", "library"),
-                "description": registry_data.get("description", ""),
-                "star_count": registry_data.get("star_count", 0),
-                "pull_count": registry_data.get("pull_count", 0),
-                "is_official": registry_data.get("is_official", False),
-                "last_updated": registry_data.get("last_updated", ""),
-            }
-        elif request.package:
-            errors.append("Docker Hub registry fetch failed")
 
         # ── Docs ───────────────────────────────────────────────────────
         command_syntax = ""
@@ -122,15 +90,12 @@ class DockerAdapter(BaseAdapter):
             examples = [command_syntax]
 
         source_urls = []
-        if registry_data and reg_url:
-            source_urls.append(reg_url)
         if docs_html:
             source_urls.append(docs_url)
 
         chunk = DocChunk(
             tool="docker" if not self._is_compose(request.operation) else "docker-compose",
             operation=request.operation,
-            package_metadata=metadata,
             command_syntax=command_syntax,
             key_flags=key_flags,
             examples=examples,

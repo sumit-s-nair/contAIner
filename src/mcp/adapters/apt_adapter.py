@@ -36,37 +36,15 @@ class AptAdapter(BaseAdapter):
         docs_url = self._choose_docs_url(request.operation)
 
         # apt has no registry API, but we can try fetching dpkg info page
-        dpkg_url = ""
-        if request.package:
-            dpkg_url = f"https://packages.debian.org/bookworm/{request.package}"
-
-        tasks = [self._fetch_html(docs_url)]
-        if dpkg_url:
-            tasks.append(self._fetch_html(dpkg_url))
-
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        docs_html = results[0] if not isinstance(results[0], BaseException) else ""
-        pkg_html = (results[1] if len(results) > 1 and
-                    not isinstance(results[1], BaseException) else "")
+        try:
+            docs_html = await self._fetch_html(docs_url)
+        except Exception as e:
+            docs_html = e
+            
+        if isinstance(docs_html, BaseException):
+            docs_html = ""
 
         errors: list[str] = []
-
-        # ── Package metadata from Debian packages page ─────────────────
-        metadata: dict[str, Any] = {}
-        if pkg_html:
-            soup = self._parse_soup(pkg_html)
-            title = soup.find("title")
-            if title and "Error" not in title.get_text():
-                desc_el = soup.find("div", id="pdesc")
-                metadata = {
-                    "name": request.package,
-                    "description": desc_el.get_text(strip=True)[:300] if desc_el else "",
-                    "source": "debian-packages",
-                }
-            else:
-                errors.append("Package not found in Debian repos")
-        elif request.package:
-            errors.append("Debian package page fetch failed")
 
         # ── Docs ───────────────────────────────────────────────────────
         command_syntax = ""
@@ -104,13 +82,11 @@ class AptAdapter(BaseAdapter):
         source_urls = []
         if docs_html:
             source_urls.append(docs_url)
-        if pkg_html and metadata:
-            source_urls.append(dpkg_url)
+
 
         chunk = DocChunk(
             tool="apt",
             operation=request.operation,
-            package_metadata=metadata,
             command_syntax=command_syntax,
             key_flags=key_flags,
             examples=examples,

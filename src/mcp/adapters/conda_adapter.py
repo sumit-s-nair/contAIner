@@ -29,30 +29,13 @@ class CondaAdapter(BaseAdapter):
 
         docs_url = self._DOCS_URL.format(operation=request.operation)
 
-        # Start docs fetch immediately; try registry channels in sequence
-        docs_task = asyncio.create_task(self._fetch_html(docs_url))
-        registry_data = await self._try_channels(request.package, channels)
-        docs_html_result = await docs_task
+        try:
+            docs_html_result = await self._fetch_html(docs_url)
+        except Exception as e:
+            docs_html_result = e
 
         docs_html = docs_html_result if not isinstance(docs_html_result, BaseException) else ""
         errors: list[str] = []
-
-        # ── Registry metadata ──────────────────────────────────────────
-        metadata: dict[str, Any] = {}
-        if registry_data:
-            metadata = {
-                "name": registry_data.get("name", request.package),
-                "summary": registry_data.get("summary", ""),
-                "description": (registry_data.get("description") or "")[:300],
-                "home": registry_data.get("home", ""),
-                "license": registry_data.get("license", ""),
-                "dev_url": registry_data.get("dev_url", ""),
-                "latest_version": registry_data.get("latest_version", ""),
-                "conda_platforms": registry_data.get("conda_platforms", []),
-                "versions": (registry_data.get("versions") or [])[:10],
-            }
-        elif request.package:
-            errors.append("Package not found in any Anaconda channel")
 
         # ── Docs ───────────────────────────────────────────────────────
         command_syntax = ""
@@ -81,20 +64,12 @@ class CondaAdapter(BaseAdapter):
             examples = [command_syntax]
 
         source_urls = []
-        if registry_data:
-            source_urls.append(
-                self._REGISTRY_URL.format(
-                    channel=registry_data.get("_channel", "conda-forge"),
-                    package=request.package,
-                )
-            )
         if docs_html:
             source_urls.append(docs_url)
 
         chunk = DocChunk(
             tool="conda",
             operation=request.operation,
-            package_metadata=metadata,
             command_syntax=command_syntax,
             key_flags=key_flags,
             examples=examples,
@@ -106,15 +81,7 @@ class CondaAdapter(BaseAdapter):
         chunk.estimate_tokens()
         return chunk
 
-    async def _try_channels(self, package: str, channels: list[str]) -> dict:
-        """Try each channel until one returns data."""
-        for channel in channels:
-            url = self._REGISTRY_URL.format(channel=channel, package=package)
-            data = await self._fetch_json(url)
-            if data:
-                data["_channel"] = channel
-                return data
-        return {}
+
 
     @staticmethod
     def _os_notes(request: DocRequest) -> str:
