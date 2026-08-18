@@ -2,3 +2,8 @@
 aiohttp>=3.9.0
 beautifulsoup4>=4.12.0
 lxml>=5.0.0
+
+# Optional — Part C abstractive compression (Qwen2.5-0.5B-Instruct)
+# Install only if you want the local model path; extractive baseline works without these.
+# transformers>=4.40.0
+# torch>=2.1.0
