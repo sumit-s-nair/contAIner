@@ -138,7 +138,6 @@ def _stub_fallback(request: dict[str, Any]) -> dict[str, Any]:
     return {
         "tool": tool,
         "operation": operation,
-        "package_metadata": {},
         "command_syntax": syntax,
         "key_flags": [],
         "examples": [syntax],

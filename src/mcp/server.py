@@ -32,6 +32,7 @@ if _PROJECT_ROOT not in sys.path:
 from src.mcp.router import DocRouter
 from src.mcp.models import DocRequest, DocChunk
 from src.mcp.cache import TTLCache, REGISTRY_TTL, DOCS_TTL
+from src.mcp.compress import compress_chunk
 
 # ── Logging ────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -163,7 +164,6 @@ def _build_unsupported_chunk(request: DocRequest, reason: str) -> DocChunk:
     chunk = DocChunk(
         tool=request.tool,
         operation=request.operation,
-        package_metadata={},
         command_syntax=syntax,
         key_flags=[],
         examples=[syntax] if syntax else [],
@@ -197,6 +197,9 @@ async def _handle_fetch_docs(body: dict[str, Any]) -> tuple[int, dict]:
             "supported_tools": _router.supported_tools(),
         }
 
+    # Parse ?compress=0 opt-out flag (passed via body for POST convenience)
+    enable_compression: bool = str(body.get("compress", "1")).strip() != "0"
+
     request = DocRequest.from_dict(body)
 
     # ── Cache lookup ───────────────────────────────────────────────────
@@ -218,6 +221,22 @@ async def _handle_fetch_docs(body: dict[str, Any]) -> tuple[int, dict]:
     except Exception as exc:
         log.exception("Unhandled adapter error")
         return 500, {"error": f"Internal error: {exc}"}
+
+    # ── Doc-compression stage (after retrieval, before cache + return) ──
+    if enable_compression:
+        try:
+            chunk = compress_chunk(chunk, method="extractive", cache=_cache)
+            log.info(
+                "compressed %s → %d tok (was %d tok, prose_ratio=%.2f)",
+                cache_key,
+                chunk.tokens_estimate,
+                getattr(chunk, "compression_report", None) and
+                    chunk.compression_report.original_token_count or chunk.tokens_estimate,
+                getattr(chunk, "compression_report", None) and
+                    chunk.compression_report.prose_reduction_ratio or 0.0,
+            )
+        except Exception as exc:
+            log.warning("Compression failed (%s) — using raw chunk", exc)
 
     # ── Cache the result ───────────────────────────────────────────────
     # Use the longer TTL if we got docs content, shorter if only registry
