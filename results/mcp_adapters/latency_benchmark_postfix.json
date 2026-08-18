@@ -1,0 +1,18 @@
+{
+  "n_reps": 20,
+  "state": "post-fix",
+  "note": "All HTTP I/O mocked; measures pure adapter logic overhead (parsing, template filling, DocChunk construction).",
+  "platform": "win32 / Python 3.13.11",
+  "date": "2026-08-18",
+  "results": {
+    "Pip":    {"mean_ms": 1.404, "std_ms": 2.287, "min_ms": 0.491, "max_ms": 11.014},
+    "Npm":    {"mean_ms": 0.733, "std_ms": 0.230, "min_ms": 0.528, "max_ms": 1.560},
+    "Go":     {"mean_ms": 0.385, "std_ms": 0.100, "min_ms": 0.237, "max_ms": 0.657},
+    "Docker": {"mean_ms": 0.721, "std_ms": 0.165, "min_ms": 0.542, "max_ms": 1.116},
+    "Cargo":  {"mean_ms": 0.938, "std_ms": 0.869, "min_ms": 0.510, "max_ms": 4.547},
+    "Conda":  {"mean_ms": 0.584, "std_ms": 0.144, "min_ms": 0.465, "max_ms": 0.952},
+    "Brew":   {"mean_ms": 0.463, "std_ms": 0.171, "min_ms": 0.267, "max_ms": 0.776},
+    "Apt":    {"mean_ms": 0.998, "std_ms": 0.217, "min_ms": 0.826, "max_ms": 1.553},
+    "Maven":  {"mean_ms": 0.509, "std_ms": 0.149, "min_ms": 0.282, "max_ms": 1.015}
+  }
+}
