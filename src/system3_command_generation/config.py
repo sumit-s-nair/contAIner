@@ -210,7 +210,7 @@ class TrainingConfig:
     model_type: ModelType = ModelType.QWEN2_5_CODER_1_5B
     
     # Paths
-    output_dir: str = "./outputs/system2_command_generation"
+    output_dir: str = "./outputs/system3_command_generation"
     cache_dir: str = "./cache"
     logging_dir: str = "./logs"
     

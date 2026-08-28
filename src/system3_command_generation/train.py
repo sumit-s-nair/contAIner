@@ -58,8 +58,8 @@ try:
         compute_metrics_for_trainer,
     )
 except ImportError as exc:
-    # Allow `python src/system2_command_generation/train.py` in addition to
-    # module execution (`python -m src.system2_command_generation.train`).
+    # Allow `python src/system3_command_generation/train.py` in addition to
+    # module execution (`python -m src.system3_command_generation.train`).
     if "attempted relative import with no known parent package" not in str(exc):
         raise
 
@@ -67,12 +67,12 @@ except ImportError as exc:
     if src_root not in sys.path:
         sys.path.insert(0, src_root)
 
-    from system2_command_generation.config import (  # type: ignore
+    from system3_command_generation.config import (  # type: ignore
         TrainingConfig,
         ModelType,
         MODEL_CONFIGS,
     )
-    from system2_command_generation.data_preprocessing import (  # type: ignore
+    from system3_command_generation.data_preprocessing import (  # type: ignore
         CommandDataProcessor,
         CommandGenerationDataset,
         MCPClient,
@@ -80,13 +80,13 @@ except ImportError as exc:
         format_input,
         format_output,
     )
-    from system2_command_generation.models import (  # type: ignore
+    from system3_command_generation.models import (  # type: ignore
         CommandGenerationModel,
         create_model,
         load_tokenizer,
         load_model,
     )
-    from system2_command_generation.metrics import (  # type: ignore
+    from system3_command_generation.metrics import (  # type: ignore
         CommandMetrics,
         MetricResults,
         check_exit_criteria,
@@ -511,7 +511,7 @@ class CommandGenerationTrainer:
         ):
             raise RuntimeError(
                 "QLoRA requested but peft is not installed. "
-                "Install dependencies from src/system2_command_generation/requirements.txt"
+                "Install dependencies from src/system3_command_generation/requirements.txt"
             )
 
         if not self.config.qlora_target_modules:
@@ -1123,7 +1123,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=str,
-        default="./outputs/system2_command_generation",
+        default="./outputs/system3_command_generation",
         help="Output directory for models and logs"
     )
     parser.add_argument(
@@ -1483,7 +1483,7 @@ def main():
             print("\n⚠️ Training interrupted by user (Ctrl+C).")
             if ckpt:
                 print(f"   Emergency checkpoint saved: {ckpt}")
-                print(f"   Resume with: python -m src.system2_command_generation.train --resume {ckpt}")
+                print(f"   Resume with: python -m src.system3_command_generation.train --resume {ckpt}")
             else:
                 print("   Could not persist an emergency checkpoint.")
 

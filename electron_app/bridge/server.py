@@ -36,7 +36,7 @@ from electron_app.bridge.system1 import System1Predictor
 from electron_app.bridge.grok import get_clarifying_question, generate_command
 
 # MCP client only — no System 2 model loaded
-from src.system2_command_generation.data_preprocessing import MCPClient
+from src.system3_command_generation.data_preprocessing import MCPClient
 
 # ── Flask app ─────────────────────────────────────────────────────────────────
 app = Flask(__name__)

@@ -239,19 +239,19 @@ System 2 processes each CanonicalIntent independently and returns a CommandPlan 
 
 ## Implementation
 
-The training implementation is located at `src/system2_command_generation/`. 
+The training implementation is located at `src/system3_command_generation/`. 
 
 ### Quick Start
 
 ```bash
 # Install dependencies
-pip install -r src/system2_command_generation/requirements.txt
+pip install -r src/system3_command_generation/requirements.txt
 
 # Train Qwen2.5-Coder-1.5B (primary model)
-python -m src.system2_command_generation.train --model qwen2_5_coder_1_5b
+python -m src.system3_command_generation.train --model qwen2_5_coder_1_5b
 
 # Train CodeT5+ (baseline comparison)
-python -m src.system2_command_generation.train --model codet5plus --baseline
+python -m src.system3_command_generation.train --model codet5plus --baseline
 ```
 
 ### Module Structure
@@ -264,7 +264,7 @@ python -m src.system2_command_generation.train --model codet5plus --baseline
 | `metrics.py` | Evaluation metrics (exact match, normalized match, etc.) |
 | `train.py` | Main training script with HuggingFace Trainer |
 
-See [src/system2_command_generation/README.md](../../src/system2_command_generation/README.md) for detailed usage.
+See [src/system3_command_generation/README.md](../../src/system3_command_generation/README.md) for detailed usage.
 
 ---
 

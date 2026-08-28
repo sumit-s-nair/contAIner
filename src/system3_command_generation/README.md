@@ -116,7 +116,7 @@ At runtime, System 1 produces a **CanonicalIntent** which is converted to the mo
 cd contAIner
 
 # Install dependencies
-pip install -r src/system2_command_generation/requirements.txt
+pip install -r src/system3_command_generation/requirements.txt
 ```
 
 ## Usage
@@ -125,40 +125,40 @@ pip install -r src/system2_command_generation/requirements.txt
 
 ```bash
 # Default command (run from repo root; includes MCP doc enrichment)
-python -m src.system2_command_generation.train \
+python -m src.system3_command_generation.train \
   --model qwen2_5_coder_1_5b \
   --use-qlora \
   --use-mcp \
   --mcp-url http://localhost:11435 \
-  --output-dir ./outputs/system2_command_generation
+  --output-dir ./outputs/system3_command_generation
 
 # Train Qwen2.5-Coder-1.5B (primary model)
-python -m src.system2_command_generation.train --model qwen2_5_coder_1_5b
+python -m src.system3_command_generation.train --model qwen2_5_coder_1_5b
 
 # Recommended on 8-12 GB GPUs: QLoRA + MCP doc enrichment
-python -m src.system2_command_generation.train --model qwen2_5_coder_1_5b --use-mcp --mcp-url http://localhost:11435 --output-dir ./outputs/system2_command_generation
+python -m src.system3_command_generation.train --model qwen2_5_coder_1_5b --use-mcp --mcp-url http://localhost:11435 --output-dir ./outputs/system3_command_generation
 
 # Train CodeT5+ (baseline)
-python -m src.system2_command_generation.train --model codet5plus --baseline
+python -m src.system3_command_generation.train --model codet5plus --baseline
 
 # Train with custom configuration
-python -m src.system2_command_generation.train --config config.json
+python -m src.system3_command_generation.train --config config.json
 
 # Resume from checkpoint
-python -m src.system2_command_generation.train --resume checkpoint-1000
+python -m src.system3_command_generation.train --resume checkpoint-1000
 ```
 
 Training sessions are saved automatically. Each run creates a timestamped folder
-under `./outputs/system2_command_generation/` (for example,
+under `./outputs/system3_command_generation/` (for example,
 `qwen2_5_coder_1_5b_20260421_110607`) containing `config.json`,
 `training_*.log`, `checkpoint-*`, and `final_model/`.
 
 To continue a saved session from a specific checkpoint:
 
 ```bash
-python -m src.system2_command_generation.train \
+python -m src.system3_command_generation.train \
   --model qwen2_5_coder_1_5b \
-  --resume ./outputs/system2_command_generation/qwen2_5_coder_1_5b_YYYYMMDD_HHMMSS/checkpoint-1000
+  --resume ./outputs/system3_command_generation/qwen2_5_coder_1_5b_YYYYMMDD_HHMMSS/checkpoint-1000
 ```
 
 Pressing `Ctrl+C` during training now triggers an emergency checkpoint save
@@ -173,7 +173,7 @@ before exit, so you can resume from the latest saved state.
 | `--data-source` | `huggingface` | Data source: `huggingface` or `local` |
 | `--dataset-name` | `sumit-s-nair/command-dataset` | HuggingFace dataset name |
 | `--local-data-dir` | `None` | Local data directory path |
-| `--output-dir` | `./outputs/system2_command_generation` | Output directory |
+| `--output-dir` | `./outputs/system3_command_generation` | Output directory |
 | `--epochs` | `10` | Number of training epochs |
 | `--batch-size` | `8` | Training batch size |
 | `--eval-batch-size` | `16` | Evaluation batch size |
@@ -208,7 +208,7 @@ before exit, so you can resume from the latest saved state.
 
 ```bash
 # Evaluate a trained model
-python -m src.system2_command_generation.train \
+python -m src.system3_command_generation.train \
     --eval-only \
     --model-path ./outputs/final_model
 ```
@@ -216,7 +216,7 @@ python -m src.system2_command_generation.train \
 ### Programmatic Usage
 
 ```python
-from src.system2_command_generation import (
+from src.system3_command_generation import (
     CommandGenerationTrainer,
     TrainingConfig,
     ModelType,
@@ -247,8 +247,8 @@ print(eval_results.summary())
 ### Inference
 
 ```python
-from src.system2_command_generation import CommandGenerationModel
-from src.system2_command_generation.models import generate_command_plan
+from src.system3_command_generation import CommandGenerationModel
+from src.system3_command_generation.models import generate_command_plan
 
 # Load trained model
 model = CommandGenerationModel.load("./outputs/final_model")
@@ -286,7 +286,7 @@ The training pipeline evaluates models against these metrics:
 ## Directory Structure
 
 ```
-src/system2_command_generation/
+src/system3_command_generation/
 ├── __init__.py              # Module exports
 ├── config.py                # Configuration and schema definitions
 ├── data_preprocessing.py    # Data loading and preprocessing
@@ -344,7 +344,7 @@ Create a `config.json` file for custom training:
 After training, the following files are created:
 
 ```
-outputs/system2_command_generation/
+outputs/system3_command_generation/
 ├── qwen2_5_coder_1_5b_YYYYMMDD_HHMMSS/
 │   ├── config.json              # Training configuration
 │   ├── training_YYYYMMDD.log    # Training logs
@@ -380,7 +380,7 @@ unless `--disable-auto-memory-tuning` is set.
 
 ```bash
 # Explicit memory-safe run (works on many 8-12 GB GPUs)
-python -m src.system2_command_generation.train \
+python -m src.system3_command_generation.train \
   --model qwen2_5_coder_1_5b \
   --batch-size 1 \
   --eval-batch-size 1 \
@@ -393,7 +393,7 @@ python -m src.system2_command_generation.train \
 
 ```bash
 # Use local dataset
-python -m src.system2_command_generation.train \
+python -m src.system3_command_generation.train \
     --data-source local \
     --local-data-dir ./datasets/command-dataset/data
 ```

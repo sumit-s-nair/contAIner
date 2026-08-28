@@ -22,13 +22,13 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from src.system2_command_generation.config import DEFAULT_SHELL, INTENT_TYPES, OS_TYPES, SHELL_TYPES
-from src.system2_command_generation.data_preprocessing import MCPClient, format_input, parse_model_output
-from src.system2_command_generation.models import CommandGenerationModel
+from src.system3_command_generation.config import DEFAULT_SHELL, INTENT_TYPES, OS_TYPES, SHELL_TYPES
+from src.system3_command_generation.data_preprocessing import MCPClient, format_input, parse_model_output
+from src.system3_command_generation.models import CommandGenerationModel
 
 
 DEFAULT_MODEL_PATH = (
-    "./outputs/system2_command_generation/"
+    "./outputs/system3_command_generation/"
     "qwen2_5_coder_1_5b_20260421_162634/checkpoint-842"
 )
 

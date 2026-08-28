@@ -17,7 +17,7 @@ SYSTEM1_MODEL_DIR = os.path.join(
 SYSTEM2_MODEL_PATH = os.path.join(
     PROJECT_ROOT,
     "outputs",
-    "system2_command_generation",
+    "system3_command_generation",
     "qwen2_5_coder_1_5b_20260422_232926",
     "checkpoint-400",
 )

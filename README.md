@@ -176,7 +176,7 @@ python scripts/push_datasets_to_hf.py \
 Completed:
 - Intent classifier training pipeline implemented (`src/system1_intent_understanding/train_intent_classifier.py`)
 - Intent model verification workflow implemented (`src/system1_intent_understanding/verify_intent_classifier.py`)
-- Command generation training stack implemented (`src/system2_command_generation/`)
+- Command generation training stack implemented (`src/system3_command_generation/`)
 - Dataset schemas and validators implemented for both intent and command datasets
 - Final System 1 model artifacts exported under `outputs/intent_classifier/final_model/`
 
@@ -262,7 +262,7 @@ contAIner/
 │       ├── train_intent_classifier.py
 │       ├── verify_intent_classifier.py
 │       └── README.md
-│   └── system2_command_generation/
+│   └── system3_command_generation/
 │       ├── train.py
 │       ├── config.py
 │       ├── data_preprocessing.py
