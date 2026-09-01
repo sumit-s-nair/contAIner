@@ -40,3 +40,8 @@ When execution fails or is BLOCKED, the system transitions into a recovery state
 - It generates detailed training signals back to System 2/3 (e.g., "Ordering violation: 'check' must occur before 'install'").
 - System 3 can be prompted to regenerate the command without destructive flags, or System 2 can replan an alternative path (e.g., using a fallback action like `ESCALATE`).
 - In extreme cases, execution falls back to manual user intervention.
+
+
+## Tracked Open Items
+- **System 3 Stub**: System 2 RL training currently uses a deterministic command-expansion stub (src/rl_env/system3_stub.py) in place of System 3. Swapping in the real trained System 3 model is a required follow-up before this pipeline reflects the intended architecture.
+- **Main Env Advancement**: Advancing the main environment with the best-of-G action accelerates convergence but biases exploration off-policy. This design decision is worth revisiting if exploration diversity becomes an issue later.

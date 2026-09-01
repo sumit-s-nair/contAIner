@@ -1,0 +1,2192 @@
+{
+  "version": 3,
+  "seed": 42,
+  "generated_at": "2026-08-29T06:59:33.993810+00:00",
+  "per_category": 100,
+  "splits": {
+    "train": [
+      {
+        "repo": "react/create-react-app",
+        "category": "manifest_present",
+        "stars": 103279,
+        "size_kb": 25186,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/react/create-react-app.git",
+        "sha": ""
+      },
+      {
+        "repo": "soxoj/maigret",
+        "category": "manifest_present",
+        "stars": 37128,
+        "size_kb": 25700,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/soxoj/maigret.git",
+        "sha": ""
+      },
+      {
+        "repo": "xinntao/Real-ESRGAN",
+        "category": "manifest_present",
+        "stars": 36624,
+        "size_kb": 5514,
+        "default_branch": "master",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/xinntao/Real-ESRGAN.git",
+        "sha": ""
+      },
+      {
+        "repo": "OpenBMB/VoxCPM",
+        "category": "manifest_present",
+        "stars": 36232,
+        "size_kb": 4140,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/OpenBMB/VoxCPM.git",
+        "sha": ""
+      },
+      {
+        "repo": "xai-org/grok-1",
+        "category": "manifest_present",
+        "stars": 52198,
+        "size_kb": 1008,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/xai-org/grok-1.git",
+        "sha": ""
+      },
+      {
+        "repo": "FoundationAgents/OpenManus",
+        "category": "manifest_present",
+        "stars": 58111,
+        "size_kb": 4572,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/FoundationAgents/OpenManus.git",
+        "sha": ""
+      },
+      {
+        "repo": "TheAlgorithms/Python",
+        "category": "manifest_present",
+        "stars": 224084,
+        "size_kb": 16729,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/TheAlgorithms/Python.git",
+        "sha": ""
+      },
+      {
+        "repo": "trekhleb/javascript-algorithms",
+        "category": "manifest_present",
+        "stars": 196576,
+        "size_kb": 14964,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/trekhleb/javascript-algorithms.git",
+        "sha": ""
+      },
+      {
+        "repo": "abi/screenshot-to-code",
+        "category": "manifest_present",
+        "stars": 75677,
+        "size_kb": 11335,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/abi/screenshot-to-code.git",
+        "sha": ""
+      },
+      {
+        "repo": "huggingface/pytorch-image-models",
+        "category": "manifest_present",
+        "stars": 37106,
+        "size_kb": 31574,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/huggingface/pytorch-image-models.git",
+        "sha": ""
+      },
+      {
+        "repo": "scrapy/scrapy",
+        "category": "manifest_present",
+        "stars": 64082,
+        "size_kb": 32014,
+        "default_branch": "master",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/scrapy/scrapy.git",
+        "sha": ""
+      },
+      {
+        "repo": "nvbn/thefuck",
+        "category": "manifest_present",
+        "stars": 97748,
+        "size_kb": 4043,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/nvbn/thefuck.git",
+        "sha": ""
+      },
+      {
+        "repo": "shiyu-coder/Kronos",
+        "category": "manifest_present",
+        "stars": 38056,
+        "size_kb": 9539,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/shiyu-coder/Kronos.git",
+        "sha": ""
+      },
+      {
+        "repo": "anuraghazra/github-readme-stats",
+        "category": "manifest_present",
+        "stars": 79842,
+        "size_kb": 7741,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/anuraghazra/github-readme-stats.git",
+        "sha": ""
+      },
+      {
+        "repo": "httpie/cli",
+        "category": "manifest_present",
+        "stars": 38465,
+        "size_kb": 6925,
+        "default_branch": "master",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/httpie/cli.git",
+        "sha": ""
+      },
+      {
+        "repo": "PatrickJS/awesome-cursorrules",
+        "category": "manifest_present",
+        "stars": 40675,
+        "size_kb": 2938,
+        "default_branch": "main",
+        "license": "CC0-1.0",
+        "clone_url": "https://github.com/PatrickJS/awesome-cursorrules.git",
+        "sha": ""
+      },
+      {
+        "repo": "blader/humanizer",
+        "category": "manifest_present",
+        "stars": 38658,
+        "size_kb": 149,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/blader/humanizer.git",
+        "sha": ""
+      },
+      {
+        "repo": "zhayujie/CowAgent",
+        "category": "manifest_present",
+        "stars": 46713,
+        "size_kb": 13699,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/zhayujie/CowAgent.git",
+        "sha": ""
+      },
+      {
+        "repo": "expressjs/express",
+        "category": "manifest_present",
+        "stars": 69400,
+        "size_kb": 9857,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/expressjs/express.git",
+        "sha": ""
+      },
+      {
+        "repo": "jingyaogong/minimind",
+        "category": "manifest_present",
+        "stars": 55122,
+        "size_kb": 39400,
+        "default_branch": "master",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/jingyaogong/minimind.git",
+        "sha": ""
+      },
+      {
+        "repo": "Yuan1z0825/nature-skills",
+        "category": "manifest_present",
+        "stars": 37686,
+        "size_kb": 39628,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/Yuan1z0825/nature-skills.git",
+        "sha": ""
+      },
+      {
+        "repo": "typicode/json-server",
+        "category": "manifest_present",
+        "stars": 75697,
+        "size_kb": 4258,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/typicode/json-server.git",
+        "sha": ""
+      },
+      {
+        "repo": "2noise/ChatTTS",
+        "category": "manifest_present",
+        "stars": 39803,
+        "size_kb": 10772,
+        "default_branch": "main",
+        "license": "AGPL-3.0",
+        "clone_url": "https://github.com/2noise/ChatTTS.git",
+        "sha": ""
+      },
+      {
+        "repo": "lllyasviel/Fooocus",
+        "category": "manifest_present",
+        "stars": 52596,
+        "size_kb": 34158,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/lllyasviel/Fooocus.git",
+        "sha": ""
+      },
+      {
+        "repo": "asgeirtj/system_prompts_leaks",
+        "category": "manifest_present",
+        "stars": 63767,
+        "size_kb": 10502,
+        "default_branch": "main",
+        "license": "CC0-1.0",
+        "clone_url": "https://github.com/asgeirtj/system_prompts_leaks.git",
+        "sha": ""
+      },
+      {
+        "repo": "affaan-m/ECC",
+        "category": "manifest_present",
+        "stars": 244018,
+        "size_kb": 48111,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/affaan-m/ECC.git",
+        "sha": ""
+      },
+      {
+        "repo": "preactjs/preact",
+        "category": "manifest_present",
+        "stars": 38842,
+        "size_kb": 19980,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/preactjs/preact.git",
+        "sha": ""
+      },
+      {
+        "repo": "deepseek-ai/DeepSeek-V3",
+        "category": "manifest_present",
+        "stars": 104432,
+        "size_kb": 1768,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/deepseek-ai/DeepSeek-V3.git",
+        "sha": ""
+      },
+      {
+        "repo": "microsoft/qlib",
+        "category": "manifest_present",
+        "stars": 48023,
+        "size_kb": 18005,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/microsoft/qlib.git",
+        "sha": ""
+      },
+      {
+        "repo": "algorithm-visualizer/algorithm-visualizer",
+        "category": "manifest_present",
+        "stars": 48702,
+        "size_kb": 21182,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/algorithm-visualizer/algorithm-visualizer.git",
+        "sha": ""
+      },
+      {
+        "repo": "leonardomso/33-js-concepts",
+        "category": "manifest_present",
+        "stars": 66515,
+        "size_kb": 2927,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/leonardomso/33-js-concepts.git",
+        "sha": ""
+      },
+      {
+        "repo": "datalab-to/marker",
+        "category": "manifest_present",
+        "stars": 39353,
+        "size_kb": 21020,
+        "default_branch": "master",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/datalab-to/marker.git",
+        "sha": ""
+      },
+      {
+        "repo": "ManimCommunity/manim",
+        "category": "manifest_present",
+        "stars": 40508,
+        "size_kb": 47824,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/ManimCommunity/manim.git",
+        "sha": ""
+      },
+      {
+        "repo": "psf/black",
+        "category": "manifest_present",
+        "stars": 41820,
+        "size_kb": 8318,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/psf/black.git",
+        "sha": ""
+      },
+      {
+        "repo": "carbon-app/carbon",
+        "category": "manifest_present",
+        "stars": 36090,
+        "size_kb": 21055,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/carbon-app/carbon.git",
+        "sha": ""
+      },
+      {
+        "repo": "google/langextract",
+        "category": "manifest_present",
+        "stars": 38501,
+        "size_kb": 12772,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/google/langextract.git",
+        "sha": ""
+      },
+      {
+        "repo": "koajs/koa",
+        "category": "manifest_present",
+        "stars": 35690,
+        "size_kb": 4009,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/koajs/koa.git",
+        "sha": ""
+      },
+      {
+        "repo": "swisskyrepo/PayloadsAllTheThings",
+        "category": "manifest_present",
+        "stars": 80468,
+        "size_kb": 23345,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/swisskyrepo/PayloadsAllTheThings.git",
+        "sha": ""
+      },
+      {
+        "repo": "HKUDS/CLI-Anything",
+        "category": "manifest_present",
+        "stars": 48537,
+        "size_kb": 42356,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/HKUDS/CLI-Anything.git",
+        "sha": ""
+      },
+      {
+        "repo": "RVC-Boss/GPT-SoVITS",
+        "category": "manifest_present",
+        "stars": 61309,
+        "size_kb": 14573,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/RVC-Boss/GPT-SoVITS.git",
+        "sha": ""
+      },
+      {
+        "repo": "oobabooga/textgen",
+        "category": "manifest_present",
+        "stars": 47592,
+        "size_kb": 32098,
+        "default_branch": "main",
+        "license": "AGPL-3.0",
+        "clone_url": "https://github.com/oobabooga/textgen.git",
+        "sha": ""
+      },
+      {
+        "repo": "exo-explore/exo",
+        "category": "manifest_present",
+        "stars": 47123,
+        "size_kb": 40156,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/exo-explore/exo.git",
+        "sha": ""
+      },
+      {
+        "repo": "666ghj/MiroFish",
+        "category": "manifest_present",
+        "stars": 71697,
+        "size_kb": 16707,
+        "default_branch": "main",
+        "license": "AGPL-3.0",
+        "clone_url": "https://github.com/666ghj/MiroFish.git",
+        "sha": ""
+      },
+      {
+        "repo": "VectifyAI/PageIndex",
+        "category": "manifest_present",
+        "stars": 35385,
+        "size_kb": 28395,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/VectifyAI/PageIndex.git",
+        "sha": ""
+      },
+      {
+        "repo": "addyosmani/agent-skills",
+        "category": "manifest_present",
+        "stars": 90558,
+        "size_kb": 1016,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/addyosmani/agent-skills.git",
+        "sha": ""
+      },
+      {
+        "repo": "LAION-AI/Open-Assistant",
+        "category": "manifest_present",
+        "stars": 37408,
+        "size_kb": 35477,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/LAION-AI/Open-Assistant.git",
+        "sha": ""
+      },
+      {
+        "repo": "openai/whisper",
+        "category": "manifest_present",
+        "stars": 108095,
+        "size_kb": 12799,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/openai/whisper.git",
+        "sha": ""
+      },
+      {
+        "repo": "charlax/professional-programming",
+        "category": "manifest_present",
+        "stars": 51456,
+        "size_kb": 4690,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/charlax/professional-programming.git",
+        "sha": ""
+      },
+      {
+        "repo": "chartjs/Chart.js",
+        "category": "manifest_present",
+        "stars": 67670,
+        "size_kb": 43590,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/chartjs/Chart.js.git",
+        "sha": ""
+      },
+      {
+        "repo": "lm-sys/FastChat",
+        "category": "manifest_present",
+        "stars": 39526,
+        "size_kb": 35323,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/lm-sys/FastChat.git",
+        "sha": ""
+      },
+      {
+        "repo": "microsoft/markitdown",
+        "category": "manifest_present",
+        "stars": 176888,
+        "size_kb": 4329,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/microsoft/markitdown.git",
+        "sha": ""
+      },
+      {
+        "repo": "hiyouga/LlamaFactory",
+        "category": "manifest_present",
+        "stars": 74431,
+        "size_kb": 13963,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/hiyouga/LlamaFactory.git",
+        "sha": ""
+      },
+      {
+        "repo": "minimaxir/big-list-of-naughty-strings",
+        "category": "manifest_present",
+        "stars": 47711,
+        "size_kb": 330,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/minimaxir/big-list-of-naughty-strings.git",
+        "sha": ""
+      },
+      {
+        "repo": "anthropics/claude-plugins-official",
+        "category": "manifest_present",
+        "stars": 35117,
+        "size_kb": 10261,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/anthropics/claude-plugins-official.git",
+        "sha": ""
+      },
+      {
+        "repo": "sansan0/TrendRadar",
+        "category": "manifest_present",
+        "stars": 61899,
+        "size_kb": 32503,
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/sansan0/TrendRadar.git",
+        "sha": ""
+      },
+      {
+        "repo": "ashishpatel26/500-AI-Agents-Projects",
+        "category": "manifest_present",
+        "stars": 37135,
+        "size_kb": 1744,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/ashishpatel26/500-AI-Agents-Projects.git",
+        "sha": ""
+      },
+      {
+        "repo": "mvanhorn/last30days-skill",
+        "category": "manifest_present",
+        "stars": 60015,
+        "size_kb": 50572,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/mvanhorn/last30days-skill.git",
+        "sha": ""
+      },
+      {
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
+        "category": "manifest_present",
+        "stars": 122660,
+        "size_kb": 7970,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git",
+        "sha": ""
+      },
+      {
+        "repo": "browser-use/browser-use",
+        "category": "manifest_present",
+        "stars": 111599,
+        "size_kb": 34818,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/browser-use/browser-use.git",
+        "sha": ""
+      },
+      {
+        "repo": "karpathy/nanoGPT",
+        "category": "manifest_present",
+        "stars": 62562,
+        "size_kb": 981,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/karpathy/nanoGPT.git",
+        "sha": ""
+      },
+      {
+        "repo": "wshobson/agents",
+        "category": "manifest_present",
+        "stars": 39234,
+        "size_kb": 5995,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/wshobson/agents.git",
+        "sha": ""
+      },
+      {
+        "repo": "goabstract/Awesome-Design-Tools",
+        "category": "manifest_present",
+        "stars": 41019,
+        "size_kb": 19220,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/goabstract/Awesome-Design-Tools.git",
+        "sha": ""
+      },
+      {
+        "repo": "TauricResearch/TradingAgents",
+        "category": "manifest_present",
+        "stars": 101622,
+        "size_kb": 5233,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/TauricResearch/TradingAgents.git",
+        "sha": ""
+      },
+      {
+        "repo": "airbnb/javascript",
+        "category": "manifest_present",
+        "stars": 148142,
+        "size_kb": 3738,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/airbnb/javascript.git",
+        "sha": ""
+      },
+      {
+        "repo": "zai-org/ChatGLM-6B",
+        "category": "manifest_present",
+        "stars": 40983,
+        "size_kb": 9362,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/zai-org/ChatGLM-6B.git",
+        "sha": ""
+      },
+      {
+        "repo": "rohitg00/ai-engineering-from-scratch",
+        "category": "manifest_less",
+        "stars": 50710,
+        "size_kb": 31246,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/rohitg00/ai-engineering-from-scratch.git",
+        "sha": ""
+      },
+      {
+        "repo": "TesterTesterov/AI5WINScriptTool",
+        "category": "manifest_less",
+        "stars": 20,
+        "size_kb": 141,
+        "default_branch": "main",
+        "license": "GPL-2.0",
+        "clone_url": "https://github.com/TesterTesterov/AI5WINScriptTool.git",
+        "sha": ""
+      },
+      {
+        "repo": "MorvanZhou/Tensorflow-Tutorial",
+        "category": "manifest_less",
+        "stars": 4335,
+        "size_kb": 38884,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/MorvanZhou/Tensorflow-Tutorial.git",
+        "sha": ""
+      },
+      {
+        "repo": "diademoff/2ch",
+        "category": "manifest_less",
+        "stars": 50,
+        "size_kb": 2411,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/diademoff/2ch.git",
+        "sha": ""
+      },
+      {
+        "repo": "new92/instatools",
+        "category": "manifest_less",
+        "stars": 331,
+        "size_kb": 14056,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/new92/instatools.git",
+        "sha": ""
+      },
+      {
+        "repo": "grplyler/cisco-cheatsheet",
+        "category": "manifest_less",
+        "stars": 536,
+        "size_kb": 90,
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/grplyler/cisco-cheatsheet.git",
+        "sha": ""
+      },
+      {
+        "repo": "MorvanZhou/Evolutionary-Algorithm",
+        "category": "manifest_less",
+        "stars": 1233,
+        "size_kb": 2316,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/MorvanZhou/Evolutionary-Algorithm.git",
+        "sha": ""
+      },
+      {
+        "repo": "codingforentrepreneurs/Try-Django-2.2",
+        "category": "manifest_less",
+        "stars": 345,
+        "size_kb": 65,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/codingforentrepreneurs/Try-Django-2.2.git",
+        "sha": ""
+      },
+      {
+        "repo": "deanishe/alfred-appscripts",
+        "category": "manifest_less",
+        "stars": 90,
+        "size_kb": 2904,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/deanishe/alfred-appscripts.git",
+        "sha": ""
+      },
+      {
+        "repo": "v0di/landsat8image",
+        "category": "manifest_less",
+        "stars": 44,
+        "size_kb": 1263,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/v0di/landsat8image.git",
+        "sha": ""
+      },
+      {
+        "repo": "czl9707/build-your-own-openclaw",
+        "category": "manifest_less",
+        "stars": 1876,
+        "size_kb": 862,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/czl9707/build-your-own-openclaw.git",
+        "sha": ""
+      },
+      {
+        "repo": "twtrubiks/docker-tutorial",
+        "category": "manifest_less",
+        "stars": 1885,
+        "size_kb": 208,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/twtrubiks/docker-tutorial.git",
+        "sha": ""
+      },
+      {
+        "repo": "selierlin/Share-SSR-V2ray",
+        "category": "manifest_less",
+        "stars": 12487,
+        "size_kb": 28277,
+        "default_branch": "master",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/selierlin/Share-SSR-V2ray.git",
+        "sha": ""
+      },
+      {
+        "repo": "TesterTesterov/mesScriptAsseAndDisassembler",
+        "category": "manifest_less",
+        "stars": 33,
+        "size_kb": 141,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/TesterTesterov/mesScriptAsseAndDisassembler.git",
+        "sha": ""
+      },
+      {
+        "repo": "shareAI-lab/learn-claude-code",
+        "category": "manifest_less",
+        "stars": 75568,
+        "size_kb": 6035,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/shareAI-lab/learn-claude-code.git",
+        "sha": ""
+      },
+      {
+        "repo": "mouredev/portafolio-template",
+        "category": "manifest_less",
+        "stars": 924,
+        "size_kb": 2649,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/mouredev/portafolio-template.git",
+        "sha": ""
+      },
+      {
+        "repo": "OmkarPathak/Python-Programs",
+        "category": "manifest_less",
+        "stars": 1156,
+        "size_kb": 663,
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/OmkarPathak/Python-Programs.git",
+        "sha": ""
+      },
+      {
+        "repo": "geoffklee/git2jss",
+        "category": "manifest_less",
+        "stars": 42,
+        "size_kb": 137,
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/geoffklee/git2jss.git",
+        "sha": ""
+      },
+      {
+        "repo": "yhangf/PythonCrawler",
+        "category": "manifest_less",
+        "stars": 1820,
+        "size_kb": 93,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/yhangf/PythonCrawler.git",
+        "sha": ""
+      },
+      {
+        "repo": "TesterTesterov/SLGSystemScriptTool",
+        "category": "manifest_less",
+        "stars": 12,
+        "size_kb": 152,
+        "default_branch": "main",
+        "license": "GPL-2.0",
+        "clone_url": "https://github.com/TesterTesterov/SLGSystemScriptTool.git",
+        "sha": ""
+      },
+      {
+        "repo": "Windy3f3f3f3f/claude-code-from-scratch",
+        "category": "manifest_less",
+        "stars": 2615,
+        "size_kb": 2582,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/Windy3f3f3f3f/claude-code-from-scratch.git",
+        "sha": ""
+      },
+      {
+        "repo": "JarryShaw/MacDaily",
+        "category": "manifest_less",
+        "stars": 16,
+        "size_kb": 5781,
+        "default_branch": "master",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/JarryShaw/MacDaily.git",
+        "sha": ""
+      },
+      {
+        "repo": "sipeed/MaixPy-v1_scripts",
+        "category": "manifest_less",
+        "stars": 640,
+        "size_kb": 17183,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/sipeed/MaixPy-v1_scripts.git",
+        "sha": ""
+      },
+      {
+        "repo": "fronzbot/docker-pycron",
+        "category": "manifest_less",
+        "stars": 12,
+        "size_kb": 50,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/fronzbot/docker-pycron.git",
+        "sha": ""
+      },
+      {
+        "repo": "enormandeau/Scripts",
+        "category": "manifest_less",
+        "stars": 80,
+        "size_kb": 492,
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/enormandeau/Scripts.git",
+        "sha": ""
+      },
+      {
+        "repo": "hackersandslackers/flask-blueprint-tutorial",
+        "category": "manifest_less",
+        "stars": 462,
+        "size_kb": 475,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/hackersandslackers/flask-blueprint-tutorial.git",
+        "sha": ""
+      },
+      {
+        "repo": "Saganaki22/Sora-Code-Gen",
+        "category": "manifest_less",
+        "stars": 21,
+        "size_kb": 84,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/Saganaki22/Sora-Code-Gen.git",
+        "sha": ""
+      },
+      {
+        "repo": "UltiRequiem/chuy",
+        "category": "manifest_less",
+        "stars": 13,
+        "size_kb": 158,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/UltiRequiem/chuy.git",
+        "sha": ""
+      },
+      {
+        "repo": "econchick/mayhem",
+        "category": "manifest_less",
+        "stars": 303,
+        "size_kb": 807,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/econchick/mayhem.git",
+        "sha": ""
+      },
+      {
+        "repo": "GDSC-RCCIIT/General-Purpose-Scripts",
+        "category": "manifest_less",
+        "stars": 47,
+        "size_kb": 26437,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/GDSC-RCCIIT/General-Purpose-Scripts.git",
+        "sha": ""
+      },
+      {
+        "repo": "twtrubiks/django-rest-framework-tutorial",
+        "category": "manifest_less",
+        "stars": 875,
+        "size_kb": 75,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/twtrubiks/django-rest-framework-tutorial.git",
+        "sha": ""
+      },
+      {
+        "repo": "AndrzejLach89/AutoCAD-Plant-3D-Script-Tester",
+        "category": "manifest_less",
+        "stars": 12,
+        "size_kb": 82,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/AndrzejLach89/AutoCAD-Plant-3D-Script-Tester.git",
+        "sha": ""
+      },
+      {
+        "repo": "saadhaxxan/Python-For-Ethical-Hacking",
+        "category": "manifest_less",
+        "stars": 50,
+        "size_kb": 1044,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/saadhaxxan/Python-For-Ethical-Hacking.git",
+        "sha": ""
+      },
+      {
+        "repo": "Rookie-wb-WH/ql_scripts",
+        "category": "manifest_less",
+        "stars": 194,
+        "size_kb": 1636,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/Rookie-wb-WH/ql_scripts.git",
+        "sha": ""
+      },
+      {
+        "repo": "lucasayres/python-tools",
+        "category": "manifest_less",
+        "stars": 93,
+        "size_kb": 143,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/lucasayres/python-tools.git",
+        "sha": ""
+      },
+      {
+        "repo": "globocom/zabbix-scripts",
+        "category": "manifest_less",
+        "stars": 18,
+        "size_kb": 60,
+        "default_branch": "master",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/globocom/zabbix-scripts.git",
+        "sha": ""
+      },
+      {
+        "repo": "sibtc/django-beginners-guide",
+        "category": "manifest_less",
+        "stars": 1263,
+        "size_kb": 406,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/sibtc/django-beginners-guide.git",
+        "sha": ""
+      },
+      {
+        "repo": "AlexMathew/scrapple",
+        "category": "manifest_less",
+        "stars": 503,
+        "size_kb": 1211,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/AlexMathew/scrapple.git",
+        "sha": ""
+      },
+      {
+        "repo": "astorfi/CNTK-World",
+        "category": "manifest_less",
+        "stars": 327,
+        "size_kb": 17082,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/astorfi/CNTK-World.git",
+        "sha": ""
+      },
+      {
+        "repo": "lgy112112/ikan",
+        "category": "manifest_less",
+        "stars": 302,
+        "size_kb": 2853,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/lgy112112/ikan.git",
+        "sha": ""
+      },
+      {
+        "repo": "protonmeacc/Not-Pixel-bot",
+        "category": "manifest_less",
+        "stars": 28,
+        "size_kb": 51,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/protonmeacc/Not-Pixel-bot.git",
+        "sha": ""
+      },
+      {
+        "repo": "wesammustafa/Claude-Code-Everything-You-Need-to-Know",
+        "category": "manifest_less",
+        "stars": 2702,
+        "size_kb": 17600,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/wesammustafa/Claude-Code-Everything-You-Need-to-Know.git",
+        "sha": ""
+      },
+      {
+        "repo": "thomasdutraa07/Trading-Bot-for-Binance-Future",
+        "category": "manifest_less",
+        "stars": 391,
+        "size_kb": 216,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/thomasdutraa07/Trading-Bot-for-Binance-Future.git",
+        "sha": ""
+      },
+      {
+        "repo": "TesterTesterov/gscScriptCompAndDecompiler",
+        "category": "manifest_less",
+        "stars": 33,
+        "size_kb": 285,
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/TesterTesterov/gscScriptCompAndDecompiler.git",
+        "sha": ""
+      },
+      {
+        "repo": "x1ah/Daily_scripts",
+        "category": "manifest_less",
+        "stars": 102,
+        "size_kb": 3479,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/x1ah/Daily_scripts.git",
+        "sha": ""
+      },
+      {
+        "repo": "codingforentrepreneurs/Try-Django-3.2",
+        "category": "manifest_less",
+        "stars": 345,
+        "size_kb": 295,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/codingforentrepreneurs/Try-Django-3.2.git",
+        "sha": ""
+      },
+      {
+        "repo": "sebp/PyGObject-Tutorial",
+        "category": "manifest_less",
+        "stars": 392,
+        "size_kb": 2935,
+        "default_branch": "master",
+        "license": "LGPL-2.1",
+        "clone_url": "https://github.com/sebp/PyGObject-Tutorial.git",
+        "sha": ""
+      },
+      {
+        "repo": "emilwallner/Coloring-greyscale-images",
+        "category": "manifest_less",
+        "stars": 1053,
+        "size_kb": 14805,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/emilwallner/Coloring-greyscale-images.git",
+        "sha": ""
+      },
+      {
+        "repo": "nfsi-canada/OrientPy",
+        "category": "manifest_less",
+        "stars": 53,
+        "size_kb": 10424,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/nfsi-canada/OrientPy.git",
+        "sha": ""
+      },
+      {
+        "repo": "trozler/myfpl-cli",
+        "category": "manifest_less",
+        "stars": 14,
+        "size_kb": 88,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/trozler/myfpl-cli.git",
+        "sha": ""
+      },
+      {
+        "repo": "njanakiev/blender-scripting",
+        "category": "manifest_less",
+        "stars": 822,
+        "size_kb": 12533,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/njanakiev/blender-scripting.git",
+        "sha": ""
+      },
+      {
+        "repo": "MorvanZhou/NLP-Tutorials",
+        "category": "manifest_less",
+        "stars": 952,
+        "size_kb": 909,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/MorvanZhou/NLP-Tutorials.git",
+        "sha": ""
+      },
+      {
+        "repo": "robertmartin8/MachineLearningStocks",
+        "category": "manifest_less",
+        "stars": 1961,
+        "size_kb": 7533,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/robertmartin8/MachineLearningStocks.git",
+        "sha": ""
+      },
+      {
+        "repo": "aw-junaid/Python-System-Administration",
+        "category": "manifest_less",
+        "stars": 23,
+        "size_kb": 3994,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/aw-junaid/Python-System-Administration.git",
+        "sha": ""
+      },
+      {
+        "repo": "mouredev/hello-sql",
+        "category": "manifest_less",
+        "stars": 10126,
+        "size_kb": 3923,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/mouredev/hello-sql.git",
+        "sha": ""
+      },
+      {
+        "repo": "tobimensch/termsql",
+        "category": "manifest_less",
+        "stars": 285,
+        "size_kb": 221,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/tobimensch/termsql.git",
+        "sha": ""
+      },
+      {
+        "repo": "ceccopierangiolieugenio/pyTermTk",
+        "category": "manifest_less",
+        "stars": 912,
+        "size_kb": 13208,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/ceccopierangiolieugenio/pyTermTk.git",
+        "sha": ""
+      },
+      {
+        "repo": "balsi2001/FCU",
+        "category": "manifest_less",
+        "stars": 12,
+        "size_kb": 27742,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/balsi2001/FCU.git",
+        "sha": ""
+      },
+      {
+        "repo": "dusklinux/dusky",
+        "category": "manifest_less",
+        "stars": 2359,
+        "size_kb": 21322,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/dusklinux/dusky.git",
+        "sha": ""
+      },
+      {
+        "repo": "mouredev/Hello-Python",
+        "category": "manifest_less",
+        "stars": 37168,
+        "size_kb": 5715,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/mouredev/Hello-Python.git",
+        "sha": ""
+      },
+      {
+        "repo": "FakerPK/BlessNetworkBot",
+        "category": "manifest_less",
+        "stars": 22,
+        "size_kb": 104,
+        "default_branch": "main",
+        "license": "AGPL-3.0",
+        "clone_url": "https://github.com/FakerPK/BlessNetworkBot.git",
+        "sha": ""
+      },
+      {
+        "repo": "reluce/szurubooru-toolkit",
+        "category": "manifest_less",
+        "stars": 73,
+        "size_kb": 1318,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/reluce/szurubooru-toolkit.git",
+        "sha": ""
+      },
+      {
+        "repo": "pkmital/pycadl",
+        "category": "manifest_less",
+        "stars": 366,
+        "size_kb": 656,
+        "default_branch": "master",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/pkmital/pycadl.git",
+        "sha": ""
+      },
+      {
+        "repo": "layumi/Person_reID_baseline_pytorch",
+        "category": "manifest_less",
+        "stars": 4447,
+        "size_kb": 8224,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/layumi/Person_reID_baseline_pytorch.git",
+        "sha": ""
+      },
+      {
+        "repo": "Wolfterro/Projetos-em-Python",
+        "category": "manifest_less",
+        "stars": 11,
+        "size_kb": 57,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/Wolfterro/Projetos-em-Python.git",
+        "sha": ""
+      },
+      {
+        "repo": "Sookhaal/auri_maya_rigging",
+        "category": "manifest_less",
+        "stars": 11,
+        "size_kb": 417,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/Sookhaal/auri_maya_rigging.git",
+        "sha": ""
+      },
+      {
+        "repo": "xgfone/snippet",
+        "category": "manifest_less",
+        "stars": 230,
+        "size_kb": 17305,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/xgfone/snippet.git",
+        "sha": ""
+      },
+      {
+        "repo": "mytechnotalent/Python-For-Kids",
+        "category": "manifest_less",
+        "stars": 796,
+        "size_kb": 4226,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/mytechnotalent/Python-For-Kids.git",
+        "sha": ""
+      },
+      {
+        "repo": "sanjit-sinha/Tg-UsenetBot",
+        "category": "manifest_less",
+        "stars": 58,
+        "size_kb": 176,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/sanjit-sinha/Tg-UsenetBot.git",
+        "sha": ""
+      },
+      {
+        "repo": "dask/dask",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/dask/dask.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "boto/boto3",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/boto/boto3.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "pallets/flask",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/pallets/flask.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "sqlalchemy/sqlalchemy",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/sqlalchemy/sqlalchemy.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "ansible/ansible",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/ansible/ansible.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "keras-team/keras",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/keras-team/keras.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "encode/django-rest-framework",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/encode/django-rest-framework.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "alembic/alembic",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/alembic/alembic.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "celery/celery",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/celery/celery.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "pypa/pip",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/pypa/pip.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "django/django",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/django/django.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "pytorch/pytorch",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/pytorch/pytorch.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "scipy/scipy",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/scipy/scipy.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "psf/requests",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/psf/requests.git",
+        "sha": "",
+        "curated": true
+      }
+    ],
+    "val": [
+      {
+        "repo": "poteto/hiring-without-whiteboards",
+        "category": "manifest_present",
+        "stars": 51817,
+        "size_kb": 3423,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/poteto/hiring-without-whiteboards.git",
+        "sha": ""
+      },
+      {
+        "repo": "virattt/ai-hedge-fund",
+        "category": "manifest_present",
+        "stars": 63078,
+        "size_kb": 3714,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/virattt/ai-hedge-fund.git",
+        "sha": ""
+      },
+      {
+        "repo": "public-apis/public-apis",
+        "category": "manifest_present",
+        "stars": 472476,
+        "size_kb": 7675,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/public-apis/public-apis.git",
+        "sha": ""
+      },
+      {
+        "repo": "impress/impress.js",
+        "category": "manifest_present",
+        "stars": 38169,
+        "size_kb": 4388,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/impress/impress.js.git",
+        "sha": ""
+      },
+      {
+        "repo": "myshell-ai/OpenVoice",
+        "category": "manifest_present",
+        "stars": 37347,
+        "size_kb": 3944,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/myshell-ai/OpenVoice.git",
+        "sha": ""
+      },
+      {
+        "repo": "drawdb-io/drawdb",
+        "category": "manifest_present",
+        "stars": 39305,
+        "size_kb": 7361,
+        "default_branch": "main",
+        "license": "AGPL-3.0",
+        "clone_url": "https://github.com/drawdb-io/drawdb.git",
+        "sha": ""
+      },
+      {
+        "repo": "RVC-Project/Retrieval-based-Voice-Conversion-WebUI",
+        "category": "manifest_present",
+        "stars": 37892,
+        "size_kb": 15453,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI.git",
+        "sha": ""
+      },
+      {
+        "repo": "google/zx",
+        "category": "manifest_present",
+        "stars": 45709,
+        "size_kb": 4199,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/google/zx.git",
+        "sha": ""
+      },
+      {
+        "repo": "usestrix/strix",
+        "category": "manifest_present",
+        "stars": 59146,
+        "size_kb": 13328,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/usestrix/strix.git",
+        "sha": ""
+      },
+      {
+        "repo": "louislam/uptime-kuma",
+        "category": "manifest_present",
+        "stars": 90723,
+        "size_kb": 38343,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/louislam/uptime-kuma.git",
+        "sha": ""
+      },
+      {
+        "repo": "jquery/jquery",
+        "category": "manifest_present",
+        "stars": 59775,
+        "size_kb": 35939,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/jquery/jquery.git",
+        "sha": ""
+      },
+      {
+        "repo": "geekcomputers/Python",
+        "category": "manifest_present",
+        "stars": 35298,
+        "size_kb": 50092,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/geekcomputers/Python.git",
+        "sha": ""
+      },
+      {
+        "repo": "Textualize/rich",
+        "category": "manifest_present",
+        "stars": 57271,
+        "size_kb": 50632,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/Textualize/rich.git",
+        "sha": ""
+      },
+      {
+        "repo": "ultralytics/yolov5",
+        "category": "manifest_present",
+        "stars": 57942,
+        "size_kb": 18146,
+        "default_branch": "master",
+        "license": "AGPL-3.0",
+        "clone_url": "https://github.com/ultralytics/yolov5.git",
+        "sha": ""
+      },
+      {
+        "repo": "avilum/smart-url-fuzzer",
+        "category": "manifest_less",
+        "stars": 60,
+        "size_kb": 346,
+        "default_branch": "master",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/avilum/smart-url-fuzzer.git",
+        "sha": ""
+      },
+      {
+        "repo": "DasyDong/norepeat",
+        "category": "manifest_less",
+        "stars": 88,
+        "size_kb": 457,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/DasyDong/norepeat.git",
+        "sha": ""
+      },
+      {
+        "repo": "tzador/makedown",
+        "category": "manifest_less",
+        "stars": 318,
+        "size_kb": 450,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/tzador/makedown.git",
+        "sha": ""
+      },
+      {
+        "repo": "KhaelK138/authfinder",
+        "category": "manifest_less",
+        "stars": 98,
+        "size_kb": 85,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/KhaelK138/authfinder.git",
+        "sha": ""
+      },
+      {
+        "repo": "jankrepl/mildlyoverfitted",
+        "category": "manifest_less",
+        "stars": 348,
+        "size_kb": 807,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/jankrepl/mildlyoverfitted.git",
+        "sha": ""
+      },
+      {
+        "repo": "aquadzn/learn-x-by-doing-y",
+        "category": "manifest_less",
+        "stars": 1955,
+        "size_kb": 527,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/aquadzn/learn-x-by-doing-y.git",
+        "sha": ""
+      },
+      {
+        "repo": "twtrubiks/docker-django-nginx-uwsgi-postgres-tutorial",
+        "category": "manifest_less",
+        "stars": 435,
+        "size_kb": 81,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/twtrubiks/docker-django-nginx-uwsgi-postgres-tutorial.git",
+        "sha": ""
+      },
+      {
+        "repo": "liriansu-opus/liriansu-opus",
+        "category": "manifest_less",
+        "stars": 34,
+        "size_kb": 581,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/liriansu-opus/liriansu-opus.git",
+        "sha": ""
+      },
+      {
+        "repo": "alivx/redis-mirror",
+        "category": "manifest_less",
+        "stars": 12,
+        "size_kb": 291,
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/alivx/redis-mirror.git",
+        "sha": ""
+      },
+      {
+        "repo": "practical-tutorials/project-based-learning",
+        "category": "manifest_less",
+        "stars": 281208,
+        "size_kb": 466,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/practical-tutorials/project-based-learning.git",
+        "sha": ""
+      },
+      {
+        "repo": "huggingface/naacl_transfer_learning_tutorial",
+        "category": "manifest_less",
+        "stars": 725,
+        "size_kb": 3790,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/huggingface/naacl_transfer_learning_tutorial.git",
+        "sha": ""
+      },
+      {
+        "repo": "luongnv89/claude-howto",
+        "category": "manifest_less",
+        "stars": 41250,
+        "size_kb": 15803,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/luongnv89/claude-howto.git",
+        "sha": ""
+      },
+      {
+        "repo": "fancyboi999/ai-engineering-from-scratch-zh",
+        "category": "manifest_less",
+        "stars": 1002,
+        "size_kb": 12440,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/fancyboi999/ai-engineering-from-scratch-zh.git",
+        "sha": ""
+      },
+      {
+        "repo": "hackersandslackers/flask-sqlalchemy-tutorial",
+        "category": "manifest_less",
+        "stars": 401,
+        "size_kb": 1627,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/hackersandslackers/flask-sqlalchemy-tutorial.git",
+        "sha": ""
+      },
+      {
+        "repo": "pypa/setuptools",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/pypa/setuptools.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "huggingface/transformers",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/huggingface/transformers.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "scikit-learn/scikit-learn",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/scikit-learn/scikit-learn.git",
+        "sha": "",
+        "curated": true
+      }
+    ],
+    "test": [
+      {
+        "repo": "LeCoupa/awesome-cheatsheets",
+        "category": "manifest_present",
+        "stars": 46405,
+        "size_kb": 8889,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/LeCoupa/awesome-cheatsheets.git",
+        "sha": ""
+      },
+      {
+        "repo": "fastify/fastify",
+        "category": "manifest_present",
+        "stars": 37047,
+        "size_kb": 10553,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/fastify/fastify.git",
+        "sha": ""
+      },
+      {
+        "repo": "github/spec-kit",
+        "category": "manifest_present",
+        "stars": 132085,
+        "size_kb": 17309,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/github/spec-kit.git",
+        "sha": ""
+      },
+      {
+        "repo": "MadsLorentzen/ai-job-search",
+        "category": "manifest_present",
+        "stars": 37826,
+        "size_kb": 3751,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/MadsLorentzen/ai-job-search.git",
+        "sha": ""
+      },
+      {
+        "repo": "hakimel/reveal.js",
+        "category": "manifest_present",
+        "stars": 72231,
+        "size_kb": 35652,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/hakimel/reveal.js.git",
+        "sha": ""
+      },
+      {
+        "repo": "sherlock-project/sherlock",
+        "category": "manifest_present",
+        "stars": 90571,
+        "size_kb": 18976,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/sherlock-project/sherlock.git",
+        "sha": ""
+      },
+      {
+        "repo": "DietrichGebert/ponytail",
+        "category": "manifest_present",
+        "stars": 115635,
+        "size_kb": 2059,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/DietrichGebert/ponytail.git",
+        "sha": ""
+      },
+      {
+        "repo": "D4Vinci/Scrapling",
+        "category": "manifest_present",
+        "stars": 76995,
+        "size_kb": 10324,
+        "default_branch": "main",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/D4Vinci/Scrapling.git",
+        "sha": ""
+      },
+      {
+        "repo": "pallets/flask",
+        "category": "manifest_present",
+        "stars": 72142,
+        "size_kb": 12368,
+        "default_branch": "main",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/pallets/flask.git",
+        "sha": ""
+      },
+      {
+        "repo": "karpathy/nanochat",
+        "category": "manifest_present",
+        "stars": 57609,
+        "size_kb": 2187,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/karpathy/nanochat.git",
+        "sha": ""
+      },
+      {
+        "repo": "psf/requests",
+        "category": "manifest_present",
+        "stars": 54261,
+        "size_kb": 13569,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/psf/requests.git",
+        "sha": ""
+      },
+      {
+        "repo": "Alishahryar1/free-claude-code",
+        "category": "manifest_present",
+        "stars": 51238,
+        "size_kb": 10781,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/Alishahryar1/free-claude-code.git",
+        "sha": ""
+      },
+      {
+        "repo": "AUTOMATIC1111/stable-diffusion-webui",
+        "category": "manifest_present",
+        "stars": 164712,
+        "size_kb": 36552,
+        "default_branch": "master",
+        "license": "AGPL-3.0",
+        "clone_url": "https://github.com/AUTOMATIC1111/stable-diffusion-webui.git",
+        "sha": ""
+      },
+      {
+        "repo": "Panniantong/Agent-Reach",
+        "category": "manifest_present",
+        "stars": 76404,
+        "size_kb": 2013,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/Panniantong/Agent-Reach.git",
+        "sha": ""
+      },
+      {
+        "repo": "h5bp/html5-boilerplate",
+        "category": "manifest_present",
+        "stars": 57608,
+        "size_kb": 22921,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/h5bp/html5-boilerplate.git",
+        "sha": ""
+      },
+      {
+        "repo": "muziing/PySide6-Code-Tutorial",
+        "category": "manifest_less",
+        "stars": 1867,
+        "size_kb": 5621,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/muziing/PySide6-Code-Tutorial.git",
+        "sha": ""
+      },
+      {
+        "repo": "dreddnafious/thereisnospoon",
+        "category": "manifest_less",
+        "stars": 1185,
+        "size_kb": 3168,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/dreddnafious/thereisnospoon.git",
+        "sha": ""
+      },
+      {
+        "repo": "sepandhaghighi/gitfollow",
+        "category": "manifest_less",
+        "stars": 28,
+        "size_kb": 345,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/sepandhaghighi/gitfollow.git",
+        "sha": ""
+      },
+      {
+        "repo": "salaheddinek/video-editing-py-script",
+        "category": "manifest_less",
+        "stars": 72,
+        "size_kb": 262,
+        "default_branch": "main",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/salaheddinek/video-editing-py-script.git",
+        "sha": ""
+      },
+      {
+        "repo": "Felixoid/clickhouse-plantuml",
+        "category": "manifest_less",
+        "stars": 26,
+        "size_kb": 128,
+        "default_branch": "master",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/Felixoid/clickhouse-plantuml.git",
+        "sha": ""
+      },
+      {
+        "repo": "IDouble/Python-Scripts",
+        "category": "manifest_less",
+        "stars": 64,
+        "size_kb": 739,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/IDouble/Python-Scripts.git",
+        "sha": ""
+      },
+      {
+        "repo": "MorvanZhou/Reinforcement-learning-with-tensorflow",
+        "category": "manifest_less",
+        "stars": 9509,
+        "size_kb": 438,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow.git",
+        "sha": ""
+      },
+      {
+        "repo": "kidscancode/pygame_tutorials",
+        "category": "manifest_less",
+        "stars": 605,
+        "size_kb": 25078,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/kidscancode/pygame_tutorials.git",
+        "sha": ""
+      },
+      {
+        "repo": "ThatXliner/idae",
+        "category": "manifest_less",
+        "stars": 11,
+        "size_kb": 391,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/ThatXliner/idae.git",
+        "sha": ""
+      },
+      {
+        "repo": "talkpython/python-for-absolute-beginners-course",
+        "category": "manifest_less",
+        "stars": 2423,
+        "size_kb": 49259,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/talkpython/python-for-absolute-beginners-course.git",
+        "sha": ""
+      },
+      {
+        "repo": "AlexFlipnote/discord_bot.py",
+        "category": "manifest_less",
+        "stars": 588,
+        "size_kb": 236,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/AlexFlipnote/discord_bot.py.git",
+        "sha": ""
+      },
+      {
+        "repo": "codingforentrepreneurs/30-Days-of-Python-3.6",
+        "category": "manifest_less",
+        "stars": 289,
+        "size_kb": 10215,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/codingforentrepreneurs/30-Days-of-Python-3.6.git",
+        "sha": ""
+      },
+      {
+        "repo": "rohan472000/rohan472000",
+        "category": "manifest_less",
+        "stars": 14,
+        "size_kb": 9014,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/rohan472000/rohan472000.git",
+        "sha": ""
+      },
+      {
+        "repo": "Unity-Technologies/Robotics-Object-Pose-Estimation",
+        "category": "manifest_less",
+        "stars": 350,
+        "size_kb": 40452,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/Unity-Technologies/Robotics-Object-Pose-Estimation.git",
+        "sha": ""
+      },
+      {
+        "repo": "muziing/PyQt_practice",
+        "category": "manifest_less",
+        "stars": 1090,
+        "size_kb": 2439,
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/muziing/PyQt_practice.git",
+        "sha": ""
+      },
+      {
+        "repo": "harmony-one/harmony-ops",
+        "category": "manifest_less",
+        "stars": 34,
+        "size_kb": 18422,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/harmony-one/harmony-ops.git",
+        "sha": ""
+      },
+      {
+        "repo": "pandas-dev/pandas",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/pandas-dev/pandas.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "numpy/numpy",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/numpy/numpy.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "apache/airflow",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/apache/airflow.git",
+        "sha": "",
+        "curated": true
+      }
+    ]
+  },
+  "stats": {
+    "train": {
+      "total": 148,
+      "by_category": {
+        "manifest_present": 65,
+        "manifest_less": 69,
+        "known_conflict": 14
+      }
+    },
+    "val": {
+      "total": 31,
+      "by_category": {
+        "manifest_present": 14,
+        "manifest_less": 14,
+        "known_conflict": 3
+      }
+    },
+    "test": {
+      "total": 34,
+      "by_category": {
+        "manifest_present": 15,
+        "manifest_less": 16,
+        "known_conflict": 3
+      }
+    }
+  },
+  "topic_search_conflict_count": 0,
+  "curated_conflict_repos": 20
+}

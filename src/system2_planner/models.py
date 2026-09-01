@@ -27,6 +27,8 @@ class PlannedStep:
     """A step output by the System 2 Planner."""
     action_type: ActionType
     description: str
+    target: Optional[str] = None
+    rationale: Optional[str] = None
 
 class WorkflowNode(abc.ABC): pass
 

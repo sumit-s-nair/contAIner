@@ -121,3 +121,6 @@
 **Threats to validity:** Live network latency was not measured (all benchmarks used mocked HTTP); the "1 fewer RTT" saving is inferred from the structural change. The test suite mocks the network layer, meaning it cannot catch changes in the upstream registry APIs or HTML structures if they diverge from the mocks.
 
 **Open question:** How does the full documentation retrieval pipeline (adapter fetch + segmentation + compression) perform end-to-end under live network conditions and concurrency?
+ 
+ -   [ 2 0 2 6 - 0 8 - 3 0 ]   S y s t e m   2   R L   t r a i n i n g   c u r r e n t l y   u s e s   a   d e t e r m i n i s t i c   c o m m a n d - e x p a n s i o n   s t u b   i n   p l a c e   o f   S y s t e m   3 ;   s w a p p i n g   i n   t h e   r e a l   t r a i n e d   S y s t e m   3   m o d e l   i s   a   r e q u i r e d   f o l l o w - u p   b e f o r e   t h i s   p i p e l i n e   r e f l e c t s   t h e   i n t e n d e d   a r c h i t e c t u r e .  
+ 

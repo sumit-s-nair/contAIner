@@ -78,10 +78,24 @@ class AtomicStep:
         Surfaced verbatim to the user in the confirmation prompt.
     """
 
-    command:     str
-    description: str            = ""
-    destructive: bool           = False
-    risk_reason: Optional[str]  = None
+    command:        str
+    description:    str            = ""
+    destructive:    bool           = False
+    risk_reason:    Optional[str]  = None
+    verify_command: Optional[str]  = None
+    """
+    Optional shell command to run *after* the main command completes,
+    inside the same execution context (container / working directory).
+
+    The verify command must exit 0 for ``ExecutionResult.verified`` to be
+    set to ``True``.  If ``None``, the step is treated as unverified (the
+    reward function applies a partial credit penalty).
+
+    Design intent: the planner should always emit a verify command so that
+    the reward signal distinguishes "command ran" from "command had effect".
+    Example: after ``pip install requests``, verify with
+    ``python -c "import requests"`` rather than trusting the exit code alone.
+    """
 
 
 # ---------------------------------------------------------------------------
@@ -164,3 +178,34 @@ class ExecutionResult:
     returncode:     Optional[int]             = None
     classification: Optional[ClassificationResult] = None
     extra:          Dict[str, Any]            = field(default_factory=dict)
+
+    # -----------------------------------------------------------------
+    # Verification gate (added for RL reward computation)
+    # -----------------------------------------------------------------
+    verified: bool = False
+    """
+    Whether a post-execution *verify* command confirmed the step's side
+    effects actually took place.
+
+    This is *distinct* from the exit-code-derived ``status``.  A command
+    can return exit-code 0 (``status == SUCCESS``) but leave the system
+    unchanged — e.g. a dry-run install flag, or a package manager that
+    silently ignores a bad version constraint.
+
+    In the RL reward function:
+      * ``status == SUCCESS and verified == True``  → full r_success reward
+      * ``status == SUCCESS and verified == False`` → partial reward (between
+        r_success and r_failed), because syntactic success ≠ semantic effect
+      * ``verified`` is set by SandboxExecutor after running the AtomicStep's
+        ``verify_command`` inside the same execution context as the step.
+
+    Defaults to ``False``; callers that do not run a verify command should
+    leave it unset — this is conservatively treated as "unverified" by the
+    reward function.
+    """
+
+    verify_stdout: str = ""
+    """Captured stdout of the verify command, if one was run."""
+
+    verify_returncode: Optional[int] = None
+    """Return code of the verify command, or ``None`` if not run."""
