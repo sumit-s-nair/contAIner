@@ -205,12 +205,40 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+# Training Outputs (keep .gitkeep so directory exists on clone)
+outputs/*
+!outputs/.gitkeep
 
-outputs/
+# Caches
 cache/
+.cache/
+
+# Model weights and optimizer states
+*.safetensors
+*.pt
+*.bin
+*.ckpt
+
+# Scratch and third-party directories
+scratch/
+artifacts/scratch/
+test_repos/
+repos/
+
+# Temporary logs and metrics
+vram*.log
+git_log.txt
+
+# Root-level scratch scripts
+reproduce_crash*.py
+simulate_nan.py
+debug_env.py
+fix_indent.py
+test_scan.py
+test_system1_prompts.py
 sample*.json
 
-# Models and Archives
-archive/
-*.safetensors
-*.bin
+# Historical checkpoint weights (keep demo_traces and training_log.jsonl)
+EXPLOITED_DO_NOT_USE/**/checkpoint-*/
+archive/**/checkpoint-*/
+
