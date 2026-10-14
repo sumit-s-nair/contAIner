@@ -351,6 +351,7 @@ def main():
             ep_pg_loss_sum = 0.0
             ep_grad_norm_sum = 0.0
             ep_steps = 0
+            flat_rewards_consecutive = 0
             
             done = False
             ep_category = ep_info.get('category', 'unknown')
@@ -383,7 +384,7 @@ def main():
                         with torch.no_grad():
                             output_ids = model.generate(
                                 **inputs,
-                                max_new_tokens=64,
+                                max_new_tokens=512,
                                 do_sample=True,
                                 temperature=0.8,
                                 pad_token_id=tokenizer.eos_token_id
@@ -404,25 +405,8 @@ def main():
                     def evaluate_completion(comp):
                         env_clone = None
                         try:
-                            start_idx = comp.find('{')
-                            end_idx = comp.rfind('}')
-                            if start_idx == -1 or end_idx == -1:
-                                raise ValueError("No JSON object found")
-                            
-                            step_dict = json.loads(comp[start_idx:end_idx+1])
-                            
-                            atype_str = step_dict.get("action_type", "CHECK").upper()
-                            try:
-                                action_type = ActionType(atype_str.lower())
-                            except ValueError:
-                                action_type = ActionType.CHECK
-    
-                            action = PlannedStep(
-                                action_type=action_type,
-                                target=step_dict.get("target", ""),
-                                description=step_dict.get("description", ""),
-                                rationale=step_dict.get("rationale", "")
-                            )
+                            from src.rl_env.parser import parse_planned_step
+                            action = parse_planned_step(comp)
                             
                             if getattr(env._cfg, 'dry_run', True):
                                 env_clone = copy.deepcopy(env)
@@ -453,8 +437,12 @@ def main():
                                 
                             return (action, info, reward)
                             
+                        except ValueError as e:
+                            return (None, {"exec_status": "UNRECOGNIZED_ACTION_TYPE", "execution_error": str(e)}, -1.0)
+                        except json.JSONDecodeError as e:
+                            return (None, {"exec_status": "JSON_DECODE_ERROR", "execution_error": str(e)}, -1.0)
                         except Exception as e:
-                            return (None, {}, -1.0)
+                            return (None, {"exec_status": "PARSE_FAILED", "execution_error": str(e)}, -1.0)
                         finally:
                             if env_clone and getattr(env_clone, '_docker_executor', None):
                                 env_clone._docker_executor.end_episode()
@@ -465,6 +453,51 @@ def main():
                     actions = results
                     rewards = [r for _, _, r in results]
                             
+                    # --- NEW ROLLOUTS LOGGING ---
+                    rollout_log_file = out_dir / "rollouts.jsonl"
+                    try:
+                        with open(rollout_log_file, "a") as rf:
+                            rollout_entry = {
+                                "episode": ep,
+                                "step_idx": run_state.step_idx,
+                                "temperature": 0.8,
+                                "top_p": 1.0,
+                                "completions": []
+                            }
+                            for i in range(G):
+                                action_obj, c_info, c_reward = actions[i]
+                                c_raw = completions[i]
+                                
+                                c_action_type = action_obj.action_type.value if action_obj else "PARSE_FAILED"
+                                c_target = action_obj.target if action_obj else ""
+                                
+                                c_breakdown = c_info.get("reward_breakdown", {}) if isinstance(c_info, dict) else {}
+                                c_exec_status = c_info.get("exec_status", "UNKNOWN") if isinstance(c_info, dict) else "UNKNOWN"
+                                
+                                # Refine execution status if needed
+                                c_exec_tier = c_info.get("exec_tier", -1) if isinstance(c_info, dict) else -1
+                                # We can hardcode 2 since RiskTier.REVIEW.value might not be directly in scope if it's imported at function level, but RiskTier is used below.
+                                # Let's just use RiskTier
+                                if c_exec_tier == RiskTier.REVIEW.value:
+                                    c_exec_status = "REVIEW_DENIED"
+                                elif isinstance(c_info, dict) and "__UNMAPPED_ACTION__" in str(c_info.get("execution_error", "")):
+                                    c_exec_status = "UNMAPPED_ACTION"
+                                    
+                                rollout_entry["completions"].append({
+                                    "raw_completion": c_raw,
+                                    "action_type": c_action_type,
+                                    "target": c_target,
+                                    "reward": c_reward,
+                                    "breakdown": c_breakdown,
+                                    "exec_status": c_exec_status,
+                                    "execution_error": c_info.get("execution_error", "") if isinstance(c_info, dict) else "",
+                                    "validator_error": c_info.get("validator_error", "") if isinstance(c_info, dict) else ""
+                                })
+                            rf.write(json.dumps(rollout_entry) + "\n")
+                    except Exception as e:
+                        logger.error(f"Failed to log rollouts: {e}")
+                    # ----------------------------
+
                     # Compute advantages
                     rewards_t = torch.tensor(rewards, dtype=torch.float32, device="cuda")
                     mean_r = rewards_t.mean()
