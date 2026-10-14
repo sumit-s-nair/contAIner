@@ -24,19 +24,18 @@ Container design
 ----------------
 * Repo bind-mounted **read-only** at ``/workspace`` — policy can read source
   files but cannot corrupt the cached clone on the host.
-* Writable overlayfs at ``/workspace_rw`` for episode side-effects:
+* Writable overlayfs at ``/workspace_rw`` as the working directory:
+  - On container start, repository contents are copied from ``/workspace/.`` to ``/workspace_rw/``
+    (skipped when booting from a snapshot image).
+  - All step commands and verify commands run with ``docker exec -w /workspace_rw``.
   - ``pip install --user`` respects ``PYTHONUSERBASE=/workspace_rw``
   - ``npm`` respects ``NPM_CONFIG_PREFIX=/workspace_rw``
-  Packages installed during an episode are visible to verify commands in the
-  **same** episode (e.g. ``python -c 'import requests'`` works after
-  ``pip install requests``) without modifying the host or the read-only mount.
-  Unlike tmpfs, the overlayfs layer is captured by ``docker commit``, enabling
-  snapshotting of in-progress episode state for GRPO branch evaluation.
-* **Package cache mounts**: a host-side pip/npm cache directory is bind-mounted
-  read-write into every container (``/cache/pip``, ``/cache/npm``).  This
-  means packages downloaded by one container are reused by all subsequent
-  containers without hitting the network.  pip and npm are both safe for
-  concurrent cache access (file-level locking).
+  Packages installed and modifications made during an episode live in ``/workspace_rw``,
+  captured by ``docker commit`` for snapshots.
+* **Package cache mounts**: host-side pip/npm cache directories are bind-mounted
+  into every container (``/cache/pip``, ``/cache/npm``). Note: when ``network.mode="none"``,
+  the pip cache is empty and cannot download packages over the network. Packages must be
+  pre-cached or allowlist networking configured.
 * **Snapshot/restore**: ``snapshot()`` commits the running container's
   overlayfs layer to a named local image.  ``start_episode(snapshot_image=...)``
   boots from that image instead of the base image, so group-evaluation
@@ -76,6 +75,7 @@ import re
 import socket
 import subprocess
 import sys
+import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -97,9 +97,8 @@ from src.rl_env.verify_table import inject_verify_command
 # ---------------------------------------------------------------------------
 
 # Host-side directories for persistent pip/npm caches, shared across all
-# episode containers.  Created on first use.  The cache directories are
-# bind-mounted read-write into every container so packages downloaded once
-# are reused without hitting the network again.
+# episode containers. Created on first use. When network.mode="none", an empty
+# cache cannot download packages from the internet.
 _DEFAULT_PKG_CACHE_ROOT = Path("cache/docker_pkg_cache")
 _PIP_CACHE_HOST  = _DEFAULT_PKG_CACHE_ROOT / "pip"
 _NPM_CACHE_HOST  = _DEFAULT_PKG_CACHE_ROOT / "npm"
@@ -538,9 +537,8 @@ class DockerEpisodeExecutor:
             # container is removed (rm=false + explicit docker rm in end_episode).
             "--workdir", "/workspace",
             # --- Persistent package caches (host-side, shared across containers) --
-            # Bind-mounted read-write so packages downloaded once are reused by all
-            # subsequent containers without network round-trips.  pip and npm both
-            # handle concurrent cache access via file-level locking.
+            # Bind-mounted read-write into containers; requires pre-cached packages
+            # when running in isolated network mode (network.mode="none").
             "--volume", f"{self._pip_cache_host}:/cache/pip",
             "--volume", f"{self._npm_cache_host}:/cache/npm",
             # --- Package manager environment --------------------------------------
@@ -607,6 +605,35 @@ class DockerEpisodeExecutor:
             raise RuntimeError(
                 f"[DockerEpisodeExecutor] Timed out creating /workspace_rw in container {self._container_id}."
             ) from exc
+
+        # Copy repo contents from read-only /workspace into writable /workspace_rw.
+        # Skipped when booting from a snapshot image, because the snapshot already has it.
+        if not snapshot_image:
+            t0 = time.monotonic()
+            try:
+                cp_res = subprocess.run(
+                    ["docker", "exec", self._container_id, "cp", "-a", "/workspace/.", "/workspace_rw/"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                )
+                if cp_res.returncode != 0:
+                    self.end_episode()
+                    raise RuntimeError(
+                        f"[DockerEpisodeExecutor] Failed to copy /workspace to /workspace_rw in container {self._container_id} (rc={cp_res.returncode}).\n"
+                        f"  stdout: {cp_res.stdout.strip()}\n"
+                        f"  stderr: {cp_res.stderr.strip()}"
+                    )
+            except subprocess.TimeoutExpired as exc:
+                self.end_episode()
+                raise RuntimeError(
+                    f"[DockerEpisodeExecutor] Timed out copying /workspace to /workspace_rw in container {self._container_id}."
+                ) from exc
+            copy_elapsed = time.monotonic() - t0
+            print(
+                f"[DockerEpisodeExecutor] Copied /workspace to /workspace_rw in {copy_elapsed:.3f}s",
+                file=sys.stderr,
+            )
 
     def execute(self, step: AtomicStep) -> ExecutionResult:
         """
@@ -950,6 +977,7 @@ class DockerEpisodeExecutor:
         proc = subprocess.Popen(
             [
                 "docker", "exec",
+                "-w", "/workspace_rw",
                 self._container_id,
                 "/bin/sh", "-c", command,
             ],

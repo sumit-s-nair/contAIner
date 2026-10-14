@@ -587,9 +587,12 @@ class TestContainerPersistenceWithinEpisode:
 
         def fake_popen(cmd, **kwargs):
             if "exec" in cmd:
-                # The container ID is the 3rd element: docker exec <cid> ...
+                # The container ID is after flags: docker exec [-w /workspace_rw] <cid> ...
                 exec_idx = cmd.index("exec")
-                exec_container_ids.append(cmd[exec_idx + 1])
+                i = exec_idx + 1
+                while i < len(cmd) and cmd[i].startswith("-"):
+                    i += 2
+                exec_container_ids.append(cmd[i])
             m = MagicMock()
             m.communicate.return_value = ("ok", "")
             m.returncode = 0
