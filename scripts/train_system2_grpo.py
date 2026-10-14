@@ -21,10 +21,14 @@ import os
 import random
 import signal
 import sys
+import traceback
 import uuid
+import concurrent.futures
 from collections import deque
+from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
 from tqdm import tqdm
@@ -35,12 +39,114 @@ from transformers import (
 )
 from peft import LoraConfig, get_peft_model, set_peft_model_state_dict
 
-from src.rl_env.env import PlannerEnv, EnvConfig
+from src.rl_env.env import PlannerEnv, EnvConfig, EnvForkError
 from src.rl_env.dry_run_executor import TrainingReviewPolicy
 from src.sandbox.models import RiskTier
+from src.system2_planner.models import PlannedStep, ActionType
+from src.rl_env.parser import (
+    parse_planned_step,
+    ParseError,
+    MissingFieldError,
+    InvalidFieldError,
+    UnrecognizedActionTypeError,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
+
+
+class EnvironmentFailure(RuntimeError):
+    """Raised when environment execution fails during completion evaluation."""
+    pass
+
+
+@dataclass
+class CompletionResult:
+    action: Optional[PlannedStep]
+    info: Dict[str, Any]
+    reward: Optional[float]
+    status: str  # OK / PARSE_ERROR / ENV_ERROR
+
+
+def evaluate_completion(
+    env: PlannerEnv,
+    completion: str,
+    snapshot_tag: Optional[str] = None,
+) -> CompletionResult:
+    """
+    Evaluate a single model completion against a fork of the environment.
+
+    (1) Parsing try block: catches JSONDecodeError first, then parser exceptions.
+        Returns status="PARSE_ERROR" with reward=-1.0 and subtype info.
+    (2) Environment try block: forks the environment and executes the action.
+        Returns status="OK" and environment reward on success.
+        Any exception returns status="ENV_ERROR" with reward=None and traceback in info.
+    """
+    info: Dict[str, Any] = {}
+    action: Optional[PlannedStep] = None
+
+    # (1) Parsing try block
+    try:
+        action = parse_planned_step(completion)
+    except json.JSONDecodeError as e:
+        info["exec_status"] = "JSON_DECODE_ERROR"
+        info["subtype"] = "JSON_DECODE_ERROR"
+        info["execution_error"] = str(e)
+        return CompletionResult(action=None, info=info, reward=-1.0, status="PARSE_ERROR")
+    except MissingFieldError as e:
+        info["exec_status"] = "MISSING_FIELD"
+        info["subtype"] = "MISSING_FIELD"
+        info["execution_error"] = str(e)
+        return CompletionResult(action=None, info=info, reward=-1.0, status="PARSE_ERROR")
+    except InvalidFieldError as e:
+        info["exec_status"] = "INVALID_FIELD"
+        info["subtype"] = "INVALID_FIELD"
+        info["execution_error"] = str(e)
+        return CompletionResult(action=None, info=info, reward=-1.0, status="PARSE_ERROR")
+    except UnrecognizedActionTypeError as e:
+        info["exec_status"] = "UNRECOGNIZED_ACTION_TYPE"
+        info["subtype"] = "UNRECOGNIZED_ACTION_TYPE"
+        info["execution_error"] = str(e)
+        return CompletionResult(action=None, info=info, reward=-1.0, status="PARSE_ERROR")
+    except ParseError as e:
+        info["exec_status"] = "PARSE_FAILED"
+        info["subtype"] = "PARSE_FAILED"
+        info["execution_error"] = str(e)
+        return CompletionResult(action=None, info=info, reward=-1.0, status="PARSE_ERROR")
+    except Exception as e:
+        tb_str = traceback.format_exc()
+        info["execution_error"] = f"Parser harness error: {type(e).__name__}: {str(e)}\n{tb_str}"
+        info["status"] = "ENV_ERROR"
+        info["exec_status"] = "ENV_ERROR"
+        return CompletionResult(action=None, info=info, reward=None, status="ENV_ERROR")
+
+    # (2) Environment try block
+    forked_env = None
+    res = None
+    try:
+        forked_env = env.fork(snapshot_tag)
+        _, reward, _, _, step_info = forked_env.step(action)
+        info.update(step_info)
+        info["status"] = "OK"
+        res = CompletionResult(action=action, info=info, reward=reward, status="OK")
+    except Exception as e:
+        tb_str = traceback.format_exc()
+        info["execution_error"] = f"{type(e).__name__}: {str(e)}\n{tb_str}"
+        info["status"] = "ENV_ERROR"
+        info["exec_status"] = "ENV_ERROR"
+        res = CompletionResult(action=action, info=info, reward=None, status="ENV_ERROR")
+    finally:
+        if forked_env is not None:
+            try:
+                forked_env.end_episode()
+            except Exception as cleanup_exc:
+                cleanup_msg = f"{type(cleanup_exc).__name__}: {str(cleanup_exc)}"
+                info["cleanup_error"] = cleanup_msg
+                if res is not None:
+                    res.info["cleanup_error"] = cleanup_msg
+
+    return res
+
 
 # --- Configuration ---
 MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
@@ -77,16 +183,225 @@ class RunState:
         self.episodes_processed = sd.get("episodes_processed", 0)
         self.global_step = sd.get("global_step", 0)
 
+
+# Module-level sampling configuration for generate() and rollout logging
+SAMPLING_CONFIG: Dict[str, Any] = {
+    "temperature": 0.8,
+    "top_p": 1.0,
+    "max_new_tokens": 512,
+}
+
+
+def compute_group_advantages(
+    results: List[Any],
+    G: int,
+    device: Optional[Union[str, torch.device]] = None,
+) -> Optional[Tuple[torch.Tensor, torch.Tensor]]:
+    """
+    Compute GRPO group advantages over non-ENV_ERROR completions.
+
+    Returns (advantages, valid_mask) where:
+    - advantages: Tensor[G]
+    - valid_mask: Tensor[G, 1]
+    or None when fewer than 2 non-ENV_ERROR completions exist.
+    Flat reward standard deviation (or std < 1e-4) yields zero advantages.
+    """
+    valid_indices = []
+    for i, r in enumerate(results):
+        status = getattr(r, "status", None) if not isinstance(r, dict) else r.get("status")
+        if status != "ENV_ERROR":
+            valid_indices.append(i)
+
+    if len(valid_indices) < 2:
+        return None
+
+    valid_rewards = []
+    for idx in valid_indices:
+        r = results[idx]
+        rew = getattr(r, "reward", None) if not isinstance(r, dict) else r.get("reward")
+        if rew is None:
+            status = getattr(r, "status", None) if not isinstance(r, dict) else r.get("status")
+            raise ValueError(f"Result at index {idx} with status '{status}' has reward None")
+        valid_rewards.append(float(rew))
+
+    reward_tensor = torch.tensor(valid_rewards, dtype=torch.float32)
+    std_r = reward_tensor.std()
+    mean_r = reward_tensor.mean()
+
+    advantages = torch.zeros(G, dtype=torch.float32)
+    valid_mask = torch.zeros(G, 1, dtype=torch.float32)
+
+    for idx in valid_indices:
+        valid_mask[idx, 0] = 1.0
+
+    if std_r >= 1e-4:
+        for idx_in_valid, orig_idx in enumerate(valid_indices):
+            advantages[orig_idx] = (reward_tensor[idx_in_valid] - mean_r) / (std_r + 1e-8)
+
+    if device is not None:
+        advantages = advantages.to(device)
+        valid_mask = valid_mask.to(device)
+
+    return advantages, valid_mask
+
+
+def masked_token_loss(
+    per_token_pg_loss: torch.Tensor,
+    per_token_kl: torch.Tensor,
+    pad_mask: torch.Tensor,
+    valid_mask: torch.Tensor,
+    beta: float,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Compute masked policy and KL token loss.
+
+    Excludes ENV_ERROR rows via valid_mask and padding via pad_mask.
+    Returns (loss, normalizer).
+    """
+    mask = pad_mask * valid_mask
+    normalizer = mask.sum()
+    if normalizer > 0:
+        per_token_loss = per_token_pg_loss + beta * per_token_kl
+        loss = (per_token_loss * mask).sum() / normalizer
+    else:
+        loss = torch.tensor(0.0, dtype=per_token_pg_loss.dtype, device=per_token_pg_loss.device)
+    return loss, normalizer
+
+
+def select_best_action(results: List[Any]) -> Optional[Tuple[int, float, Any]]:
+    """
+    Select the best action among completions with status OK.
+
+    Returns (best_idx, best_reward, best_action) or None if no OK completion exists.
+    """
+    ok_candidates = []
+    for i, r in enumerate(results):
+        status = getattr(r, "status", None) if not isinstance(r, dict) else r.get("status")
+        reward = getattr(r, "reward", None) if not isinstance(r, dict) else r.get("reward")
+        action = getattr(r, "action", None) if not isinstance(r, dict) else r.get("action")
+        if status == "OK" and reward is not None and action is not None:
+            ok_candidates.append((i, float(reward), action))
+
+    if not ok_candidates:
+        return None
+
+    return max(ok_candidates, key=lambda x: x[1])
+
+
+class FailFastTracker:
+    """
+    Tracks consecutive and per-episode ENV_ERROR counts to fail fast and loudly.
+
+    Aborts if 3 consecutive completions are ENV_ERROR (across group boundaries)
+    or if running ENV_ERROR count in an episode exceeds 10% of (max_steps * G).
+    """
+    def __init__(self, max_steps: int, G: int):
+        self.max_steps = max_steps
+        self.G = G
+        self.consecutive_env_errors: int = 0
+        self.episode_env_errors: int = 0
+        self.total_env_errors: int = 0
+        self.last_traceback: str = ""
+        self._threshold = 0.10 * (max_steps * G)
+        self._should_abort: bool = False
+        self._reason: str = ""
+
+    def reset_episode(self) -> None:
+        self.episode_env_errors = 0
+
+    def record(self, status: str, traceback_str: str = "") -> None:
+        if status == "ENV_ERROR":
+            self.consecutive_env_errors += 1
+            self.episode_env_errors += 1
+            self.total_env_errors += 1
+            if traceback_str:
+                self.last_traceback = traceback_str
+            self._check_abort()
+        else:
+            self.consecutive_env_errors = 0
+
+    def record_main_step_error(self, traceback_str: str = "") -> None:
+        self.consecutive_env_errors += 1
+        self.episode_env_errors += 1
+        self.total_env_errors += 1
+        if traceback_str:
+            self.last_traceback = traceback_str
+        self._check_abort()
+
+    def _check_abort(self) -> None:
+        if self.consecutive_env_errors >= 3:
+            self._should_abort = True
+            self._reason = f"3 consecutive completions are ENV_ERROR (reached {self.consecutive_env_errors})"
+        elif self.episode_env_errors > self._threshold:
+            self._should_abort = True
+            self._reason = (
+                f"Running ENV_ERROR count ({self.episode_env_errors}) in episode "
+                f"exceeds 10% threshold ({self._threshold:.1f})"
+            )
+
+    @property
+    def should_abort(self) -> bool:
+        return self._should_abort
+
+    @property
+    def reason(self) -> str:
+        return self._reason
+
+
+def write_emergency_abort(
+    out_dir: Path,
+    model: Any,
+    optimizer: Any,
+    run_state: Any,
+    tracker: FailFastTracker,
+    last_tb: str = "",
+) -> Path:
+    """
+    Save emergency checkpoint and reason.txt into out_dir / 'emergency_ckpt'.
+
+    If checkpoint saving raises an exception, writes that exception into reason.txt.
+    Does not call sys.exit().
+    """
+    emergency_dir = out_dir / "emergency_ckpt"
+    emergency_dir.mkdir(parents=True, exist_ok=True)
+
+    ckpt_error_str = ""
+    try:
+        save_checkpoint(out_dir, model, optimizer, run_state, is_emergency=True, target_dir=emergency_dir)
+    except Exception as e:
+        ckpt_error_str = f"\nCHECKPOINT SAVE FAILED: {type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
+        logger.error("Emergency checkpoint save failed: %s", e)
+
+    tb_to_write = last_tb or tracker.last_traceback
+    reason_file = emergency_dir / "reason.txt"
+    with open(reason_file, "w", encoding="utf-8") as f:
+        f.write(
+            f"REASON: {tracker.reason}\n"
+            f"Consecutive ENV_ERROR count: {tracker.consecutive_env_errors}\n"
+            f"Episode ENV_ERROR count: {tracker.episode_env_errors}\n"
+            f"LAST TRACEBACK:\n{tb_to_write}\n"
+        )
+        if ckpt_error_str:
+            f.write(ckpt_error_str + "\n")
+
+    logger.critical("EMERGENCY ABORT: %s. Saved to %s", tracker.reason, emergency_dir)
+    return emergency_dir
+
+
 # --- Checkpoint & Resume Logic ---
 def save_checkpoint(
     output_dir: Path,
     model: torch.nn.Module,
     optimizer: torch.optim.Optimizer,
     run_state: RunState,
-    is_emergency: bool = False
+    is_emergency: bool = False,
+    target_dir: Optional[Path] = None,
 ):
-    ckpt_name = "checkpoint-emergency" if is_emergency else f"checkpoint-{run_state.episode_idx}"
-    ckpt_dir = output_dir / ckpt_name
+    if target_dir is not None:
+        ckpt_dir = target_dir
+    else:
+        ckpt_name = "checkpoint-emergency" if is_emergency else f"checkpoint-{run_state.episode_idx}"
+        ckpt_dir = output_dir / ckpt_name
     ckpt_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Save LoRA weights
@@ -312,10 +627,27 @@ def main():
     rolling_completion = deque(maxlen=20)
     
     pbar = tqdm(total=MAX_EPISODES, initial=run_state.episode_idx, desc="Training")
-    
+
+    # Fail-fast and tracking counters
+    G = BATCH_SIZE
+    tracker = FailFastTracker(max_steps=getattr(env._cfg, 'max_steps', 10), G=G)
+    excluded_repos_count = 0
+    snapshot_failures_count = 0
+    skipped_updates_count = 0
+    total_updates = 0
+    no_valid_action_steps_count = 0
+
+    if env._corpus is None:
+        env._load_corpus()
+    initial_corpus_len = len(env._corpus)
+
     try:
         for ep in range(run_state.episode_idx, MAX_EPISODES):
             run_state.episode_idx = ep
+            tracker.reset_episode()
+            ep_updates = 0
+            ep_skipped_updates = 0
+            ep_no_valid_action_steps = 0
             
             # Hard fail if val/test splits ever leak in (using the env's explicit split argument)
             if env._corpus is None:
@@ -323,6 +655,7 @@ def main():
             
             repo_entry = env._rng.choice(env._corpus)
             success = False
+            last_reset_tb = ""
             for attempt in range(3):
                 try:
                     obs, ep_info = env.reset(repo_entry=repo_entry)
@@ -330,6 +663,7 @@ def main():
                     success = True
                     break
                 except Exception as e:
+                    last_reset_tb = traceback.format_exc()
                     logger.warning(f"Failed to reset environment for {repo_entry['repo']} (attempt {attempt+1}/3): {e}")
                     import time
                     time.sleep(2)
@@ -337,8 +671,17 @@ def main():
             if not success:
                 logger.error(f"REPO EXCLUDED: {repo_entry['repo']} failed all 3 reset attempts. Removing from corpus and skipping episode.")
                 env._corpus.remove(repo_entry)
-                with open(out_dir / "excluded_repos.txt", "a", encoding="utf-8") as f:
-                    f.write(repo_entry['repo'] + "\n")
+                excluded_repos_count += 1
+                with open(out_dir / "excluded_repos.jsonl", "a", encoding="utf-8") as f:
+                    f.write(json.dumps({
+                        "repo": repo_entry["repo"],
+                        "split": getattr(env._cfg, "split", "train"),
+                        "traceback": last_reset_tb
+                    }) + "\n")
+                if initial_corpus_len > 0 and (excluded_repos_count / initial_corpus_len) > 0.05:
+                    raise RuntimeError(
+                        f"Excluded repos threshold exceeded: {excluded_repos_count}/{initial_corpus_len} (>5%) failed reset 3x."
+                    )
                 continue
             
             episode_reward = 0.0
@@ -351,7 +694,6 @@ def main():
             ep_pg_loss_sum = 0.0
             ep_grad_norm_sum = 0.0
             ep_steps = 0
-            flat_rewards_consecutive = 0
             
             done = False
             ep_category = ep_info.get('category', 'unknown')
@@ -360,12 +702,10 @@ def main():
             # evaluation containers can branch from it without replaying history.
             # Invariant: current_snapshot_tag is always valid when not None.
             current_snapshot_tag: Optional[str] = None
+            info: Dict[str, Any] = {}
             try:
                 while not done:
                     # 1. Get structured chat prompt from observation
-                    # Pass the tokenizer for exact per-section token accounting.
-                    # to_chat_prompt() will trim only the dependency list to fit
-                    # the budget — system, conflicts, and history are always intact.
                     chat_messages = env._serializer.to_chat_prompt(obs, tokenizer=tokenizer)
                     
                     # 2. Use tokenizer to format it exactly according to ChatML
@@ -376,258 +716,241 @@ def main():
                     )
                     
                     # --- GRPO Sampling block ---
-                    G = BATCH_SIZE
                     inputs = tokenizer([prompt_str] * G, return_tensors="pt", padding=True).to("cuda")
                     
                     torch.cuda.empty_cache()  # evict residual allocations before G-way generate
+                    generate_failed = False
+                    gen_exc_str = ""
                     try:
                         with torch.no_grad():
                             output_ids = model.generate(
                                 **inputs,
-                                max_new_tokens=512,
+                                max_new_tokens=SAMPLING_CONFIG["max_new_tokens"],
                                 do_sample=True,
-                                temperature=0.8,
+                                temperature=SAMPLING_CONFIG["temperature"],
+                                top_p=SAMPLING_CONFIG["top_p"],
                                 pad_token_id=tokenizer.eos_token_id
                             )
                     except Exception as gen_exc:
-                        logger.error("model.generate() failed (possibly OOM) on episode %d step %d: %s", ep, run_state.step_idx, gen_exc)
-                        # Graceful degrade: force failure string so episode aborts / learns negative reward
-                        output_ids = torch.full((G, inputs.input_ids.shape[1] + 2), tokenizer.eos_token_id, device="cuda")
-                        
-                    input_length = inputs.input_ids.shape[1]
-                    gen_ids = output_ids[:, input_length:]
-                    completions = tokenizer.batch_decode(gen_ids, skip_special_tokens=True)
-                    
-                    import copy
-                    from src.system2_planner.models import PlannedStep, ActionType
-                    import concurrent.futures
-    
-                    def evaluate_completion(comp):
-                        env_clone = None
-                        try:
-                            from src.rl_env.parser import parse_planned_step
-                            action = parse_planned_step(comp)
-                            
-                            if getattr(env._cfg, 'dry_run', True):
-                                env_clone = copy.deepcopy(env)
-                                _, reward, _, _, info = env_clone.step(action)
-                            else:
-                                env_clone = setup_environment()
-                                repo_entry = {"repo": ep_info["repo"], "category": ep_info.get("category", "")}
-                                
-                                # Use the main env's already-cloned path and manifest to avoid ThreadPool concurrency
-                                import unittest.mock
-                                with unittest.mock.patch('src.rl_env.repo_loader.RepoLoader.load', return_value=(env._instance.manifest, env._local_path)):
-                                    # Branch from snapshot if available, else fall back to full replay.
-                                    # snapshot_image=current_snapshot_tag means /workspace_rw already
-                                    # contains all packages installed in steps 0..t-1; no replay needed.
-                                    snap = current_snapshot_tag  # capture for thread safety
-                                    env_clone._docker_executor.start_episode(
-                                        repo_path=env._local_path,
-                                        repo_name=repo_entry["repo"],
-                                        snapshot_image=snap,
-                                    ) if snap else env_clone.reset(repo_entry=repo_entry)
-                                    
-                                if not snap:
-                                    # No snapshot yet (step 0) — replay history the old way
-                                    for past_step in env._plan_so_far:
-                                        env_clone.step(past_step)
-                                
-                                _, reward, _, _, info = env_clone.step(action)
-                                
-                            return (action, info, reward)
-                            
-                        except ValueError as e:
-                            return (None, {"exec_status": "UNRECOGNIZED_ACTION_TYPE", "execution_error": str(e)}, -1.0)
-                        except json.JSONDecodeError as e:
-                            return (None, {"exec_status": "JSON_DECODE_ERROR", "execution_error": str(e)}, -1.0)
-                        except Exception as e:
-                            return (None, {"exec_status": "PARSE_FAILED", "execution_error": str(e)}, -1.0)
-                        finally:
-                            if env_clone and getattr(env_clone, '_docker_executor', None):
-                                env_clone._docker_executor.end_episode()
-                        
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=BATCH_SIZE) as executor:
-                        results = list(executor.map(evaluate_completion, completions))
-                        
-                    actions = results
-                    rewards = [r for _, _, r in results]
-                            
-                    # --- NEW ROLLOUTS LOGGING ---
-                    rollout_log_file = out_dir / "rollouts.jsonl"
-                    try:
-                        with open(rollout_log_file, "a") as rf:
-                            rollout_entry = {
-                                "episode": ep,
-                                "step_idx": run_state.step_idx,
-                                "temperature": 0.8,
-                                "top_p": 1.0,
-                                "completions": []
-                            }
-                            for i in range(G):
-                                action_obj, c_info, c_reward = actions[i]
-                                c_raw = completions[i]
-                                
-                                c_action_type = action_obj.action_type.value if action_obj else "PARSE_FAILED"
-                                c_target = action_obj.target if action_obj else ""
-                                
-                                c_breakdown = c_info.get("reward_breakdown", {}) if isinstance(c_info, dict) else {}
-                                c_exec_status = c_info.get("exec_status", "UNKNOWN") if isinstance(c_info, dict) else "UNKNOWN"
-                                
-                                # Refine execution status if needed
-                                c_exec_tier = c_info.get("exec_tier", -1) if isinstance(c_info, dict) else -1
-                                # We can hardcode 2 since RiskTier.REVIEW.value might not be directly in scope if it's imported at function level, but RiskTier is used below.
-                                # Let's just use RiskTier
-                                if c_exec_tier == RiskTier.REVIEW.value:
-                                    c_exec_status = "REVIEW_DENIED"
-                                elif isinstance(c_info, dict) and "__UNMAPPED_ACTION__" in str(c_info.get("execution_error", "")):
-                                    c_exec_status = "UNMAPPED_ACTION"
-                                    
-                                rollout_entry["completions"].append({
-                                    "raw_completion": c_raw,
-                                    "action_type": c_action_type,
-                                    "target": c_target,
-                                    "reward": c_reward,
-                                    "breakdown": c_breakdown,
-                                    "exec_status": c_exec_status,
-                                    "execution_error": c_info.get("execution_error", "") if isinstance(c_info, dict) else "",
-                                    "validator_error": c_info.get("validator_error", "") if isinstance(c_info, dict) else ""
-                                })
-                            rf.write(json.dumps(rollout_entry) + "\n")
-                    except Exception as e:
-                        logger.error(f"Failed to log rollouts: {e}")
-                    # ----------------------------
+                        logger.error("model.generate() failed on episode %d step %d: %s", ep, run_state.step_idx, gen_exc)
+                        generate_failed = True
+                        gen_exc_str = f"{type(gen_exc).__name__}: {str(gen_exc)}\n{traceback.format_exc()}"
 
-                    # Compute advantages
-                    rewards_t = torch.tensor(rewards, dtype=torch.float32, device="cuda")
-                    mean_r = rewards_t.mean()
-                    std_r = rewards_t.std()
-                    
-                    if std_r < 1e-4:
-                        advantages = torch.zeros_like(rewards_t)
-                        flat_rewards_consecutive += 1
-                        if flat_rewards_consecutive >= 3:
-                            logger.warning("LOUD WARNING: Flat rewards across group for %d consecutive steps (std < 1e-4). Zero PG learning signal flowing.", flat_rewards_consecutive)
-                    else:
-                        advantages = (rewards_t - mean_r) / (std_r + 1e-8)
-                        flat_rewards_consecutive = 0
-                        
-                    # Compute loss and step
-                    optimizer.zero_grad()
-                    
-                    outputs = model(input_ids=output_ids, attention_mask=(output_ids != tokenizer.pad_token_id).long())
-                    logits = outputs.logits[:, input_length-1:-1, :]
-                    
-                    log_probs = torch.nn.functional.log_softmax(logits, dim=-1)
-                    action_log_probs = torch.gather(log_probs, 2, gen_ids.unsqueeze(-1)).squeeze(-1)
-                    
-                    mask = (gen_ids != tokenizer.pad_token_id).float()
-                    # GRPO computes ratio and KL *per-token*, not per-sequence.
-                    # Sequence-level ratios multiply (exp(sum) = product), which explodes/vanishes 
-                    # and causes gradients to scale linearly with sequence length.
-                    with torch.no_grad():
-                        with model.disable_adapter():
-                            ref_outputs = model(input_ids=output_ids, attention_mask=(output_ids != tokenizer.pad_token_id).long())
-                            ref_logits = ref_outputs.logits[:, input_length-1:-1, :]
-                            ref_log_probs = torch.nn.functional.log_softmax(ref_logits, dim=-1)
-                            ref_action_log_probs = torch.gather(ref_log_probs, 2, gen_ids.unsqueeze(-1)).squeeze(-1)
-                    
-                    per_token_log_ratio = action_log_probs - ref_action_log_probs
-                    per_token_ratio = torch.exp(per_token_log_ratio)
-                    clip_ratio = torch.clamp(per_token_ratio, 0.8, 1.2)
-                    
-                    # Expand advantages to match sequence length
-                    adv_expanded = advantages.unsqueeze(1).expand_as(per_token_ratio)
-                    per_token_pg_loss = -torch.min(per_token_ratio * adv_expanded, clip_ratio * adv_expanded)
-                    
-                    # Robust non-negative GRPO KL estimator per token: exp(x) - x - 1
-                    per_token_kl = torch.exp(per_token_log_ratio) - per_token_log_ratio - 1
-                    
-                    per_token_loss = per_token_pg_loss + 0.1 * per_token_kl
-                    
-                    # Average over all non-pad tokens in the batch (prevents gradient explosion scaling with seq_len)
-                    loss = (per_token_loss * mask).sum() / mask.sum()
-                    
-                    # For logging purposes, we can keep track of sequence-level KL
-                    with torch.no_grad():
-                        kl = (per_token_kl * mask).sum(dim=1).mean()
-                        pg_loss = (per_token_pg_loss * mask).sum(dim=1).mean()
-                    
-                    loss.backward()
-                    
-                    # Prevent exploding gradients which corrupt model weights (NaNs) 
-                    # and lead to fatal CUDA device-side asserts in model.generate(do_sample=True)
-                    grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-                    optimizer.step()
-                    
-                    ep_loss_sum += loss.item()
-                    ep_kl_sum += kl.item()
-                    ep_pg_loss_sum += pg_loss.item()
-                    ep_grad_norm_sum += grad_norm.item()
-                    ep_steps += 1
-                    
-                    # Select best action to advance the MAIN environment
-                    # Rationale: Advancing with the max-reward action (best-of-G) accelerates convergence towards optimal trajectories, though it biases exploration off-policy.
-                    best_idx = int(torch.argmax(rewards_t).item())
-                    best_action, best_info, best_reward = actions[best_idx]
-                    
-                    if best_action is None:
-                        # All failed parsing, force a dummy action to take penalty and move forward
-                        best_action = PlannedStep(action_type=ActionType.CHECK, description="Fallback dummy action due to parse failure")
-                    
-                    # Execute in MAIN environment
-                    obs, reward, done, truncated, info = env.step(best_action)
-                    done = done or truncated
-                    
-                    # --- Snapshot the MAIN container after each successful step ----------
-                    # Order: commit NEW -> verify it exists -> delete PREVIOUS.
-                    # Never delete-then-commit: if the process crashes between steps we
-                    # must always have at least one valid snapshot available.
-                    if not getattr(env._cfg, 'dry_run', True) and env._docker_executor:
-                        try:
-                            new_snap = env._docker_executor.snapshot()
-                            # Verify the image was actually created before evicting old one
-                            verify_result = _sp.run(
-                                ["docker", "image", "inspect", new_snap],
-                                capture_output=True, timeout=10
+                    if generate_failed:
+                        results = [
+                            CompletionResult(
+                                action=None,
+                                info={"execution_error": gen_exc_str, "status": "ENV_ERROR", "exec_status": "ENV_ERROR"},
+                                reward=None,
+                                status="ENV_ERROR"
                             )
-                            if verify_result.returncode == 0:
-                                # Safe to delete previous snapshot now that new one is confirmed
-                                old_snap = current_snapshot_tag
-                                current_snapshot_tag = new_snap
-                                if old_snap:
-                                    env._docker_executor.delete_snapshot(old_snap)
-                            else:
-                                # Commit succeeded but image not found — keep old snapshot
-                                logger.warning(
-                                    "Snapshot %s failed verification; keeping previous snapshot.",
-                                    new_snap,
-                                )
-                        except Exception as snap_exc:
-                            logger.warning("Snapshot failed at step %d: %s", run_state.step_idx, snap_exc)
-                    
-                    episode_reward += reward
-                    run_state.step_idx += 1
+                            for _ in range(G)
+                        ]
+                        completions = ["<GENERATE_FAILED>"] * G
+                    else:
+                        input_length = inputs.input_ids.shape[1]
+                        gen_ids = output_ids[:, input_length:]
+                        completions = tokenizer.batch_decode(gen_ids, skip_special_tokens=True)
+                        _eval_fn = partial(evaluate_completion, env, snapshot_tag=current_snapshot_tag)
+                        with concurrent.futures.ThreadPoolExecutor(max_workers=BATCH_SIZE) as executor:
+                            results = list(executor.map(_eval_fn, completions))
+                        
+                    # --- ROLLOUTS LOGGING (FIRST, BEFORE any abort / fail-fast checks) ---
+                    rollout_log_file = out_dir / "rollouts.jsonl"
+                    rollout_entry = {
+                        "episode": ep,
+                        "step_idx": run_state.step_idx,
+                        "temperature": SAMPLING_CONFIG["temperature"],
+                        "top_p": SAMPLING_CONFIG["top_p"],
+                        "completions": []
+                    }
+                    for i in range(G):
+                        c_res = results[i]
+                        action_obj = c_res.action
+                        c_info = c_res.info
+                        c_reward = c_res.reward
+                        c_status = c_res.status
+                        c_raw = completions[i]
+                        
+                        c_action_type = action_obj.action_type.value if action_obj else "PARSE_FAILED"
+                        c_target = action_obj.target if action_obj else ""
+                        
+                        c_breakdown = c_info.get("reward_breakdown", {}) if isinstance(c_info, dict) else {}
+                        c_exec_status = c_info.get("exec_status", "UNKNOWN") if isinstance(c_info, dict) else "UNKNOWN"
+                        
+                        c_exec_tier = c_info.get("exec_tier", -1) if isinstance(c_info, dict) else -1
+                        if c_exec_tier == RiskTier.REVIEW.value and str(c_exec_status).lower() == "aborted":
+                            c_exec_status = "REVIEW_DENIED"
+                            
+                        rollout_entry["completions"].append({
+                            "completion_idx": i,
+                            "snapshot_tag": current_snapshot_tag,
+                            "raw_completion": c_raw,
+                            "action_type": c_action_type,
+                            "target": c_target,
+                            "reward": c_reward,
+                            "status": c_status,
+                            "breakdown": c_breakdown,
+                            "exec_status": c_exec_status,
+                            "execution_error": c_info.get("execution_error", "") if isinstance(c_info, dict) else "",
+                            "validator_error": c_info.get("validator_error", "") if isinstance(c_info, dict) else "",
+                            "stdout_tail": c_info.get("stdout_tail", "") if isinstance(c_info, dict) else "",
+                            "stderr_tail": c_info.get("stderr_tail", "") if isinstance(c_info, dict) else "",
+                            "returncode": c_info.get("returncode", None) if isinstance(c_info, dict) else None,
+                            "verify_stdout_tail": c_info.get("verify_stdout_tail", "") if isinstance(c_info, dict) else "",
+                            "verify_returncode": c_info.get("verify_returncode", None) if isinstance(c_info, dict) else None,
+                        })
+
+                    # Exactly one write to rollouts.jsonl, not in a swallowing try/except
+                    with open(rollout_log_file, "a", encoding="utf-8") as rf:
+                        rf.write(json.dumps(rollout_entry) + "\n")
+                    # -----------------------------------------------------------------
+
+                    # F1: Fail-fast tracking across completions in group
+                    for r in results:
+                        tracker.record(r.status, str(r.info.get("execution_error", "")))
+                        if tracker.should_abort:
+                            write_emergency_abort(out_dir, model, optimizer, run_state, tracker, tracker.last_traceback)
+                            sys.exit(1)
+
+                    # E2 & E3: Compute advantages and masked token loss
+                    adv_res = compute_group_advantages(results, G, device="cuda")
+                    if generate_failed or adv_res is None:
+                        logger.warning(
+                            "Skipping gradient update at ep %d step %d: %s.",
+                            ep, run_state.step_idx,
+                            "generate() failed" if generate_failed else "fewer than 2 valid completions"
+                        )
+                        skipped_updates_count += 1
+                        ep_skipped_updates += 1
+                    else:
+                        advantages, valid_seq_mask = adv_res
+                        optimizer.zero_grad()
+                        
+                        outputs = model(input_ids=output_ids, attention_mask=(output_ids != tokenizer.pad_token_id).long())
+                        logits = outputs.logits[:, input_length-1:-1, :]
+                        
+                        log_probs = torch.nn.functional.log_softmax(logits, dim=-1)
+                        action_log_probs = torch.gather(log_probs, 2, gen_ids.unsqueeze(-1)).squeeze(-1)
+                        pad_mask = (gen_ids != tokenizer.pad_token_id).float()
+
+                        with torch.no_grad():
+                            with model.disable_adapter():
+                                ref_outputs = model(input_ids=output_ids, attention_mask=(output_ids != tokenizer.pad_token_id).long())
+                                ref_logits = ref_outputs.logits[:, input_length-1:-1, :]
+                                ref_log_probs = torch.nn.functional.log_softmax(ref_logits, dim=-1)
+                                ref_action_log_probs = torch.gather(ref_log_probs, 2, gen_ids.unsqueeze(-1)).squeeze(-1)
+                        
+                        per_token_log_ratio = action_log_probs - ref_action_log_probs
+                        per_token_ratio = torch.exp(per_token_log_ratio)
+                        clip_ratio = torch.clamp(per_token_ratio, 0.8, 1.2)
+                        
+                        adv_expanded = advantages.unsqueeze(1).expand_as(per_token_ratio)
+                        per_token_pg_loss = -torch.min(per_token_ratio * adv_expanded, clip_ratio * adv_expanded)
+                        per_token_kl = torch.exp(per_token_log_ratio) - per_token_log_ratio - 1
+
+                        loss, normalizer = masked_token_loss(per_token_pg_loss, per_token_kl, pad_mask, valid_seq_mask, beta=0.1)
+                        if normalizer > 0:
+                            loss.backward()
+                            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                            optimizer.step()
+                            ep_updates += 1
+                            total_updates += 1
+
+                            with torch.no_grad():
+                                kl = (per_token_kl * pad_mask * valid_seq_mask).sum() / normalizer
+                                pg_loss = (per_token_pg_loss * pad_mask * valid_seq_mask).sum() / normalizer
+
+                            ep_loss_sum += loss.item()
+                            ep_kl_sum += kl.item()
+                            ep_pg_loss_sum += pg_loss.item()
+                            ep_grad_norm_sum += grad_norm.item()
+
+                    # E4 & E5: Best-of-G selection picks only from status OK
+                    best = select_best_action(results)
+
+                    if best is None:
+                        logger.warning(
+                            "NO_VALID_ACTION: No completion with status OK at episode %d step %d. Skipping env step.",
+                            ep, run_state.step_idx
+                        )
+                        no_valid_action_steps_count += 1
+                        ep_no_valid_action_steps += 1
+                        ep_steps += 1
+                        run_state.step_idx += 1
+                        if ep_steps >= getattr(env._cfg, 'max_steps', 10):
+                            done = True
+                    else:
+                        best_idx, best_reward, best_action = best
+                        ep_steps += 1
+                        run_state.step_idx += 1
+
+                        # F3: Main env step with exception handling
+                        try:
+                            obs, reward, done, truncated, info = env.step(best_action)
+                            done = done or truncated or (ep_steps >= getattr(env._cfg, 'max_steps', 10))
+                            episode_reward += reward
+
+                            # G2: Snapshot MAIN container
+                            if not getattr(env._cfg, 'dry_run', True) and env._docker_executor:
+                                try:
+                                    new_snap = env._docker_executor.snapshot()
+                                    verify_result = _sp.run(
+                                        ["docker", "image", "inspect", new_snap],
+                                        capture_output=True, timeout=10
+                                    )
+                                    if verify_result.returncode == 0:
+                                        old_snap = current_snapshot_tag
+                                        current_snapshot_tag = new_snap
+                                        if old_snap:
+                                            env._docker_executor.delete_snapshot(old_snap)
+                                    else:
+                                        current_snapshot_tag = None
+                                        snapshot_failures_count += 1
+                                        logger.warning(
+                                            "Snapshot %s failed verification; reset snapshot tag to None.",
+                                            new_snap
+                                        )
+                                except Exception as snap_exc:
+                                    current_snapshot_tag = None
+                                    snapshot_failures_count += 1
+                                    logger.warning(
+                                        "Snapshot failed at step %d: %s; reset snapshot tag to None.",
+                                        run_state.step_idx, snap_exc
+                                    )
+                        except Exception as main_step_exc:
+                            main_tb = traceback.format_exc()
+                            logger.error("Main environment step failed with traceback:\n%s", main_tb)
+                            env.end_episode()
+                            done = True
+                            tracker.record_main_step_error(main_tb)
+                            if tracker.should_abort:
+                                write_emergency_abort(out_dir, model, optimizer, run_state, tracker, main_tb)
+                                sys.exit(1)
                     
                     # Track detailed breakdown
-                    details = info.get("reward_breakdown", {})
-                    for k in step_breakdown:
-                        step_breakdown[k] += details.get(k, 0.0)
-                        
-                    # Log risks
-                    if info.get("exec_tier") == RiskTier.BLOCKED.value:
-                        blocked_count += 1
-                        print(f"\n[!] LOUD WARNING: BLOCKED step generated: {best_action.action_type} {best_action.target}")
-                    elif info.get("exec_tier") == RiskTier.REVIEW.value:
-                        review_denied_count += 1
+                    if best is not None:
+                        details = info.get("reward_breakdown", {})
+                        for k in step_breakdown:
+                            step_breakdown[k] += details.get(k, 0.0)
+                            
+                        # Log risks
+                        if info.get("exec_tier") == RiskTier.BLOCKED.value:
+                            blocked_count += 1
+                            print(f"\n[!] LOUD WARNING: BLOCKED step generated: {best_action.action_type} {best_action.target}")
+                        elif info.get("exec_tier") == RiskTier.REVIEW.value:
+                            review_denied_count += 1
                         
                     # Explicit GC cleanup at step boundary to prevent OOM
-                    del output_ids, gen_ids, completions, actions, rewards
+                    if 'output_ids' in locals(): del output_ids
+                    if 'gen_ids' in locals(): del gen_ids
+                    if 'completions' in locals(): del completions
+                    if 'results' in locals(): del results
                     if 'outputs' in locals():
-                        del outputs, logits, log_probs, action_log_probs, mask
+                        del outputs, logits, log_probs, action_log_probs
                         del ref_outputs, ref_logits, ref_log_probs, ref_action_log_probs
                         del per_token_log_ratio, per_token_ratio, clip_ratio, adv_expanded, per_token_pg_loss
-                        del per_token_kl, per_token_loss, loss, kl, pg_loss, grad_norm, advantages, rewards_t
+                        del per_token_kl, loss, kl, pg_loss, grad_norm, advantages
                     if 'inputs' in locals():
                         del inputs
                     torch.cuda.empty_cache()
@@ -678,10 +1001,20 @@ def main():
                     "completed": bool(completed),
                     "cursor": run_state.episodes_processed,
                     "breakdown": step_breakdown,
-                    "loss": ep_loss_sum / max(1, ep_steps),
-                    "kl": ep_kl_sum / max(1, ep_steps),
-                    "pg_loss": ep_pg_loss_sum / max(1, ep_steps),
-                    "grad_norm": ep_grad_norm_sum / max(1, ep_steps),
+                    "loss": ep_loss_sum / max(1, ep_updates),
+                    "kl": ep_kl_sum / max(1, ep_updates),
+                    "pg_loss": ep_pg_loss_sum / max(1, ep_updates),
+                    "grad_norm": ep_grad_norm_sum / max(1, ep_updates),
+                    "updates": ep_updates,
+                    "updates_total": total_updates,
+                    "skipped_updates": ep_skipped_updates,
+                    "skipped_updates_total": skipped_updates_count,
+                    "no_valid_action_steps": ep_no_valid_action_steps,
+                    "no_valid_action_steps_total": no_valid_action_steps_count,
+                    "env_errors": tracker.episode_env_errors,
+                    "env_errors_total": tracker.total_env_errors,
+                    "snapshot_failures_total": snapshot_failures_count,
+                    "excluded_repos_total": excluded_repos_count,
                     "mem_alloc_gb": mem_alloc_gb,
                     "mem_res_gb": mem_res_gb
                 }

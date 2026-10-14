@@ -46,11 +46,12 @@ fixture repos (for smoke testing without a real corpus).
 
 from __future__ import annotations
 
+import copy
 import json
 import random
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from src.repo_scan.models import Dependency, EcosystemManifest, RepoManifest, SourceRef
 from src.sandbox.models import AtomicStep, ExecutionResult, ExecutionStatus, RiskTier
@@ -62,6 +63,11 @@ from .docker_executor import DockerEpisodeExecutor, DockerExecutorConfig
 from .dry_run_executor import DryRunExecutor, TrainingReviewPolicy
 from .observation import CanonicalIntent, Observation, ObservationSerializer
 from .reward import RewardConfig, compute_reward
+
+
+class EnvForkError(RuntimeError):
+    """Raised when environment forking fails or is attempted on an un-reset environment."""
+    pass
 
 
 # ---------------------------------------------------------------------------
@@ -205,6 +211,8 @@ class PlannerEnv:
         self._executor:        Optional[DryRunExecutor]         = None
         self._docker_executor: Optional[DockerEpisodeExecutor]  = None
         self._done:            bool                             = False
+        self._repo_entry:      Optional[Dict]                   = None
+        self._local_path:      Optional[str]                    = None
 
     # ------------------------------------------------------------------ public
 
@@ -237,6 +245,7 @@ class PlannerEnv:
         if repo_entry is None:
             corpus = self._load_corpus()
             repo_entry = self._rng.choice(corpus)
+        self._repo_entry = repo_entry
 
         # --- Prepare repo (clone + scan in real mode) ---------------------
         manifest, local_path = self._prepare_repo(repo_entry)
@@ -319,6 +328,7 @@ class PlannerEnv:
         aggregated_tier = RiskTier.SAFE
         all_verified = True
         final_returncode = 0
+        last_res = None
         
         for a_step in atomic_steps:
             if a_step.command == "__UNMAPPED_ACTION__":
@@ -331,6 +341,7 @@ class PlannerEnv:
                 )
             else:
                 res = self._executor.execute(a_step)
+            last_res = res
             # Tier escalates to highest risk
             if res.tier == RiskTier.BLOCKED:
                 aggregated_tier = RiskTier.BLOCKED
@@ -346,15 +357,24 @@ class PlannerEnv:
             if a_step.verify_command and not res.verified:
                 all_verified = False
         
-        
         final_atomic_step = atomic_steps[-1] if atomic_steps else AtomicStep(command="noop", description="Empty expansion")
+        final_stdout = last_res.stdout if last_res is not None else ""
+        final_stderr = last_res.stderr if last_res is not None else ""
+        if final_returncode == 0 and last_res is not None and last_res.returncode is not None:
+            final_returncode = last_res.returncode
+        final_verify_stdout = last_res.verify_stdout if last_res is not None else ""
+        final_verify_returncode = last_res.verify_returncode if last_res is not None else None
         
         exec_result = ExecutionResult(
             step=final_atomic_step,
             status=aggregated_status,
             tier=aggregated_tier,
             verified=all_verified,
-            returncode=final_returncode
+            returncode=final_returncode,
+            stdout=final_stdout,
+            stderr=final_stderr,
+            verify_stdout=final_verify_stdout,
+            verify_returncode=final_verify_returncode,
         )
 
         # --- Accumulate plan ----------------------------------------------
@@ -443,7 +463,14 @@ class PlannerEnv:
             "blocked":          blocked,
             "episode_complete": episode_complete,
             "step_index":       self._obs.step_index,
+            "stdout_tail":      (exec_result.stdout or "")[-2000:],
+            "stderr_tail":      (exec_result.stderr or "")[-2000:],
+            "returncode":       exec_result.returncode,
         }
+        if exec_result.verify_stdout:
+            info["verify_stdout_tail"] = exec_result.verify_stdout[-2000:]
+        if exec_result.verify_returncode is not None:
+            info["verify_returncode"] = exec_result.verify_returncode
 
         return self._obs, reward, terminated, truncated, info
 
@@ -509,13 +536,118 @@ class PlannerEnv:
         if self._docker_executor is not None:
             self._docker_executor.end_episode()
             self._docker_executor = None
+        elif self._executor is not None and hasattr(self._executor, "end_episode"):
+            self._executor.end_episode()
+            self._executor = None
+
+    def end_episode(self) -> None:
+        """Release episode resources (delegates to close())."""
+        self.close()
+
+    def fork(self, snapshot_image: Optional[str] = None) -> PlannerEnv:
+        """
+        Create a new, independent PlannerEnv branching from the current state.
+
+        Parameters
+        ----------
+        snapshot_image:
+            If provided, starts the new environment from this pre-committed
+            Docker snapshot image without re-running past steps.
+            If None, starts from the base state and replays self._plan_so_far.
+        """
+        # Detect if called on an un-reset env via _instance being None
+        if self._instance is None:
+            raise EnvForkError("Cannot fork an environment that has not been reset(). Call reset() first.")
+
+        # If self._repo_entry is None, raise EnvForkError
+        if self._repo_entry is None:
+            raise EnvForkError("Cannot fork an environment with _repo_entry=None.")
+
+        # Cannot fork if episode is already done
+        if self._done:
+            raise EnvForkError("Cannot fork an environment that has finished (_done=True).")
+
+        # 1. New PlannerEnv using the exact same config object
+        forked = PlannerEnv(config=self._cfg)
+
+        # 2. Deep copies of mutable state
+        forked._instance = copy.deepcopy(self._instance)
+        forked._obs = copy.deepcopy(self._obs)
+        forked._plan_so_far = copy.deepcopy(self._plan_so_far)
+        forked._execution_history = copy.deepcopy(self._execution_history)
+        forked._local_path = copy.deepcopy(self._local_path)
+        forked._done = copy.deepcopy(self._done)
+        forked._repo_entry = copy.deepcopy(self._repo_entry)
+
+        repo_entry = forked._repo_entry
+        manifest = forked._instance.manifest
+        local_path = forked._local_path
+
+        # 3. Create executor via the same factory reset() uses, with cleanup guard
+        try:
+            if snapshot_image is not None:
+                # Starts from snapshot_image. No re-clone, no replay.
+                forked._executor = forked._make_executor(
+                    repo_entry=repo_entry,
+                    manifest=manifest,
+                    local_path=local_path,
+                    snapshot_image=snapshot_image,
+                )
+            else:
+                # Starts fresh from base state and replays parent's _plan_so_far
+                forked._executor = forked._make_executor(
+                    repo_entry=repo_entry,
+                    manifest=manifest,
+                    local_path=local_path,
+                )
+                parent_plan = copy.deepcopy(self._plan_so_far)
+                parent_tuples = [
+                    (e.status, e.verified, e.tier) for e in self._execution_history
+                ]
+
+                # Clear plan & history on the fork before replaying through step()
+                forked._plan_so_far = []
+                forked._execution_history = []
+                forked._obs.episode_steps = []
+                forked._obs.step_index = 0
+                forked._done = False
+
+                for past_step in parent_plan:
+                    forked.step(past_step)
+
+                replayed_tuples = [
+                    (e.status, e.verified, e.tier) for e in forked._execution_history
+                ]
+
+                if len(replayed_tuples) != len(parent_tuples):
+                    raise RuntimeError(
+                        f"Replayed execution history length mismatch: parent={len(parent_tuples)}, replayed={len(replayed_tuples)}"
+                    )
+
+                for step_idx, (p_tup, r_tup) in enumerate(zip(parent_tuples, replayed_tuples)):
+                    if p_tup != r_tup:
+                        raise RuntimeError(
+                            f"Replayed execution history does not match parent history at step {step_idx}: "
+                            f"parent=(status={p_tup[0]}, verified={p_tup[1]}, tier={p_tup[2]}), "
+                            f"replayed=(status={r_tup[0]}, verified={r_tup[1]}, tier={r_tup[2]})"
+                        )
+        except Exception as exc:
+            try:
+                forked.end_episode()
+            except Exception:
+                pass
+            raise EnvForkError(f"Failed to fork environment: {exc}") from exc
+
+        return forked
 
     def _make_executor(
         self,
         repo_entry: Dict,
         manifest: RepoManifest,
         local_path: Optional[str],
-    ) -> DryRunExecutor:
+        *,
+        snapshot_image: Optional[str] = None,
+    ) -> Union[DryRunExecutor, DockerEpisodeExecutor]:
         """
         Create the appropriate executor for a new episode.
 
@@ -536,6 +668,7 @@ class PlannerEnv:
         # Tear down the previous episode's container first.
         if self._docker_executor is not None:
             self._docker_executor.end_episode()
+            self._docker_executor = None
 
         if local_path is None:
             raise RuntimeError(
@@ -553,6 +686,7 @@ class PlannerEnv:
             repo_path=local_path,
             repo_name=repo_entry["repo"],
             ecosystems=list(manifest.ecosystems.keys()),
+            snapshot_image=snapshot_image,
         )
         self._docker_executor = docker_exec
         return docker_exec

@@ -447,9 +447,19 @@ class TestExecute:
             return m
 
         with patch("src.rl_env.docker_executor.subprocess.Popen",
-                   side_effect=fake_popen):
+                   side_effect=fake_popen), \
+             patch("src.rl_env.docker_executor.subprocess.run",
+                   side_effect=lambda args, **kwargs: subprocess.CompletedProcess(args, 0, "true\n", "")) as mock_run:
             result = executor.execute(step)
 
+        mock_run.assert_called_once()
+        inspect_cmd = mock_run.call_args[0][0]
+        assert inspect_cmd == [
+            "docker", "inspect",
+            "-f", "{{.State.Running}}",
+            executor._container_id,
+        ]
+        assert executor._container_id in inspect_cmd
         assert result.verified is False
         assert result.status == ExecutionStatus.SUCCESS   # main still succeeded
         assert result.verify_returncode == 1

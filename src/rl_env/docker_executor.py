@@ -445,8 +445,9 @@ class DockerEpisodeExecutor:
         # directory inside the container.  Out-of-scope path checks target that
         # directory, not the host filesystem.
         self._classifier    = CommandRiskClassifier(sandbox_root="/workspace_rw")
-        self._container_id: Optional[str] = None
-        self._repo_name:    str           = ""
+        self._container_id:   Optional[str] = None
+        self._container_name: Optional[str] = None
+        self._repo_name:      str           = ""
         # Snapshot tracking: the current live snapshot image tag for this
         # executor instance (set by snapshot(), cleared by delete_snapshot()).
         self._snapshot_tag: Optional[str] = None
@@ -515,11 +516,13 @@ class DockerEpisodeExecutor:
         self._pip_cache_host.mkdir(parents=True, exist_ok=True)
         self._npm_cache_host.mkdir(parents=True, exist_ok=True)
 
+        self._container_name = self._make_container_name()
+
         cmd: List[str] = [
             "docker", "run",
             "--detach",
             "--rm=false",                        # we control removal in end_episode()
-            "--name", self._make_container_name(),
+            "--name", self._container_name,
             # --- Resource limits -------------------------------------------------
             "--memory", self._config.memory_limit,
             "--memory-swap", self._config.memory_limit,  # disable swap entirely
@@ -556,8 +559,23 @@ class DockerEpisodeExecutor:
             "sleep", "infinity",    # container stays alive; steps use docker exec
         ]
 
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        except subprocess.TimeoutExpired as exc:
+            try:
+                subprocess.run(["docker", "rm", "-f", self._container_name], capture_output=True, timeout=10)
+            except Exception:
+                pass
+            raise RuntimeError(
+                f"[DockerEpisodeExecutor] docker run timed out after 60s for image {image!r}.\n"
+                f"  container name: {self._container_name}"
+            ) from exc
+
         if result.returncode != 0:
+            try:
+                subprocess.run(["docker", "rm", "-f", self._container_name], capture_output=True, timeout=10)
+            except Exception:
+                pass
             raise RuntimeError(
                 f"[DockerEpisodeExecutor] docker run failed for image {image!r}.\n"
                 f"  stdout: {result.stdout.strip()}\n"
@@ -570,11 +588,25 @@ class DockerEpisodeExecutor:
         # With overlayfs (no tmpfs), the directory must be created explicitly
         # on the base image.  For snapshot containers it will already exist
         # (inherited from the committed layer), so mkdir -p is idempotent.
-        subprocess.run(
-            ["docker", "exec", self._container_id, "mkdir", "-p", "/workspace_rw"],
-            capture_output=True,
-            timeout=10,
-        )
+        try:
+            mkdir_res = subprocess.run(
+                ["docker", "exec", self._container_id, "mkdir", "-p", "/workspace_rw"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            if mkdir_res.returncode != 0:
+                self.end_episode()
+                raise RuntimeError(
+                    f"[DockerEpisodeExecutor] Failed to create /workspace_rw in container {self._container_id} (rc={mkdir_res.returncode}).\n"
+                    f"  stdout: {mkdir_res.stdout.strip()}\n"
+                    f"  stderr: {mkdir_res.stderr.strip()}"
+                )
+        except subprocess.TimeoutExpired as exc:
+            self.end_episode()
+            raise RuntimeError(
+                f"[DockerEpisodeExecutor] Timed out creating /workspace_rw in container {self._container_id}."
+            ) from exc
 
     def execute(self, step: AtomicStep) -> ExecutionResult:
         """
@@ -927,6 +959,40 @@ class DockerEpisodeExecutor:
         )
         try:
             stdout, stderr = proc.communicate(timeout=timeout)
+
+            # On ANY non-zero return code, verify whether container is still alive via docker inspect
+            if proc.returncode != 0:
+                inspect_cmd = [
+                    "docker", "inspect",
+                    "-f", "{{.State.Running}}",
+                    self._container_id,
+                ]
+                try:
+                    insp_res = subprocess.run(
+                        inspect_cmd,
+                        capture_output=True,
+                        text=True,
+                        timeout=10,
+                    )
+                    if insp_res.returncode != 0 or insp_res.stdout.strip().lower() != "true":
+                        raise RuntimeError(
+                            f"[DockerEpisodeExecutor] Container {self._container_id} is not running "
+                            f"(inspect rc={insp_res.returncode}, out={insp_res.stdout.strip()!r}):\n"
+                            f"Command failed with rc={proc.returncode}:\n"
+                            f"  stdout: {stdout.strip()}\n"
+                            f"  stderr: {stderr.strip()}"
+                        )
+                except subprocess.TimeoutExpired as e:
+                    raise RuntimeError(
+                        f"[DockerEpisodeExecutor] docker inspect timed out after 10s for container {self._container_id}."
+                    ) from e
+                except Exception as e:
+                    if isinstance(e, RuntimeError):
+                        raise
+                    raise RuntimeError(
+                        f"[DockerEpisodeExecutor] docker inspect failed for container {self._container_id}: {e}"
+                    ) from e
+
             return _ExecResult(
                 returncode=proc.returncode,
                 stdout=stdout,

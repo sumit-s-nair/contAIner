@@ -69,6 +69,7 @@ def evaluate_model(model_name: str, model, tokenizer, test_repos, demo_repos, ou
         "execution_success": 0, # >0 execution reward
         "full_completion": 0, # episode completed
         "total_steps": 0,
+        "env_errors": 0,
         "failures": {
             "invalid_json": 0,
             "invalid_structure": 0,
@@ -84,11 +85,6 @@ def evaluate_model(model_name: str, model, tokenizer, test_repos, demo_repos, ou
     for repo in tqdm(test_repos):
         repo_name = repo["repo"]
         cat = repo["category"]
-        if cat not in metrics["by_category"]:
-            metrics["by_category"][cat] = {"total": 0, "completed": 0, "reward": 0.0}
-            
-        metrics["total_episodes"] += 1
-        metrics["by_category"][cat]["total"] += 1
         
         is_demo = repo_name in demo_repos
         trace_log = []
@@ -99,15 +95,30 @@ def evaluate_model(model_name: str, model, tokenizer, test_repos, demo_repos, ou
             obs, _ = env.reset(repo_entry=repo)
         except Exception as e:
             logger.error(f"Failed to reset env for {repo_name}: {e}")
-            if not failure_logged:
-                metrics["failures"]["execution_failed"] += 1
-            if is_demo: trace_log.append(f"**Result:** FAILED - Env Reset Error: {e}\n")
+            metrics["env_errors"] += 1
+            if is_demo:
+                trace_log.append(f"**Result:** FAILED - Env Reset Error: {e}\n")
+                safe_name = repo_name.replace("/", "_")
+                with open(demo_dir / f"{model_name}_{safe_name}.md", "w") as f:
+                    f.write("\n".join(trace_log))
             continue
         
+        # Local metrics accumulated for this episode
+        ep_valid_json = 0
+        ep_valid_structure = 0
+        ep_execution_success = 0
+        ep_steps_taken = 0
+        ep_failures = {
+            "invalid_json": 0,
+            "invalid_structure": 0,
+            "execution_failed": 0,
+            "max_steps_reached": 0
+        }
         ep_reward = 0.0
-        terminated = False
-        steps_taken = 0
+        env_error_occurred = False
         failure_logged = False
+        terminated = False
+        info = {}
         
         for step_idx in range(10): # max 10 steps
             prompt_dicts = env._serializer.to_chat_prompt(obs)
@@ -135,21 +146,21 @@ def evaluate_model(model_name: str, model, tokenizer, test_repos, demo_repos, ou
                 trace_log.append(f"**Raw LLM Output:**\n```json\n{completion}\n```\n")
             
             step_dict = extract_step_dict(completion)
-            steps_taken += 1
+            ep_steps_taken += 1
             
             if step_dict is None:
                 if not failure_logged:
-                    metrics["failures"]["invalid_json"] += 1
+                    ep_failures["invalid_json"] += 1
                     failure_logged = True
                 if is_demo: trace_log.append("**Result:** FAILED - Invalid JSON\n")
                 break
                 
-            metrics["valid_json"] += 1
+            ep_valid_json += 1
             
             # Strict structural validation
             if "action_type" not in step_dict or "description" not in step_dict:
                 if not failure_logged:
-                    metrics["failures"]["invalid_structure"] += 1
+                    ep_failures["invalid_structure"] += 1
                     failure_logged = True
                 if is_demo: trace_log.append("**Result:** FAILED - Structural Validation Error (Missing required fields)\n")
                 break
@@ -158,7 +169,7 @@ def evaluate_model(model_name: str, model, tokenizer, test_repos, demo_repos, ou
                 action_type = ActionType(step_dict["action_type"].lower())
             except ValueError:
                 if not failure_logged:
-                    metrics["failures"]["invalid_structure"] += 1
+                    ep_failures["invalid_structure"] += 1
                     failure_logged = True
                 if is_demo: trace_log.append(f"**Result:** FAILED - Structural Validation Error (Invalid action_type: {step_dict['action_type']})\n")
                 break
@@ -169,29 +180,36 @@ def evaluate_model(model_name: str, model, tokenizer, test_repos, demo_repos, ou
                 description=step_dict["description"],
                 rationale=step_dict.get("rationale", "")
             )
-            metrics["valid_structure"] += 1
+            ep_valid_structure += 1
                 
-            obs, reward, terminated, truncated, info = env.step(action)
+            try:
+                obs, reward, terminated, truncated, info = env.step(action)
+            except Exception as e:
+                logger.error(f"Env step failed for {repo_name}: {e}")
+                metrics["env_errors"] += 1
+                env_error_occurred = True
+                if is_demo: trace_log.append(f"**Result:** FAILED - Env Step Error: {e}\n")
+                break
+
             ep_reward += reward
             
             # Check for blocked or execution failed directly from info
             is_blocked = info.get("blocked", False)
-            is_complete = info.get("episode_complete", False)
             
             if is_blocked:
                 if not failure_logged:
-                    metrics["failures"]["execution_failed"] += 1
+                    ep_failures["execution_failed"] += 1
                     failure_logged = True
                 if is_demo: trace_log.append(f"**Result:** FAILED - Action Blocked (AUTO_DENY). Reward: {reward}\n")
                 break
                 
             step_exec_reward = info.get("reward_breakdown", {}).get("execution", 0.0)
             if step_exec_reward > 0 or action.action_type.value == "check":
-                 metrics["execution_success"] += 1
+                ep_execution_success += 1
             else:
                 # If execution failed for a non-blocked action
                 if not failure_logged:
-                    metrics["failures"]["execution_failed"] += 1
+                    ep_failures["execution_failed"] += 1
                     failure_logged = True
                 if is_demo: trace_log.append(f"**Result:** FAILED - Execution/Verification Failed. Reward: {reward}\n")
                 break
@@ -202,8 +220,27 @@ def evaluate_model(model_name: str, model, tokenizer, test_repos, demo_repos, ou
             if terminated or truncated:
                 break
                 
-        metrics["total_steps"] += steps_taken
+        if env_error_occurred:
+            # An episode with an env error contributes ONLY to env_errors
+            if is_demo:
+                safe_name = repo_name.replace("/", "_")
+                with open(demo_dir / f"{model_name}_{safe_name}.md", "w") as f:
+                    f.write("\n".join(trace_log))
+            continue
+
+        # Commit local episode metrics into global metrics
+        if cat not in metrics["by_category"]:
+            metrics["by_category"][cat] = {"total": 0, "completed": 0, "reward": 0.0}
+            
+        metrics["total_episodes"] += 1
+        metrics["by_category"][cat]["total"] += 1
+        metrics["valid_json"] += ep_valid_json
+        metrics["valid_structure"] += ep_valid_structure
+        metrics["execution_success"] += ep_execution_success
+        metrics["total_steps"] += ep_steps_taken
         metrics["by_category"][cat]["reward"] += ep_reward
+        for k in ep_failures:
+            metrics["failures"][k] += ep_failures[k]
         
         if info.get("episode_complete", False) and not failure_logged:
             metrics["full_completion"] += 1
@@ -222,6 +259,13 @@ def evaluate_model(model_name: str, model, tokenizer, test_repos, demo_repos, ou
             with open(demo_dir / f"{model_name}_{safe_name}.md", "w") as f:
                 f.write("\n".join(trace_log))
                 
+    logger.info(
+        f"Evaluation finished for {model_name}: "
+        f"total_episodes={metrics['total_episodes']}, "
+        f"completed={metrics['full_completion']}, "
+        f"execution_failed={metrics['failures']['execution_failed']}, "
+        f"env_errors={metrics['env_errors']}"
+    )
     return metrics
 
 def main():
