@@ -1,0 +1,17 @@
+### 1. Intent Dataset Normalization (System 1)
+The [Intent Dataset](file:///c:/Users/sumit/Documents/contAIner/datasets/intent-dataset/schema.json) is designed to train the joint intent classification and Named Entity Recognition (NER) pipeline (using `distilroberta-base`). The normalization ensures that messy user prompts are systematically mapped into explicit intents and entities.
+
+* **Intent Canonicalization**: Raw natural-language instructions are mapped to a strict, finite set of atomic intent labels (e.g., `install_package`, `update_runtime`, `check_version`, `create_isolation`, `list_dependencies`).
+* **Entity Standardization**: Instead of arbitrary token extraction, entities are rigidly mapped to predefined keys (`software`, `version`, `project`, `file`). 
+* **Span Indexing**: To facilitate token-level NER training, the dataset normalizes entity locations into `entity_spans` containing precise character indices (`start`, `end`) and the matched `text`.
+* **Context Injection**: Each row is enriched with a `context` object containing `os_hint` and `shell_type`, teaching the model to understand environmental constraints inherently mentioned in the prompt.
+* **Paraphrase Grouping**: A `paraphrase_group` identifier is added to cluster different linguistic variations of the exact same instruction. This helps the model generalize across diverse phrasings.
+
+### 2. Command Generation Dataset Normalization (System 2)
+The [Command Generation Dataset](file:///c:/Users/sumit/Documents/contAIner/datasets/command-dataset/schema.json) is used to fine-tune the `Qwen2.5-Coder-1.5B` model. It takes the output schema of System 1 (the `CanonicalIntent`) and maps it to executable cross-platform commands.
+
+* **Schema Unification**: The dataset aggregates entirely different external datasets (like ~10K samples from NL2Bash and the NL2SH-ALFA dataset) and normalizes them into a single unified JSON schema. The `source` field tracks the data's origin.
+* **OS and Shell Metadata Alignment**: A critical normalization step for this dataset is explicitly tagging every single row with an `os` (e.g., `windows`, `linux`, `macos`) and a `shell` (e.g., `bash`, `powershell`, `cmd`, `zsh`). Because the source dataset `NL2Bash` was purely Linux/Bash, this metadata provides the strict conditioning the model needs to generate correct syntax for the target environment.
+* **Entity Constraint**: The entities here are narrowed down specifically to actionable items for command generation: `runtime`, `package`, and `version`. Null values are strictly enforced for missing entities.
+* **Data Augmentation for Cross-Platform Parity**: The raw normalized dataset (~3,500 samples) was heavily biased toward Linux. The pipeline augments this dataset to ~5,000+ samples by generating Windows-specific command equivalents (e.g., generating `winget` or `choco` PowerShell commands for a corresponding `apt` Bash command).
+* **Output (CommandPlan) Formatting**: During training/inference, the normalized intent is mapped to a strict `CommandPlan` JSON contract. Instead of just returning a raw string, commands are normalized into a structured list of execution `steps` (including `type`, `command`, `description`), a `confidence` score, and a `requires_elevation` boolean for safety validation.
