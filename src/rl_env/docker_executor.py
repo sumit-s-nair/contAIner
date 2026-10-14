@@ -70,6 +70,7 @@ The result returned has ``returncode=-1`` and a ``[timeout]`` prefix in stderr.
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import socket
@@ -304,7 +305,7 @@ class NetworkConfig:
     """
 
     mode: str = "none"
-    """Network mode: ``"none"`` | ``"allowlist"`` | ``"bridge"``."""
+    """Network mode: ``"none"`` | ``"proxy"`` | ``"allowlist"`` | ``"bridge"``."""
 
     allowed_registry_hosts: List[str] = field(default_factory=lambda: [
         # PyPI (Python)
@@ -511,11 +512,26 @@ class DockerEpisodeExecutor:
         if self._config.network.mode == "allowlist":
             self._verify_network_label(self._config.network.docker_network_name)
 
+        if self._config.network.mode == "proxy":
+            self._verify_proxy_network_and_container()
+
         # Ensure host-side package cache directories exist before mounting.
         self._pip_cache_host.mkdir(parents=True, exist_ok=True)
         self._npm_cache_host.mkdir(parents=True, exist_ok=True)
 
         self._container_name = self._make_container_name()
+
+        proxy_env_flags: List[str] = []
+        if self._config.network.mode == "proxy":
+            proxy_url = "http://contai_egress_proxy:3128"
+            proxy_env_flags = [
+                "--env", f"HTTP_PROXY={proxy_url}",
+                "--env", f"HTTPS_PROXY={proxy_url}",
+                "--env", f"http_proxy={proxy_url}",
+                "--env", f"https_proxy={proxy_url}",
+                "--env", f"PIP_PROXY={proxy_url}",
+                "--env", f"npm_config_https_proxy={proxy_url}",
+            ]
 
         cmd: List[str] = [
             "docker", "run",
@@ -549,7 +565,8 @@ class DockerEpisodeExecutor:
             "--env", "NODE_PATH=/workspace_rw/lib/node_modules",
             "--env", "HOME=/workspace_rw",
             "--env", "PIP_ROOT_USER_ACTION=ignore",
-            # --- Network ---------------------------------------------------------
+            # --- Proxy & Network -------------------------------------------------
+            *proxy_env_flags,
             *network_flags,
             *extra_host_flags,
             # --- Image + entrypoint ----------------------------------------------
@@ -984,6 +1001,8 @@ class DockerEpisodeExecutor:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
         try:
             stdout, stderr = proc.communicate(timeout=timeout)
@@ -1132,6 +1151,9 @@ class DockerEpisodeExecutor:
         if net.mode == "none":
             return ["--network", "none"], []
 
+        if net.mode == "proxy":
+            return ["--network", "contai_sandbox"], []
+
         if net.mode == "bridge":
             return ["--network", "bridge"], []
 
@@ -1254,4 +1276,61 @@ class DockerEpisodeExecutor:
                 f"    # recreate with: docker network rm {network_name} && "
                 f"scripts/setup_docker_network.sh"
             )
+
+    def _verify_proxy_network_and_container(self) -> None:
+        """
+        Verify that the internal network 'contai_sandbox' exists and has Internal: true,
+        and that 'contai_egress_proxy' is running.
+
+        Raises
+        ------
+        RuntimeError
+            If contai_sandbox is missing, not internal, or contai_egress_proxy is not running.
+        """
+        try:
+            net_res = subprocess.run(
+                ["docker", "network", "inspect", "contai_sandbox", "--format", "{{.Internal}}"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise RuntimeError("[DockerEpisodeExecutor] docker network inspect contai_sandbox timed out.") from exc
+
+        if net_res.returncode != 0:
+            raise RuntimeError(
+                f"[DockerEpisodeExecutor] Required Docker network 'contai_sandbox' not found.\n"
+                f"Run 'python scripts/setup_egress_proxy.py' to provision it.\n"
+                f"stderr: {net_res.stderr.strip()}"
+            )
+
+        if net_res.stdout.strip().lower() != "true":
+            raise RuntimeError(
+                f"[DockerEpisodeExecutor] Docker network 'contai_sandbox' is not internal (Internal: {net_res.stdout.strip()}).\n"
+                f"Run 'python scripts/setup_egress_proxy.py' to re-create it."
+            )
+
+        try:
+            proxy_res = subprocess.run(
+                ["docker", "inspect", "contai_egress_proxy", "--format", "{{.State.Running}}"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise RuntimeError("[DockerEpisodeExecutor] docker inspect contai_egress_proxy timed out.") from exc
+
+        if proxy_res.returncode != 0:
+            raise RuntimeError(
+                f"[DockerEpisodeExecutor] Proxy container 'contai_egress_proxy' not found.\n"
+                f"Run 'python scripts/setup_egress_proxy.py' to start it.\n"
+                f"stderr: {proxy_res.stderr.strip()}"
+            )
+
+        if proxy_res.stdout.strip().lower() != "true":
+            raise RuntimeError(
+                f"[DockerEpisodeExecutor] Proxy container 'contai_egress_proxy' is not running (Running: {proxy_res.stdout.strip()}).\n"
+                f"Run 'python scripts/setup_egress_proxy.py' to start it."
+            )
+
 

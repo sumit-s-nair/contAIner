@@ -3,7 +3,8 @@
 scripts/diagnostics/stage2a_real_env_walk.py
 ===========================================
 Stage 2A: Diagnostic walk of one repo through the real environment.
-Uses real PlannerEnv and DockerEpisodeExecutor with the training script configuration.
+Uses real PlannerEnv and DockerEpisodeExecutor with the training script configuration
+under NetworkConfig mode="proxy".
 """
 
 from __future__ import annotations
@@ -30,6 +31,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.rl_env.env import PlannerEnv, EnvConfig
+from src.rl_env.docker_executor import DockerExecutorConfig, NetworkConfig
 from src.rl_env.dry_run_executor import TrainingReviewPolicy
 from src.rl_env.repo_loader import RepoLoader
 from src.repo_scan.scanner import scan_repo
@@ -201,15 +203,32 @@ def main() -> None:
     diagnostic_log["chosen_reason"] = reason
     diagnostic_log["first_dep"] = first_dep
 
-    # Matching train_system2_grpo.py setup_environment()
+    # Matching train_system2_grpo.py setup_environment() with mode="proxy"
     config = EnvConfig(
         dry_run=False,
         review_policy=TrainingReviewPolicy.AUTO_DENY,
         corpus_manifest_path=corpus_path,
+        docker_config=DockerExecutorConfig(network=NetworkConfig(mode="proxy")),
     )
     env = PlannerEnv(config)
     forked_env: Optional[PlannerEnv] = None
     snapshot_tag: Optional[str] = None
+
+    step_isolate = PlannedStep(
+        action_type=ActionType.ISOLATE,
+        target=".venv",
+        description="Create virtual environment in .venv",
+    )
+    step_install = PlannedStep(
+        action_type=ActionType.INSTALL,
+        target=first_dep,
+        description=f"Install first manifest dependency: {first_dep}",
+    )
+    step_check = PlannedStep(
+        action_type=ActionType.CHECK,
+        target=".",
+        description="Run test check on .",
+    )
 
     # Step a: env.reset(repo)
     try:
@@ -229,9 +248,21 @@ def main() -> None:
             "traceback": traceback.format_exc(),
         }
 
-    # Step b: docker commit the main container, exactly as training script does
+    # Step b: Run MAIN ISOLATE before taking snapshot
     try:
-        print("[Step b] docker commit main container...")
+        print("[Step b] Main: step ISOLATE (before snapshot)...")
+        rec_main_iso = step_and_record(env, step_isolate, "main_isolate")
+        diagnostic_log["steps"]["step_b_main_isolate"] = rec_main_iso
+    except Exception as exc:
+        diagnostic_log["steps"]["step_b_main_isolate"] = {
+            "status": "ERROR",
+            "error": f"{type(exc).__name__}: {exc}",
+            "traceback": traceback.format_exc(),
+        }
+
+    # Step c: docker commit the main container, exactly as training script does
+    try:
+        print("[Step c] docker commit main container...")
         if env._docker_executor is None:
             raise RuntimeError("Main env._docker_executor is None.")
         snapshot_tag = env._docker_executor.snapshot()
@@ -241,64 +272,68 @@ def main() -> None:
             text=True,
             timeout=10,
         )
-        diagnostic_log["steps"]["step_b_commit"] = {
+        diagnostic_log["steps"]["step_c_commit"] = {
             "status": "SUCCESS" if v_res.returncode == 0 else "VERIFY_FAILED",
             "snapshot_tag": snapshot_tag,
             "inspect_returncode": v_res.returncode,
         }
     except Exception as exc:
-        diagnostic_log["steps"]["step_b_commit"] = {
+        diagnostic_log["steps"]["step_c_commit"] = {
             "status": "ERROR",
             "error": f"{type(exc).__name__}: {exc}",
             "traceback": traceback.format_exc(),
         }
 
-    # Step c: env.fork(snapshot_image=tag)
+    # Step d: env.fork(snapshot_image=tag)
+    fork_cid: Optional[str] = None
     try:
-        print(f"[Step c] env.fork(snapshot_image={snapshot_tag})...")
+        print(f"[Step d] env.fork(snapshot_image={snapshot_tag})...")
         forked_env = env.fork(snapshot_image=snapshot_tag)
         fork_cid = getattr(getattr(forked_env, "_docker_executor", None) or getattr(forked_env, "_executor", None), "_container_id", None)
-        diagnostic_log["steps"]["step_c_fork"] = {
+        diagnostic_log["steps"]["step_d_fork"] = {
             "status": "SUCCESS",
             "fork_container_id": fork_cid,
             "docker_inspect": docker_inspect_fields(fork_cid),
         }
     except Exception as exc:
-        diagnostic_log["steps"]["step_c_fork"] = {
+        diagnostic_log["steps"]["step_d_fork"] = {
             "status": "ERROR",
             "error": f"{type(exc).__name__}: {exc}",
             "traceback": traceback.format_exc(),
         }
 
-    # Step d: In FORK, step ISOLATE (target .venv)
-    step_isolate = PlannedStep(
-        action_type=ActionType.ISOLATE,
-        target=".venv",
-        description="Create virtual environment in .venv",
-    )
-    if forked_env is not None:
+    # Check .venv in fork and record ls /workspace_rw in fork before any fork step
+    if forked_env is not None and fork_cid:
         try:
-            print("[Step d] Fork: step ISOLATE...")
-            rec_d = step_and_record(forked_env, step_isolate, "fork_isolate")
-            diagnostic_log["steps"]["step_d_fork_isolate"] = rec_d
+            print("[Step d.check] Checking /workspace_rw/.venv/bin/python and recording ls /workspace_rw in fork...")
+            py_res = subprocess.run(
+                ["docker", "exec", fork_cid, "test", "-f", "/workspace_rw/.venv/bin/python"],
+                capture_output=True,
+                timeout=10,
+            )
+            has_venv_python = (py_res.returncode == 0)
+
+            ls_res = subprocess.run(
+                ["docker", "exec", fork_cid, "ls", "-la", "/workspace_rw"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            ls_output = ls_res.stdout.strip()
+            print(f"  /workspace_rw/.venv/bin/python exists in fork: {has_venv_python}")
+            print(f"  ls /workspace_rw in fork:\n{ls_output}")
+
+            diagnostic_log["steps"]["fork_pre_step_checks"] = {
+                "has_venv_python": has_venv_python,
+                "ls_workspace_rw": ls_output,
+            }
         except Exception as exc:
-            diagnostic_log["steps"]["step_d_fork_isolate"] = {
-                "status": "ERROR",
+            diagnostic_log["steps"]["fork_pre_step_checks"] = {
                 "error": f"{type(exc).__name__}: {exc}",
                 "traceback": traceback.format_exc(),
             }
-    else:
-        diagnostic_log["steps"]["step_d_fork_isolate"] = {
-            "status": "SKIPPED",
-            "reason": "forked_env is None",
-        }
 
     # Step e: In FORK, step INSTALL for the first manifest dependency
-    step_install = PlannedStep(
-        action_type=ActionType.INSTALL,
-        target=first_dep,
-        description=f"Install first manifest dependency: {first_dep}",
-    )
     if forked_env is not None:
         try:
             print(f"[Step e] Fork: step INSTALL ({first_dep})...")
@@ -317,11 +352,6 @@ def main() -> None:
         }
 
     # Step f: In FORK, step CHECK (target tests or .)
-    step_check = PlannedStep(
-        action_type=ActionType.CHECK,
-        target=".",
-        description="Run test check on .",
-    )
     if forked_env is not None:
         try:
             print("[Step f] Fork: step CHECK (.)...")
@@ -339,26 +369,14 @@ def main() -> None:
             "reason": "forked_env is None",
         }
 
-    # Step g: Repeat steps d–f in the MAIN env
-    # Main ISOLATE
-    try:
-        print("[Step g.1] Main: step ISOLATE...")
-        rec_g_iso = step_and_record(env, step_isolate, "main_isolate")
-        diagnostic_log["steps"]["step_g1_main_isolate"] = rec_g_iso
-    except Exception as exc:
-        diagnostic_log["steps"]["step_g1_main_isolate"] = {
-            "status": "ERROR",
-            "error": f"{type(exc).__name__}: {exc}",
-            "traceback": traceback.format_exc(),
-        }
-
+    # Step g: In MAIN, step INSTALL and CHECK
     # Main INSTALL
     try:
-        print(f"[Step g.2] Main: step INSTALL ({first_dep})...")
+        print(f"[Step g.1] Main: step INSTALL ({first_dep})...")
         rec_g_inst = step_and_record(env, step_install, "main_install")
-        diagnostic_log["steps"]["step_g2_main_install"] = rec_g_inst
+        diagnostic_log["steps"]["step_g1_main_install"] = rec_g_inst
     except Exception as exc:
-        diagnostic_log["steps"]["step_g2_main_install"] = {
+        diagnostic_log["steps"]["step_g1_main_install"] = {
             "status": "ERROR",
             "error": f"{type(exc).__name__}: {exc}",
             "traceback": traceback.format_exc(),
@@ -366,11 +384,11 @@ def main() -> None:
 
     # Main CHECK
     try:
-        print("[Step g.3] Main: step CHECK (.)...")
+        print("[Step g.2] Main: step CHECK (.)...")
         rec_g_chk = step_and_record(env, step_check, "main_check")
-        diagnostic_log["steps"]["step_g3_main_check"] = rec_g_chk
+        diagnostic_log["steps"]["step_g2_main_check"] = rec_g_chk
     except Exception as exc:
-        diagnostic_log["steps"]["step_g3_main_check"] = {
+        diagnostic_log["steps"]["step_g2_main_check"] = {
             "status": "ERROR",
             "error": f"{type(exc).__name__}: {exc}",
             "traceback": traceback.format_exc(),
@@ -420,12 +438,11 @@ def main() -> None:
 
     # Build summary lines
     step_items = [
-        ("Fork ISOLATE", diagnostic_log["steps"].get("step_d_fork_isolate")),
+        ("Main ISOLATE", diagnostic_log["steps"].get("step_b_main_isolate")),
         ("Fork INSTALL", diagnostic_log["steps"].get("step_e_fork_install")),
         ("Fork CHECK", diagnostic_log["steps"].get("step_f_fork_check")),
-        ("Main ISOLATE", diagnostic_log["steps"].get("step_g1_main_isolate")),
-        ("Main INSTALL", diagnostic_log["steps"].get("step_g2_main_install")),
-        ("Main CHECK", diagnostic_log["steps"].get("step_g3_main_check")),
+        ("Main INSTALL", diagnostic_log["steps"].get("step_g1_main_install")),
+        ("Main CHECK", diagnostic_log["steps"].get("step_g2_main_check")),
     ]
 
     print("\n=== STEP RESULTS ===")

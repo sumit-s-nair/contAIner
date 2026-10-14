@@ -1,3 +1,4 @@
+# SUPERSEDED by scripts/setup_egress_proxy.py (Stage 2C); iptables approach does not work on Docker Desktop/Windows.
 #!/usr/bin/env bash
 # scripts/setup_docker_network.sh
 # =================================
