@@ -121,6 +121,25 @@
 **Threats to validity:** Live network latency was not measured (all benchmarks used mocked HTTP); the "1 fewer RTT" saving is inferred from the structural change. The test suite mocks the network layer, meaning it cannot catch changes in the upstream registry APIs or HTML structures if they diverge from the mocks.
 
 **Open question:** How does the full documentation retrieval pipeline (adapter fetch + segmentation + compression) perform end-to-end under live network conditions and concurrency?
- 
- -   [ 2 0 2 6 - 0 8 - 3 0 ]   S y s t e m   2   R L   t r a i n i n g   c u r r e n t l y   u s e s   a   d e t e r m i n i s t i c   c o m m a n d - e x p a n s i o n   s t u b   i n   p l a c e   o f   S y s t e m   3 ;   s w a p p i n g   i n   t h e   r e a l   t r a i n e d   S y s t e m   3   m o d e l   i s   a   r e q u i r e d   f o l l o w - u p   b e f o r e   t h i s   p i p e l i n e   r e f l e c t s   t h e   i n t e n d e d   a r c h i t e c t u r e .  
- 
+
+## [2026-10-15] Stage 1D: GRPO loss formulation correction (decoupling clip ratio from reference model and correcting the inverted-ratio K3 KL estimator)
+
+**Question/Hypothesis:** What caused the flat learning curves and lack of policy improvement observed in historical System 2 RL training runs?
+**Method:** Audited the policy gradient and KL divergence mathematics in `scripts/train_system2_grpo.py`. Modularized the per-token loss calculations into `compute_per_token_losses` and added unit test verification in `tests/test_rl_env/test_stage1d_loss.py`.
+
+**Result:** Two flaws were present in every run before Stage 1D:
+
+1. **Ref-anchored clip ratio:** the importance ratio was exp(logp − ref_logp), clipped to [0.8, 1.2]. Under the PPO min, positive-advantage tokens got zero gradient once π/ref > 1.2, and negative-advantage tokens got zero gradient once π/ref < 0.8. Gradient still flowed in the opposite direction. So the policy was held within [0.8, 1.2]× of Qwen-base on the side the advantage pointed.
+2. **Inverted-ratio K3:** the KL term used exp(x) − x − 1 with x = logp − ref_logp instead of exp(−x) + x − 1. The gradient sign was the same, but the size was wrong. The penalty grew exponentially (eˣ − 1) when π rose above ref, and was capped at 1 when π fell below ref. It was also not an unbiased estimate of KL(π‖ref).
+
+Every run before Stage 1D used both. This is a possible explanation for flat learning in the earlier runs. It is not confirmed.
+**Fix:** ratio = exp(logp − logp.detach()) with PPO min/clip (clip_eps = 0.2), with no reference to ref; KL = exp(log_r) − log_r − 1 with log_r = ref_logp − logp. Unit tests are in tests/test_rl_env/test_stage1d_loss.py.
+
+**Interpretation:** The loss now matches the standard single-update GRPO form. Whether this changes learning dynamics is untested until a training run.
+
+**Novelty/contribution relevance:** None. This is a bug fix to the standard formulation. It is recorded for an accurate history of the earlier runs.
+
+**Threats to validity:** Empirical validation of learning dynamics requires a live training run.
+**Open question:** Does the policy achieve non-trivial completion rate and reward scaling on the full training corpus once training is restarted?
+
+- [2026-08-30] System 2 RL training currently uses a deterministic command-expansion stub in place of System 3; swapping in the real trained System 3 model is a required follow-up before this pipeline reflects the intended architecture.

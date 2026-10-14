@@ -245,6 +245,49 @@ def compute_group_advantages(
     return advantages, valid_mask
 
 
+def compute_per_token_losses(
+    action_log_probs: torch.Tensor,
+    ref_action_log_probs: torch.Tensor,
+    advantages: torch.Tensor,
+    clip_eps: float = 0.2,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Compute per-token policy gradient loss and K3 KL divergence.
+
+    Parameters
+    ----------
+    action_log_probs : torch.Tensor
+        Log probabilities of actions under current policy pi, shape [G, seq_len].
+    ref_action_log_probs : torch.Tensor
+        Log probabilities of actions under reference policy ref, shape [G, seq_len].
+    advantages : torch.Tensor
+        Group advantages, shape [G] or [G, 1].
+    clip_eps : float, default 0.2
+        PPO clipping epsilon parameter.
+
+    Returns
+    -------
+    per_token_pg_loss : torch.Tensor
+        PPO policy gradient loss per token, shape [G, seq_len].
+    per_token_kl : torch.Tensor
+        K3 estimator of KL(pi || ref) per token, shape [G, seq_len].
+    """
+    ratio = torch.exp(action_log_probs - action_log_probs.detach())
+    clip_ratio = torch.clamp(ratio, 1.0 - clip_eps, 1.0 + clip_eps)
+
+    if advantages.dim() == 1:
+        adv_expanded = advantages.unsqueeze(1).expand_as(ratio)
+    else:
+        adv_expanded = advantages.expand_as(ratio)
+
+    per_token_pg_loss = -torch.min(ratio * adv_expanded, clip_ratio * adv_expanded)
+
+    log_r = ref_action_log_probs - action_log_probs
+    per_token_kl = torch.exp(log_r) - log_r - 1
+
+    return per_token_pg_loss, per_token_kl
+
+
 def masked_token_loss(
     per_token_pg_loss: torch.Tensor,
     per_token_kl: torch.Tensor,
@@ -841,13 +884,12 @@ def main():
                                 ref_log_probs = torch.nn.functional.log_softmax(ref_logits, dim=-1)
                                 ref_action_log_probs = torch.gather(ref_log_probs, 2, gen_ids.unsqueeze(-1)).squeeze(-1)
                         
-                        per_token_log_ratio = action_log_probs - ref_action_log_probs
-                        per_token_ratio = torch.exp(per_token_log_ratio)
-                        clip_ratio = torch.clamp(per_token_ratio, 0.8, 1.2)
-                        
-                        adv_expanded = advantages.unsqueeze(1).expand_as(per_token_ratio)
-                        per_token_pg_loss = -torch.min(per_token_ratio * adv_expanded, clip_ratio * adv_expanded)
-                        per_token_kl = torch.exp(per_token_log_ratio) - per_token_log_ratio - 1
+                        per_token_pg_loss, per_token_kl = compute_per_token_losses(
+                            action_log_probs,
+                            ref_action_log_probs,
+                            advantages,
+                            clip_eps=0.2,
+                        )
 
                         loss, normalizer = masked_token_loss(per_token_pg_loss, per_token_kl, pad_mask, valid_seq_mask, beta=0.1)
                         if normalizer > 0:
@@ -949,8 +991,7 @@ def main():
                     if 'outputs' in locals():
                         del outputs, logits, log_probs, action_log_probs
                         del ref_outputs, ref_logits, ref_log_probs, ref_action_log_probs
-                        del per_token_log_ratio, per_token_ratio, clip_ratio, adv_expanded, per_token_pg_loss
-                        del per_token_kl, loss, kl, pg_loss, grad_norm, advantages
+                        del per_token_pg_loss, per_token_kl, loss, kl, pg_loss, grad_norm, advantages
                     if 'inputs' in locals():
                         del inputs
                     torch.cuda.empty_cache()
