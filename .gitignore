@@ -242,3 +242,8 @@ sample*.json
 EXPLOITED_DO_NOT_USE/**/checkpoint-*/
 archive/**/checkpoint-*/
 
+# Rollout logs (must not be committed to git)
+**/rollouts.jsonl
+rollouts*.jsonl
+
+

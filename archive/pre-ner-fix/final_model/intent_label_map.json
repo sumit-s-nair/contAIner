@@ -1,0 +1,12 @@
+{
+  "check_installed": 0,
+  "check_version": 1,
+  "create_isolation": 2,
+  "install_package": 3,
+  "install_runtime": 4,
+  "list_dependencies": 5,
+  "remove_package": 6,
+  "remove_runtime": 7,
+  "update_package": 8,
+  "update_runtime": 9
+}

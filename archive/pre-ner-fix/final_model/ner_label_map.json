@@ -1,0 +1,32 @@
+{
+  "label2id": {
+    "O": 0,
+    "B-runtime": 1,
+    "B-package": 2,
+    "B-version": 3,
+    "B-virtual_env": 4,
+    "B-package_manager": 5,
+    "B-project": 6,
+    "I-runtime": 7,
+    "I-package": 8,
+    "I-version": 9,
+    "I-virtual_env": 10,
+    "I-package_manager": 11,
+    "I-project": 12
+  },
+  "id2label": {
+    "0": "O",
+    "1": "B-runtime",
+    "2": "B-package",
+    "3": "B-version",
+    "4": "B-virtual_env",
+    "5": "B-package_manager",
+    "6": "B-project",
+    "7": "I-runtime",
+    "8": "I-package",
+    "9": "I-version",
+    "10": "I-virtual_env",
+    "11": "I-package_manager",
+    "12": "I-project"
+  }
+}
