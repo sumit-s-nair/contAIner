@@ -33,7 +33,7 @@ def expand_planned_step(planned: PlannedStep) -> List[AtomicStep]:
             AtomicStep(
                 command="python -m venv .venv",
                 description="Create virtual environment",
-                verify_command="test -d .venv",
+                verify_command="test -f .venv/bin/python || test -f .venv/Scripts/python.exe",
                 destructive=False
             )
         ]
@@ -48,7 +48,7 @@ def expand_planned_step(planned: PlannedStep) -> List[AtomicStep]:
     # Default fallback
     return [
         AtomicStep(
-            command=f"echo '{atype.value} {target}'",
+            command="__UNMAPPED_ACTION__",
             description=planned.description,
             destructive=False
         )

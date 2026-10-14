@@ -120,6 +120,7 @@ class RewardConfig:
     r_success_unverified:  float = 0.2    # exit-0 but NOT verified
     r_failed:              float = -1.0   # non-zero exit
     r_error:               float = -0.5   # Python exception
+    r_unmapped:            float = -0.5   # unmapped action
 
     # --- validator rewards ---------------------------------------------------
     r_valid:             float =  1.0
@@ -177,6 +178,9 @@ def _execution_reward(
     elif status == ExecutionStatus.FAILED:
         raw = cfg.r_failed
         label = "failed"
+    elif status == ExecutionStatus.UNMAPPED:
+        raw = cfg.r_unmapped
+        label = "unmapped"
     else:  # ERROR
         raw = cfg.r_error
         label = "error"

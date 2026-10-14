@@ -54,7 +54,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from src.repo_scan.models import Dependency, EcosystemManifest, RepoManifest, SourceRef
 from src.sandbox.models import AtomicStep, ExecutionResult, ExecutionStatus, RiskTier
-from src.system2_planner.models import PlannedStep, TemplateInstance
+from src.system2_planner.models import PlannedStep, TemplateInstance, ActionType
 from src.rl_env.system3_stub import expand_planned_step
 from src.system2_planner.templates import TEMPLATES
 
@@ -200,7 +200,8 @@ class PlannerEnv:
         # Episode state (set by reset(), mutated by step())
         self._obs:             Optional[Observation]            = None
         self._instance:        Optional[TemplateInstance]       = None
-        self._plan_so_far:     List[AtomicStep]                 = []
+        self._plan_so_far:     List[PlannedStep]                = []
+        self._execution_history: List[ExecutionResult]          = []
         self._executor:        Optional[DryRunExecutor]         = None
         self._docker_executor: Optional[DockerEpisodeExecutor]  = None
         self._done:            bool                             = False
@@ -273,6 +274,7 @@ class PlannerEnv:
         )
 
         self._plan_so_far = []
+        self._execution_history = []
         self._done = False
 
         info = {
@@ -319,7 +321,16 @@ class PlannerEnv:
         final_returncode = 0
         
         for a_step in atomic_steps:
-            res = self._executor.execute(a_step)
+            if a_step.command == "__UNMAPPED_ACTION__":
+                res = ExecutionResult(
+                    step=a_step,
+                    status=ExecutionStatus.UNMAPPED,
+                    tier=RiskTier.SAFE,
+                    verified=False,
+                    stderr="Unmapped action type executed."
+                )
+            else:
+                res = self._executor.execute(a_step)
             # Tier escalates to highest risk
             if res.tier == RiskTier.BLOCKED:
                 aggregated_tier = RiskTier.BLOCKED
@@ -350,6 +361,7 @@ class PlannerEnv:
         self._plan_so_far.append(action)
         self._obs.episode_steps.append(action.description)
         self._obs.step_index += 1
+        self._execution_history.append(exec_result)
 
         # --- Check termination conditions ---------------------------------
         blocked = (
@@ -357,10 +369,55 @@ class PlannerEnv:
             or exec_result.status == ExecutionStatus.BLOCKED
         )
 
-        # Episode is "complete" when all expected actions verified + not blocked
         expected_actions = self._instance.get_expected_actions()
-        all_steps_taken  = len(self._plan_so_far) >= len(expected_actions)
-        episode_complete = all_steps_taken and not blocked and exec_result.verified
+        expected_types = [a.action_type for a in expected_actions]
+        
+        verified_types = [
+            p.action_type
+            for p, e in zip(self._plan_so_far, self._execution_history)
+            if e.verified and e.status == ExecutionStatus.SUCCESS
+        ]
+        
+        import collections
+        expected_counts = collections.Counter(expected_types)
+        verified_counts = collections.Counter(verified_types)
+        
+        episode_complete = True
+        for atype, count in expected_counts.items():
+            if verified_counts[atype] < count:
+                episode_complete = False
+                break
+                
+        if episode_complete and ActionType.INSTALL in expected_types:
+            from src.repo_scan.import_scan import IMPORT_TO_PACKAGE
+            alias_map = {k.lower(): v.lower() for k, v in IMPORT_TO_PACKAGE.items()}
+            alias_map["node"] = "nodejs"  # explicitly handle node/nodejs alias
+
+            def _canonicalize(pkg: str) -> str:
+                pkg_lower = pkg.lower()
+                return alias_map.get(pkg_lower, pkg_lower)
+
+            required_packages = set()
+            for eco in self._instance.manifest.ecosystems.values():
+                for declared_dep in eco.dependencies.keys():
+                    required_packages.add(_canonicalize(declared_dep))
+                for d in eco.inferred_dependencies:
+                    pkg = d.guessed_package_name or d.import_name
+                    required_packages.add(_canonicalize(pkg))
+                    
+            if required_packages:
+                verified_installs = {
+                    _canonicalize(p.target)
+                    for p, e in zip(self._plan_so_far, self._execution_history)
+                    if p.action_type == ActionType.INSTALL 
+                    and e.verified 
+                    and e.status == ExecutionStatus.SUCCESS
+                    and p.target
+                }
+                if not required_packages.issubset(verified_installs):
+                    episode_complete = False
+
+        episode_complete = episode_complete and not blocked
 
         terminated = blocked or episode_complete
         truncated  = (not terminated) and (self._obs.step_index >= self._cfg.max_steps)
@@ -384,7 +441,7 @@ class PlannerEnv:
             "exec_tier":        exec_result.tier.value,
             "verified":         exec_result.verified,
             "blocked":          blocked,
-            "episode_complete": all_verified,
+            "episode_complete": episode_complete,
             "step_index":       self._obs.step_index,
         }
 

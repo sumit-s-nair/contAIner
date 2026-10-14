@@ -139,6 +139,7 @@ class ExecutionStatus(str, Enum):
     ABORTED  = "aborted"   # REVIEW-tier: user denied confirmation
     BLOCKED  = "blocked"   # BLOCKED-tier: refused unconditionally
     ERROR    = "error"     # Unexpected Python-level exception
+    UNMAPPED = "unmapped"  # Unmapped action type from system 3 stub
 
 
 @dataclass

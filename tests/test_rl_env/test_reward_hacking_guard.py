@@ -142,9 +142,12 @@ class TestTrivialNoOp:
         # Construct unverified SUCCESS (exit 0 but no real effect)
         exec_result = _safe_exec_result(step, verified=False)
 
+        from src.system2_planner.models import PlannedStep, ActionType
+        planned_step = PlannedStep(action_type=ActionType.CHECK, description="no-op")
+        
         total, breakdown = compute_reward(
-            step=step,
-            plan_so_far=[step],
+            step=planned_step,
+            plan_so_far=[planned_step],
             instance=instance,
             execution_result=exec_result,
             episode_complete=False,
@@ -231,9 +234,12 @@ class TestVerifyFailExploit:
         # Execution: exit-0 but verify failed (verified=False)
         exec_result = _safe_exec_result(step, verified=False)
 
+        from src.system2_planner.models import PlannedStep, ActionType
+        planned_step = PlannedStep(action_type=ActionType.INSTALL, description="install requests package", target="requests")
+
         total, breakdown = compute_reward(
-            step=step,
-            plan_so_far=[step],
+            step=planned_step,
+            plan_so_far=[planned_step],
             instance=instance,
             execution_result=exec_result,
             episode_complete=False,
@@ -300,9 +306,12 @@ class TestVerifyFailExploit:
         )
         exec_result = _safe_exec_result(step, verified=False)
 
+        from src.system2_planner.models import PlannedStep, ActionType
+        planned_step = PlannedStep(action_type=ActionType.INSTALL, description="install numpy package", target="numpy")
+
         total, breakdown = compute_reward(
-            step=step,
-            plan_so_far=[step],
+            step=planned_step,
+            plan_so_far=[planned_step],
             instance=instance,
             execution_result=exec_result,
             episode_complete=False,
@@ -319,4 +328,74 @@ class TestVerifyFailExploit:
             f"({lower_bound:.4f}, {upper_bound:.4f}).\n"
             f"Breakdown: {breakdown}\n"
             "r_success_unverified must be strictly between r_failed and r_success."
+        )
+
+# ---------------------------------------------------------------------------
+# Case 3: Unmapped action exploit (BUILD / echo)
+# ---------------------------------------------------------------------------
+
+class TestUnmappedActionExploit:
+    def test_unmapped_action_fails_completion(self) -> None:
+        from src.system2_planner.models import PlannedStep, ActionType
+        from src.rl_env.env import PlannerEnv, EnvConfig
+        from src.sandbox.models import ExecutionStatus
+        from src.repo_scan.models import RepoManifest, EcosystemManifest, Dependency, SourceRef
+
+        env = PlannerEnv(config=EnvConfig(dry_run=True, max_steps=5))
+        
+        manifest = RepoManifest()
+        eco = EcosystemManifest(ecosystem="python", manifest_files=["requirements.txt"])
+        eco.add_dependency(Dependency(
+            name="requests",
+            declared_constraint=">=2.0",
+            sources=[SourceRef(file="requirements.txt", line=1, raw_line="requests>=2.0")],
+        ))
+        manifest.ecosystems["python"] = eco
+
+        env.reset(repo_entry={"repo": "test", "category": "manifest_present"})
+        env._instance.manifest = manifest
+
+        action = PlannedStep(action_type=ActionType.BUILD, description="build")
+        obs, reward, terminated, truncated, info = env.step(action)
+
+        assert info["exec_status"] == ExecutionStatus.UNMAPPED.value, (
+            f"Expected UNMAPPED status, got {info['exec_status']}"
+        )
+        assert not info["episode_complete"], "Episode should not be complete with unmapped action."
+
+
+# ---------------------------------------------------------------------------
+# Case 4: Irrelevant target exploit (Wrong package name)
+# ---------------------------------------------------------------------------
+
+class TestIrrelevantTargetExploit:
+    def test_wrong_package_name_fails_completion(self) -> None:
+        from src.system2_planner.models import PlannedStep, ActionType
+        from src.rl_env.env import PlannerEnv, EnvConfig
+        from src.sandbox.models import ExecutionStatus
+        from src.repo_scan.models import RepoManifest, EcosystemManifest, Dependency, SourceRef
+
+        env = PlannerEnv(config=EnvConfig(dry_run=True, max_steps=5))
+        
+        manifest = RepoManifest()
+        eco = EcosystemManifest(ecosystem="python", manifest_files=["requirements.txt"])
+        eco.add_dependency(Dependency(
+            name="requests",
+            declared_constraint=">=2.0",
+            sources=[SourceRef(file="requirements.txt", line=1, raw_line="requests>=2.0")],
+        ))
+        manifest.ecosystems["python"] = eco
+
+        env.reset(repo_entry={"repo": "test", "category": "manifest_present"})
+        env._instance.manifest = manifest
+
+        action = PlannedStep(action_type=ActionType.INSTALL, description="install wrong", target="flask")
+        obs, reward, terminated, truncated, info = env.step(action)
+
+        assert info["exec_status"] == ExecutionStatus.SUCCESS.value, (
+            f"DryRunExecutor should fake success for SAFE step, got {info['exec_status']}"
+        )
+        assert info["verified"] is True
+        assert not info["episode_complete"], (
+            "Episode completed despite installing 'flask' instead of the required 'requests'."
         )

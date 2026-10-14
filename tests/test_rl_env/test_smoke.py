@@ -37,7 +37,7 @@ from typing import Iterator, List
 import pytest
 
 from src.sandbox.models import AtomicStep
-from src.system2_planner.models import ActionType, TemplateInstance
+from src.system2_planner.models import ActionType, TemplateInstance, PlannedStep
 from src.system2_planner.templates import TEMPLATES
 from src.rl_env.env import PlannerEnv, EnvConfig
 from src.rl_env.dry_run_executor import TrainingReviewPolicy
@@ -96,21 +96,20 @@ class FixedDummyPolicy:
         self._actions = instance.get_expected_actions()
         self._cursor  = 0
 
-    def next_action(self) -> AtomicStep:
+    def next_action(self) -> PlannedStep:
         if self._cursor >= len(self._actions):
             # If the policy has exhausted its planned actions, emit a benign INSTALL
-            return AtomicStep(
-                command="pip list",
+            return PlannedStep(
+                action_type=ActionType.CHECK,
                 description="check installed packages",
-                verify_command="pip list",
             )
         action_node = self._actions[self._cursor]
         self._cursor += 1
         atype = action_node.action_type
-        return AtomicStep(
-            command=_ACTION_COMMANDS.get(atype, "echo done"),
+        return PlannedStep(
+            action_type=atype,
             description=_ACTION_DESCRIPTIONS.get(atype, "unknown action"),
-            verify_command=_ACTION_VERIFY_COMMANDS.get(atype, "true"),
+            target="requests" if atype == ActionType.INSTALL else None,
         )
 
 

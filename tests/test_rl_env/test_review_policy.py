@@ -33,7 +33,7 @@ from src.rl_env.reward import RewardConfig, compute_reward
 from src.repo_scan.models import (
     Dependency, EcosystemManifest, RepoManifest, SourceRef
 )
-from src.system2_planner.models import TemplateInstance
+from src.system2_planner.models import TemplateInstance, PlannedStep, ActionType
 from src.system2_planner.templates import TEMPLATES
 
 
@@ -143,9 +143,10 @@ class TestAutoDenyPolicy:
 
         cfg = RewardConfig()
         inst = _instance()
+        planned_review = PlannedStep(action_type=ActionType.INSTALL, description="remove a file")
         total, breakdown = compute_reward(
-            step=REVIEW_STEP,
-            plan_so_far=[REVIEW_STEP],
+            step=planned_review,
+            plan_so_far=[planned_review],
             instance=inst,
             execution_result=result,
             episode_complete=False,
@@ -197,9 +198,10 @@ class TestBlockedStepsUnconditional:
 
         cfg = RewardConfig()
         inst = _instance()
+        planned_blocked = PlannedStep(action_type=ActionType.INSTALL, description="delete everything")
         total, breakdown = compute_reward(
-            step=BLOCKED_STEP,
-            plan_so_far=[BLOCKED_STEP],
+            step=planned_blocked,
+            plan_so_far=[planned_blocked],
             instance=inst,
             execution_result=result,
             episode_complete=False,
@@ -250,9 +252,10 @@ class TestBlockAsHardStopPolicy:
 
         cfg = RewardConfig()
         inst = _instance()
+        planned_review = PlannedStep(action_type=ActionType.INSTALL, description="remove a file")
         _, breakdown = compute_reward(
-            step=REVIEW_STEP,
-            plan_so_far=[REVIEW_STEP],
+            step=planned_review,
+            plan_so_far=[planned_review],
             instance=inst,
             execution_result=result,
             episode_complete=False,

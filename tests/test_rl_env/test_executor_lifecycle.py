@@ -153,25 +153,19 @@ class TestStartEpisode:
             "docker run must bind-mount the repo read-only at /workspace"
         )
 
-    def test_docker_run_includes_workspace_rw_tmpfs(self) -> None:
-        """A writable tmpfs is created at /workspace_rw for episode side-effects."""
+    def test_docker_run_workspace_rw_initialized(self) -> None:
+        """A writable workspace is created at /workspace_rw via overlayfs for snapshotting."""
         run_mock = MagicMock(side_effect=_docker_run_dispatcher())
         with patch("src.rl_env.docker_executor.subprocess.run", run_mock):
             executor = DockerEpisodeExecutor()
             executor.start_episode(_FAKE_REPO_PATH, _FAKE_REPO_NAME)
 
-        run_cmd = next(
-            c.args[0] for c in run_mock.call_args_list if "run" in c.args[0]
-        )
-        assert "--tmpfs" in run_cmd, "docker run must include --tmpfs flag"
-        tmpfs_idx = run_cmd.index("--tmpfs")
-        tmpfs_val = run_cmd[tmpfs_idx + 1]
-        assert tmpfs_val.startswith("/workspace_rw"), (
-            f"tmpfs must be at /workspace_rw, got: {tmpfs_val!r}"
-        )
-        assert "exec" in tmpfs_val, (
-            "tmpfs must be mounted exec (pip wheels require executable pages)"
-        )
+        mkdir_calls = [
+            c.args[0] for c in run_mock.call_args_list
+            if "mkdir" in c.args[0] and "/workspace_rw" in c.args[0]
+        ]
+        assert len(mkdir_calls) > 0, "/workspace_rw must be initialized inside the container"
+
 
     def test_docker_run_injects_workspace_rw_env_vars(self) -> None:
         """

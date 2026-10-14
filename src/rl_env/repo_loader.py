@@ -99,7 +99,17 @@ class RepoLoader:
             if sha_tag == "latest" and actual_sha:
                 new_path = self._cache_dir / f"{safe_name}_{actual_sha[:8]}"
                 if not new_path.exists():
-                    local_path.rename(new_path)
+                    import time
+                    for _ in range(5):
+                        try:
+                            local_path.rename(new_path)
+                            break
+                        except PermissionError:
+                            time.sleep(1.0)
+                    else:
+                        print(f"[RepoLoader] Warning: Could not rename {local_path} to {new_path}")
+                        # Fallback to using the old path if rename completely fails
+                        new_path = local_path
                 local_path = new_path
                 repo_entry["sha"] = actual_sha  # update in-place for logging
 

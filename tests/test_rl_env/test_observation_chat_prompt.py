@@ -1,6 +1,6 @@
 import json
 from src.rl_env.observation import Observation, ObservationSerializer
-from src.rl_env.env import Intent
+from src.rl_env.observation import CanonicalIntent as Intent
 from src.repo_scan.models import RepoManifest, EcosystemManifest
 
 def test_to_chat_prompt_structure_and_content():
@@ -45,10 +45,8 @@ def test_to_chat_prompt_structure_and_content():
     user_content = prompt[1]["content"]
 
     # Verify action vocabulary is in system prompt
-    assert "command" in system_content
+    assert "action_type" in system_content
     assert "description" in system_content
-    assert "verify_command" in system_content
-    assert "destructive" in system_content
 
     # Verify user prompt includes key information
     assert "Install requirements" in user_content
