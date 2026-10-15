@@ -1,0 +1,1181 @@
+{
+  "summary": {
+    "oracle_episodes": 36,
+    "oracle_won": 35,
+    "oracle_totals": {
+      "soxoj/maigret": 7.9,
+      "scrapy/scrapy": 7.805,
+      "nvbn/thefuck": 7.536,
+      "zhayujie/CowAgent": 9.8,
+      "psf/black": 7.567,
+      "google/langextract": 7.9,
+      "VectifyAI/PageIndex": 9.8,
+      "lm-sys/FastChat": 7.9,
+      "browser-use/browser-use": 7.9,
+      "TauricResearch/TradingAgents": 9.8,
+      "new92/instatools": 0.2,
+      "grplyler/cisco-cheatsheet": 7.9,
+      "deanishe/alfred-appscripts": 7.9,
+      "shareAI-lab/learn-claude-code": 7.9,
+      "fronzbot/docker-pycron": 7.9,
+      "UltiRequiem/chuy": 7.9,
+      "twtrubiks/django-rest-framework-tutorial": 7.9,
+      "saadhaxxan/Python-For-Ethical-Hacking": 7.9,
+      "sibtc/django-beginners-guide": 7.9,
+      "AlexMathew/scrapple": 7.9,
+      "protonmeacc/Not-Pixel-bot": 7.9,
+      "codingforentrepreneurs/Try-Django-3.2": 7.9,
+      "sebp/PyGObject-Tutorial": 7.9,
+      "nfsi-canada/OrientPy": 7.9,
+      "trozler/myfpl-cli": 7.9,
+      "ceccopierangiolieugenio/pyTermTk": 7.9,
+      "balsi2001/FCU": 7.9,
+      "FakerPK/BlessNetworkBot": 7.9,
+      "reluce/szurubooru-toolkit": 7.9,
+      "dask/dask": 7.65,
+      "pallets/flask": 7.9,
+      "sqlalchemy/sqlalchemy": 7.9,
+      "encode/django-rest-framework": 7.9,
+      "psf/requests": 7.9,
+      "virattt/ai-hedge-fund": 7.9,
+      "Textualize/rich": 7.9
+    },
+    "spam_total": null,
+    "spam_below_oracle": false
+  },
+  "episodes": [
+    {
+      "label": "oracle",
+      "repo": "soxoj/maigret",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "26/26",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 48.7,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 63.7,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "scrapy/scrapy",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.805,
+          "execution_label": "success_verified",
+          "install_progress": 0.9523809523809523,
+          "required": "21/21",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 31.5,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.805,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 55.1,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "nvbn/thefuck",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.536,
+          "execution_label": "success_verified",
+          "install_progress": 0.8181818181818182,
+          "required": "11/11",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 24.6,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.536,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 42.2,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "zhayujie/CowAgent",
+      "steps": [
+        {
+          "action": "isolate .venv",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.9,
+          "execution_label": "success_verified",
+          "install_progress": null,
+          "required": "0/23",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.6,
+          "stderr_tail": "",
+          "pip_check_ok": null,
+          "pip_check": ""
+        },
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "23/23",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 70.2,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 9.8,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 110.7,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "psf/black",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.567,
+          "execution_label": "success_verified",
+          "install_progress": 0.8333333333333334,
+          "required": "6/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 12.8,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.567,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 32.6,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "google/langextract",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "17/17",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 52.7,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 66.1,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "VectifyAI/PageIndex",
+      "steps": [
+        {
+          "action": "isolate .venv",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.9,
+          "execution_label": "success_verified",
+          "install_progress": null,
+          "required": "0/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.8,
+          "stderr_tail": "",
+          "pip_check_ok": null,
+          "pip_check": ""
+        },
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "13/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 72.6,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 9.8,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 95.1,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "lm-sys/FastChat",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "15/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 38.9,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 54.8,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "browser-use/browser-use",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "35/35",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 61.3,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 83.7,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "TauricResearch/TradingAgents",
+      "steps": [
+        {
+          "action": "isolate .venv",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.9,
+          "execution_label": "success_verified",
+          "install_progress": null,
+          "required": "0/22",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.2,
+          "stderr_tail": "",
+          "pip_check_ok": null,
+          "pip_check": ""
+        },
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "22/22",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 99.3,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 9.8,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 121.1,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "new92/instatools",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.2,
+          "stderr_tail": "ERROR: Cannot install -r requirements.txt (line 1), -r requirements.txt (line 5) and requests==2.33.0 because these package versions have conflicting dependencies.\nERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/#dealing-with-dependency-conflicts\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n",
+          "pip_check_ok": null,
+          "pip_check": ""
+        },
+        {
+          "action": "install colorama==0.4.6",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "1/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.1,
+          "stderr_tail": "",
+          "pip_check_ok": null,
+          "pip_check": ""
+        },
+        {
+          "action": "install instagrapi==2.6.9",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "2/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 14.8,
+          "stderr_tail": "",
+          "pip_check_ok": null,
+          "pip_check": ""
+        },
+        {
+          "action": "install instaloader==4.10",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "3/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.0,
+          "stderr_tail": "",
+          "pip_check_ok": null,
+          "pip_check": ""
+        },
+        {
+          "action": "install prettytable==3.8.0",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "4/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.0,
+          "stderr_tail": "",
+          "pip_check_ok": null,
+          "pip_check": ""
+        },
+        {
+          "action": "install requests==2.33.0",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "5/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.3,
+          "stderr_tail": "",
+          "pip_check_ok": null,
+          "pip_check": ""
+        },
+        {
+          "action": "install rich==12.6.0",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "6/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.4,
+          "stderr_tail": "",
+          "pip_check_ok": null,
+          "pip_check": ""
+        },
+        {
+          "action": "install tabulate==0.9.0",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "7/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.4,
+          "stderr_tail": "",
+          "pip_check_ok": false,
+          "pip_check": "instagrapi 2.6.9 has requirement requests==2.34.2, but you have requests 2.33.0.\n"
+        }
+      ],
+      "total": 0.2,
+      "complete": false,
+      "ended": "truncated",
+      "missing_required": [],
+      "seconds": 56.2,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "grplyler/cisco-cheatsheet",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.8,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 13.3,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "deanishe/alfred-appscripts",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.9,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 15.1,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "shareAI-lab/learn-claude-code",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "3/3",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 13.5,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 32.4,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "fronzbot/docker-pycron",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.7,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 14.1,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "UltiRequiem/chuy",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "3/3",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.4,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 16.0,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "twtrubiks/django-rest-framework-tutorial",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 10.2,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 20.3,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "saadhaxxan/Python-For-Ethical-Hacking",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.9,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 13.8,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "sibtc/django-beginners-guide",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "6/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 12.0,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 23.5,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "AlexMathew/scrapple",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "7/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 8.7,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 19.8,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "protonmeacc/Not-Pixel-bot",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "38/38",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 39.6,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 49.9,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "codingforentrepreneurs/Try-Django-3.2",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "10/10",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 25.2,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 37.8,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "sebp/PyGObject-Tutorial",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "5/5",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 21.7,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 34.4,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "nfsi-canada/OrientPy",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "3/3",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 50.9,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 62.3,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "trozler/myfpl-cli",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.4,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 17.9,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "ceccopierangiolieugenio/pyTermTk",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "5/5",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 13.4,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 46.8,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "balsi2001/FCU",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 29.1,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 38.9,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "FakerPK/BlessNetworkBot",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "4/4",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 10.1,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 19.3,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "reluce/szurubooru-toolkit",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "6/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 12.8,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 24.0,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "dask/dask",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.65,
+          "execution_label": "success_verified",
+          "install_progress": 0.875,
+          "required": "8/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 14.5,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.65,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 37.5,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "pallets/flask",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "6/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.6,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 21.0,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "sqlalchemy/sqlalchemy",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 59.7,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 90.2,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "encode/django-rest-framework",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 12.8,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 37.6,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "psf/requests",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "4/4",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 8.2,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 20.3,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "virattt/ai-hedge-fund",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "15/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 84.2,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 97.1,
+      "image": "python-3.11-git-toolchain-v2"
+    },
+    {
+      "label": "oracle",
+      "repo": "Textualize/rich",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.1,
+          "stderr_tail": "",
+          "pip_check_ok": true,
+          "pip_check": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 27.3,
+      "image": "python-3.11-git-toolchain-v2"
+    }
+  ]
+}

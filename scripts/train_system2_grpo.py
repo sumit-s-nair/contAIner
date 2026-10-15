@@ -40,6 +40,7 @@ from transformers import (
 from peft import LoraConfig, get_peft_model, set_peft_model_state_dict
 
 from src.rl_env.env import PlannerEnv, EnvConfig, EnvForkError
+from src.rl_env.docker_executor import DockerExecutorConfig, NetworkConfig
 from src.rl_env.dry_run_executor import TrainingReviewPolicy
 from src.sandbox.models import RiskTier
 from src.system2_planner.models import PlannedStep, ActionType
@@ -150,7 +151,8 @@ def evaluate_completion(
 
 # --- Configuration ---
 MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
-CORPUS_MANIFEST = "datasets/repo_corpus/corpus_manifest_v3.json"
+# Stage 2G: pilot corpus = v3 train/val filtered to winnable repos (scripts/build_pilot_corpus.py)
+CORPUS_MANIFEST = "datasets/repo_corpus/corpus_manifest_v3_pilot.json"
 
 # VRAM-friendly defaults for 8GB
 BATCH_SIZE = 4            # Group size G for GRPO
@@ -586,27 +588,35 @@ def _run_dry_run_test():
     assert new_state.episodes_processed == 100
     logger.info("Dry-run checkpoint test passed.")
 
-def setup_environment():
+def setup_environment(network: str = "proxy"):
     if "COMPROMISED" in CORPUS_MANIFEST:
         raise ValueError("CRITICAL: Corpus manifest contains 'COMPROMISED' - halting to prevent exploit injection.")
         
     config = EnvConfig(
         dry_run=False,
         review_policy=TrainingReviewPolicy.AUTO_DENY,
-        corpus_manifest_path=CORPUS_MANIFEST
+        corpus_manifest_path=CORPUS_MANIFEST,
+        docker_config=DockerExecutorConfig(network=NetworkConfig(mode=network)),
     )
     env = PlannerEnv(config)
     return env
 
-def main():
+def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--resume_from", type=str, help="Path to checkpoint directory to resume from")
     parser.add_argument("--test_checkpoint", action="store_true", help="Run the dry-run checkpoint test and exit")
-    args = parser.parse_args()
+    parser.add_argument("--network", choices=["proxy", "none"], default="proxy", help="Docker network isolation mode")
+    return parser
+
+def main(cli_args=None):
+    parser = get_parser()
+    args = parser.parse_args(cli_args)
 
     if args.test_checkpoint:
         _run_dry_run_test()
         sys.exit(0)
+
+    logger.info(f"Network mode: {args.network}")
 
     # Output directory versioning
     run_id = uuid.uuid4().hex[:6]
@@ -616,7 +626,7 @@ def main():
     logger.info(f"Output directory: {out_dir}")
 
     # Initialize Environment
-    env = setup_environment()
+    env = setup_environment(network=args.network)
     
     # Log initial disk usage for delta measurement
     import subprocess as _sp

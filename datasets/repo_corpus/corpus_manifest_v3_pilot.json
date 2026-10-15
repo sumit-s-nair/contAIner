@@ -1,0 +1,2548 @@
+{
+  "version": 3,
+  "seed": 42,
+  "generated_at": "2026-08-29T06:59:33.993810+00:00",
+  "per_category": 100,
+  "stats": {
+    "train": {
+      "total": 148,
+      "by_category": {
+        "manifest_present": 65,
+        "manifest_less": 69,
+        "known_conflict": 14
+      }
+    },
+    "val": {
+      "total": 31,
+      "by_category": {
+        "manifest_present": 14,
+        "manifest_less": 14,
+        "known_conflict": 3
+      }
+    },
+    "test": {
+      "total": 34,
+      "by_category": {
+        "manifest_present": 15,
+        "manifest_less": 16,
+        "known_conflict": 3
+      }
+    }
+  },
+  "topic_search_conflict_count": 0,
+  "curated_conflict_repos": 20,
+  "source": "corpus_manifest_v3.json",
+  "pilot_generated_at": "2026-10-15T13:29:52.178836+00:00",
+  "pilot_filter": "scripts/build_pilot_corpus.py\n=============================\nStage 2G: build the pilot training corpus from corpus_manifest_v3.json.\n\nKeeps only train/val repos a perfect planner can actually complete with the\ncurrent System 3 stub (pip-only):\n  * cloned in cache/repo_clones (scanned from the clone, no network)\n  * Python is the only ecosystem (stub has no npm/cargo/... installer)\n  * >= 1 *declared* Python dependency that applies on linux/py3.11\n    (repos with only import-inferred deps are excluded: inferred names include\n    local modules and guesses such as 'kernel', 'model', '-pytest')\n  * at least one installable manifest (requirements*.txt / pyproject.toml /\n    setup.py / setup.cfg)\n  * no heavy framework in the required set, or as the repo itself\n    (torch, tensorflow, jax, ...):\n    multi-GB wheels through the proxy make episodes minutes long\n  * the repo's declared Python constraint admits the sandbox interpreter\n    (3.11): [project].requires-python, [tool.poetry.dependencies].python,\n    setup.py/setup.cfg python_requires; and not every requirements*.txt line\n    is gated off by a PEP 508 marker (pip would \"succeed\" installing nothing)\n  * not recorded as unwinnable in datasets/repo_corpus/pilot_winnability.json\n    (written by scripts/diagnostics/stage2g_winnability.py --all; applied only\n    when the recorded sha matches): the scripted oracle -- manifests, then each\n    still-missing required package -- must reach episode_complete with a\n    positive total in the real sandbox.  Catches what static checks cannot,\n    e.g. requirements pins that are mutually unsatisfiable.\nThe test split is copied unchanged and never scanned.  Every excluded repo is\nlisted with its reason in the output under \"pilot_excluded\".",
+  "splits": {
+    "test": [
+      {
+        "repo": "LeCoupa/awesome-cheatsheets",
+        "category": "manifest_present",
+        "stars": 46405,
+        "size_kb": 8889,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/LeCoupa/awesome-cheatsheets.git",
+        "sha": ""
+      },
+      {
+        "repo": "fastify/fastify",
+        "category": "manifest_present",
+        "stars": 37047,
+        "size_kb": 10553,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/fastify/fastify.git",
+        "sha": ""
+      },
+      {
+        "repo": "github/spec-kit",
+        "category": "manifest_present",
+        "stars": 132085,
+        "size_kb": 17309,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/github/spec-kit.git",
+        "sha": ""
+      },
+      {
+        "repo": "MadsLorentzen/ai-job-search",
+        "category": "manifest_present",
+        "stars": 37826,
+        "size_kb": 3751,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/MadsLorentzen/ai-job-search.git",
+        "sha": ""
+      },
+      {
+        "repo": "hakimel/reveal.js",
+        "category": "manifest_present",
+        "stars": 72231,
+        "size_kb": 35652,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/hakimel/reveal.js.git",
+        "sha": ""
+      },
+      {
+        "repo": "sherlock-project/sherlock",
+        "category": "manifest_present",
+        "stars": 90571,
+        "size_kb": 18976,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/sherlock-project/sherlock.git",
+        "sha": ""
+      },
+      {
+        "repo": "DietrichGebert/ponytail",
+        "category": "manifest_present",
+        "stars": 115635,
+        "size_kb": 2059,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/DietrichGebert/ponytail.git",
+        "sha": ""
+      },
+      {
+        "repo": "D4Vinci/Scrapling",
+        "category": "manifest_present",
+        "stars": 76995,
+        "size_kb": 10324,
+        "default_branch": "main",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/D4Vinci/Scrapling.git",
+        "sha": ""
+      },
+      {
+        "repo": "pallets/flask",
+        "category": "manifest_present",
+        "stars": 72142,
+        "size_kb": 12368,
+        "default_branch": "main",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/pallets/flask.git",
+        "sha": ""
+      },
+      {
+        "repo": "karpathy/nanochat",
+        "category": "manifest_present",
+        "stars": 57609,
+        "size_kb": 2187,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/karpathy/nanochat.git",
+        "sha": ""
+      },
+      {
+        "repo": "psf/requests",
+        "category": "manifest_present",
+        "stars": 54261,
+        "size_kb": 13569,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/psf/requests.git",
+        "sha": ""
+      },
+      {
+        "repo": "Alishahryar1/free-claude-code",
+        "category": "manifest_present",
+        "stars": 51238,
+        "size_kb": 10781,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/Alishahryar1/free-claude-code.git",
+        "sha": ""
+      },
+      {
+        "repo": "AUTOMATIC1111/stable-diffusion-webui",
+        "category": "manifest_present",
+        "stars": 164712,
+        "size_kb": 36552,
+        "default_branch": "master",
+        "license": "AGPL-3.0",
+        "clone_url": "https://github.com/AUTOMATIC1111/stable-diffusion-webui.git",
+        "sha": ""
+      },
+      {
+        "repo": "Panniantong/Agent-Reach",
+        "category": "manifest_present",
+        "stars": 76404,
+        "size_kb": 2013,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/Panniantong/Agent-Reach.git",
+        "sha": ""
+      },
+      {
+        "repo": "h5bp/html5-boilerplate",
+        "category": "manifest_present",
+        "stars": 57608,
+        "size_kb": 22921,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/h5bp/html5-boilerplate.git",
+        "sha": ""
+      },
+      {
+        "repo": "muziing/PySide6-Code-Tutorial",
+        "category": "manifest_less",
+        "stars": 1867,
+        "size_kb": 5621,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/muziing/PySide6-Code-Tutorial.git",
+        "sha": ""
+      },
+      {
+        "repo": "dreddnafious/thereisnospoon",
+        "category": "manifest_less",
+        "stars": 1185,
+        "size_kb": 3168,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/dreddnafious/thereisnospoon.git",
+        "sha": ""
+      },
+      {
+        "repo": "sepandhaghighi/gitfollow",
+        "category": "manifest_less",
+        "stars": 28,
+        "size_kb": 345,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/sepandhaghighi/gitfollow.git",
+        "sha": ""
+      },
+      {
+        "repo": "salaheddinek/video-editing-py-script",
+        "category": "manifest_less",
+        "stars": 72,
+        "size_kb": 262,
+        "default_branch": "main",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/salaheddinek/video-editing-py-script.git",
+        "sha": ""
+      },
+      {
+        "repo": "Felixoid/clickhouse-plantuml",
+        "category": "manifest_less",
+        "stars": 26,
+        "size_kb": 128,
+        "default_branch": "master",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/Felixoid/clickhouse-plantuml.git",
+        "sha": ""
+      },
+      {
+        "repo": "IDouble/Python-Scripts",
+        "category": "manifest_less",
+        "stars": 64,
+        "size_kb": 739,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/IDouble/Python-Scripts.git",
+        "sha": ""
+      },
+      {
+        "repo": "MorvanZhou/Reinforcement-learning-with-tensorflow",
+        "category": "manifest_less",
+        "stars": 9509,
+        "size_kb": 438,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow.git",
+        "sha": ""
+      },
+      {
+        "repo": "kidscancode/pygame_tutorials",
+        "category": "manifest_less",
+        "stars": 605,
+        "size_kb": 25078,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/kidscancode/pygame_tutorials.git",
+        "sha": ""
+      },
+      {
+        "repo": "ThatXliner/idae",
+        "category": "manifest_less",
+        "stars": 11,
+        "size_kb": 391,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/ThatXliner/idae.git",
+        "sha": ""
+      },
+      {
+        "repo": "talkpython/python-for-absolute-beginners-course",
+        "category": "manifest_less",
+        "stars": 2423,
+        "size_kb": 49259,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/talkpython/python-for-absolute-beginners-course.git",
+        "sha": ""
+      },
+      {
+        "repo": "AlexFlipnote/discord_bot.py",
+        "category": "manifest_less",
+        "stars": 588,
+        "size_kb": 236,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/AlexFlipnote/discord_bot.py.git",
+        "sha": ""
+      },
+      {
+        "repo": "codingforentrepreneurs/30-Days-of-Python-3.6",
+        "category": "manifest_less",
+        "stars": 289,
+        "size_kb": 10215,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/codingforentrepreneurs/30-Days-of-Python-3.6.git",
+        "sha": ""
+      },
+      {
+        "repo": "rohan472000/rohan472000",
+        "category": "manifest_less",
+        "stars": 14,
+        "size_kb": 9014,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/rohan472000/rohan472000.git",
+        "sha": ""
+      },
+      {
+        "repo": "Unity-Technologies/Robotics-Object-Pose-Estimation",
+        "category": "manifest_less",
+        "stars": 350,
+        "size_kb": 40452,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/Unity-Technologies/Robotics-Object-Pose-Estimation.git",
+        "sha": ""
+      },
+      {
+        "repo": "muziing/PyQt_practice",
+        "category": "manifest_less",
+        "stars": 1090,
+        "size_kb": 2439,
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/muziing/PyQt_practice.git",
+        "sha": ""
+      },
+      {
+        "repo": "harmony-one/harmony-ops",
+        "category": "manifest_less",
+        "stars": 34,
+        "size_kb": 18422,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/harmony-one/harmony-ops.git",
+        "sha": ""
+      },
+      {
+        "repo": "pandas-dev/pandas",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/pandas-dev/pandas.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "numpy/numpy",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/numpy/numpy.git",
+        "sha": "",
+        "curated": true
+      },
+      {
+        "repo": "apache/airflow",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/apache/airflow.git",
+        "sha": "",
+        "curated": true
+      }
+    ],
+    "train": [
+      {
+        "repo": "soxoj/maigret",
+        "category": "manifest_present",
+        "stars": 37128,
+        "size_kb": 25700,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/soxoj/maigret.git",
+        "sha": "da0fe665"
+      },
+      {
+        "repo": "scrapy/scrapy",
+        "category": "manifest_present",
+        "stars": 64082,
+        "size_kb": 32014,
+        "default_branch": "master",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/scrapy/scrapy.git",
+        "sha": "latest"
+      },
+      {
+        "repo": "nvbn/thefuck",
+        "category": "manifest_present",
+        "stars": 97748,
+        "size_kb": 4043,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/nvbn/thefuck.git",
+        "sha": "c7e7e1d8"
+      },
+      {
+        "repo": "jingyaogong/minimind",
+        "category": "manifest_present",
+        "stars": 55122,
+        "size_kb": 39400,
+        "default_branch": "master",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/jingyaogong/minimind.git",
+        "sha": "7a6fddd6"
+      },
+      {
+        "repo": "psf/black",
+        "category": "manifest_present",
+        "stars": 41820,
+        "size_kb": 8318,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/psf/black.git",
+        "sha": "8947c48e"
+      },
+      {
+        "repo": "google/langextract",
+        "category": "manifest_present",
+        "stars": 38501,
+        "size_kb": 12772,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/google/langextract.git",
+        "sha": "9853e446"
+      },
+      {
+        "repo": "VectifyAI/PageIndex",
+        "category": "manifest_present",
+        "stars": 35385,
+        "size_kb": 28395,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/VectifyAI/PageIndex.git",
+        "sha": "b058e036"
+      },
+      {
+        "repo": "lm-sys/FastChat",
+        "category": "manifest_present",
+        "stars": 39526,
+        "size_kb": 35323,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/lm-sys/FastChat.git",
+        "sha": "587d5cfa"
+      },
+      {
+        "repo": "TauricResearch/TradingAgents",
+        "category": "manifest_present",
+        "stars": 101622,
+        "size_kb": 5233,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/TauricResearch/TradingAgents.git",
+        "sha": "2448d0a1"
+      },
+      {
+        "repo": "grplyler/cisco-cheatsheet",
+        "category": "manifest_less",
+        "stars": 536,
+        "size_kb": 90,
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/grplyler/cisco-cheatsheet.git",
+        "sha": "f7659805"
+      },
+      {
+        "repo": "deanishe/alfred-appscripts",
+        "category": "manifest_less",
+        "stars": 90,
+        "size_kb": 2904,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/deanishe/alfred-appscripts.git",
+        "sha": "43915688"
+      },
+      {
+        "repo": "shareAI-lab/learn-claude-code",
+        "category": "manifest_less",
+        "stars": 75568,
+        "size_kb": 6035,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/shareAI-lab/learn-claude-code.git",
+        "sha": "0dcafa2a"
+      },
+      {
+        "repo": "fronzbot/docker-pycron",
+        "category": "manifest_less",
+        "stars": 12,
+        "size_kb": 50,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/fronzbot/docker-pycron.git",
+        "sha": "180eab79"
+      },
+      {
+        "repo": "UltiRequiem/chuy",
+        "category": "manifest_less",
+        "stars": 13,
+        "size_kb": 158,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/UltiRequiem/chuy.git",
+        "sha": "d9395e3f"
+      },
+      {
+        "repo": "twtrubiks/django-rest-framework-tutorial",
+        "category": "manifest_less",
+        "stars": 875,
+        "size_kb": 75,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/twtrubiks/django-rest-framework-tutorial.git",
+        "sha": "26bc92d8"
+      },
+      {
+        "repo": "saadhaxxan/Python-For-Ethical-Hacking",
+        "category": "manifest_less",
+        "stars": 50,
+        "size_kb": 1044,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/saadhaxxan/Python-For-Ethical-Hacking.git",
+        "sha": "87ef18b2"
+      },
+      {
+        "repo": "sibtc/django-beginners-guide",
+        "category": "manifest_less",
+        "stars": 1263,
+        "size_kb": 406,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/sibtc/django-beginners-guide.git",
+        "sha": "cb376b92"
+      },
+      {
+        "repo": "protonmeacc/Not-Pixel-bot",
+        "category": "manifest_less",
+        "stars": 28,
+        "size_kb": 51,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/protonmeacc/Not-Pixel-bot.git",
+        "sha": "c5704620"
+      },
+      {
+        "repo": "codingforentrepreneurs/Try-Django-3.2",
+        "category": "manifest_less",
+        "stars": 345,
+        "size_kb": 295,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/codingforentrepreneurs/Try-Django-3.2.git",
+        "sha": "8e9c900e"
+      },
+      {
+        "repo": "sebp/PyGObject-Tutorial",
+        "category": "manifest_less",
+        "stars": 392,
+        "size_kb": 2935,
+        "default_branch": "master",
+        "license": "LGPL-2.1",
+        "clone_url": "https://github.com/sebp/PyGObject-Tutorial.git",
+        "sha": "f98a6e51"
+      },
+      {
+        "repo": "trozler/myfpl-cli",
+        "category": "manifest_less",
+        "stars": 14,
+        "size_kb": 88,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/trozler/myfpl-cli.git",
+        "sha": "3a764f5b"
+      },
+      {
+        "repo": "ceccopierangiolieugenio/pyTermTk",
+        "category": "manifest_less",
+        "stars": 912,
+        "size_kb": 13208,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/ceccopierangiolieugenio/pyTermTk.git",
+        "sha": "390eb49a"
+      },
+      {
+        "repo": "balsi2001/FCU",
+        "category": "manifest_less",
+        "stars": 12,
+        "size_kb": 27742,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/balsi2001/FCU.git",
+        "sha": "60c2f9f2"
+      },
+      {
+        "repo": "FakerPK/BlessNetworkBot",
+        "category": "manifest_less",
+        "stars": 22,
+        "size_kb": 104,
+        "default_branch": "main",
+        "license": "AGPL-3.0",
+        "clone_url": "https://github.com/FakerPK/BlessNetworkBot.git",
+        "sha": "49535978"
+      },
+      {
+        "repo": "reluce/szurubooru-toolkit",
+        "category": "manifest_less",
+        "stars": 73,
+        "size_kb": 1318,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/reluce/szurubooru-toolkit.git",
+        "sha": "9d1133c8"
+      },
+      {
+        "repo": "sanjit-sinha/Tg-UsenetBot",
+        "category": "manifest_less",
+        "stars": 58,
+        "size_kb": 176,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/sanjit-sinha/Tg-UsenetBot.git",
+        "sha": "a837e5d6"
+      },
+      {
+        "repo": "dask/dask",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/dask/dask.git",
+        "sha": "latest",
+        "curated": true
+      },
+      {
+        "repo": "pallets/flask",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/pallets/flask.git",
+        "sha": "d318b683",
+        "curated": true
+      },
+      {
+        "repo": "sqlalchemy/sqlalchemy",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/sqlalchemy/sqlalchemy.git",
+        "sha": "latest",
+        "curated": true
+      },
+      {
+        "repo": "encode/django-rest-framework",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/encode/django-rest-framework.git",
+        "sha": "latest",
+        "curated": true
+      },
+      {
+        "repo": "psf/requests",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/psf/requests.git",
+        "sha": "5460f467",
+        "curated": true
+      }
+    ],
+    "val": [
+      {
+        "repo": "virattt/ai-hedge-fund",
+        "category": "manifest_present",
+        "stars": 63078,
+        "size_kb": 3714,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/virattt/ai-hedge-fund.git",
+        "sha": "78b779c1"
+      },
+      {
+        "repo": "Textualize/rich",
+        "category": "manifest_present",
+        "stars": 57271,
+        "size_kb": 50632,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/Textualize/rich.git",
+        "sha": "9d8f9a37"
+      },
+      {
+        "repo": "zhayujie/CowAgent",
+        "category": "manifest_present",
+        "stars": 46713,
+        "size_kb": 13699,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/zhayujie/CowAgent.git",
+        "sha": "latest"
+      },
+      {
+        "repo": "browser-use/browser-use",
+        "category": "manifest_present",
+        "stars": 111599,
+        "size_kb": 34818,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/browser-use/browser-use.git",
+        "sha": "cf0b917f"
+      },
+      {
+        "repo": "AlexMathew/scrapple",
+        "category": "manifest_less",
+        "stars": 503,
+        "size_kb": 1211,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/AlexMathew/scrapple.git",
+        "sha": "0c19c7a2"
+      },
+      {
+        "repo": "nfsi-canada/OrientPy",
+        "category": "manifest_less",
+        "stars": 53,
+        "size_kb": 10424,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/nfsi-canada/OrientPy.git",
+        "sha": "f02ea919"
+      }
+    ]
+  },
+  "pilot_excluded": {
+    "train": [
+      {
+        "repo": "react/create-react-app",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "xinntao/Real-ESRGAN",
+        "reason": "heavy_packages: ['torch', 'torchvision']"
+      },
+      {
+        "repo": "OpenBMB/VoxCPM",
+        "reason": "heavy_packages: ['torch', 'torchaudio']"
+      },
+      {
+        "repo": "xai-org/grok-1",
+        "reason": "heavy_packages: ['jax']"
+      },
+      {
+        "repo": "FoundationAgents/OpenManus",
+        "reason": "python_version_incompatible: setup.py python_requires '>=3.12' excludes 3.11.0"
+      },
+      {
+        "repo": "TheAlgorithms/Python",
+        "reason": "python_version_incompatible: pyproject [project].requires-python '>=3.14' excludes 3.11.0"
+      },
+      {
+        "repo": "trekhleb/javascript-algorithms",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "abi/screenshot-to-code",
+        "reason": "non_python_ecosystems: ['node', 'python']"
+      },
+      {
+        "repo": "huggingface/pytorch-image-models",
+        "reason": "heavy_packages: ['torch', 'torchvision']"
+      },
+      {
+        "repo": "shiyu-coder/Kronos",
+        "reason": "heavy_packages: ['torch']"
+      },
+      {
+        "repo": "anuraghazra/github-readme-stats",
+        "reason": "non_python_ecosystems: ['node', 'python']"
+      },
+      {
+        "repo": "httpie/cli",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "PatrickJS/awesome-cursorrules",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "blader/humanizer",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "expressjs/express",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "Yuan1z0825/nature-skills",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "typicode/json-server",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "2noise/ChatTTS",
+        "reason": "heavy_packages: ['torch', 'torchaudio']"
+      },
+      {
+        "repo": "lllyasviel/Fooocus",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "asgeirtj/system_prompts_leaks",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "affaan-m/ECC",
+        "reason": "non_python_ecosystems: ['node', 'python']"
+      },
+      {
+        "repo": "preactjs/preact",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "deepseek-ai/DeepSeek-V3",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "microsoft/qlib",
+        "reason": "non_python_ecosystems: ['node', 'python']"
+      },
+      {
+        "repo": "algorithm-visualizer/algorithm-visualizer",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "leonardomso/33-js-concepts",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "datalab-to/marker",
+        "reason": "heavy_packages: ['torch']"
+      },
+      {
+        "repo": "ManimCommunity/manim",
+        "reason": "oracle_unwinnable: {\"failed_steps\": [\"install pyproject.toml\", \"install manimpango<1.0.0,>=0.6.1\"], \"missing_required\": [\"manimpango\", \"mapbox-earcut\", \"moderngl\", \"moderngl-window\", \"networkx\", \"pillow\", \"pycairo\", \"pydub\", \"pygments\", \"rich\", \"scipy\", \"screeninfo\", \"skia-pathops\", \"srt\", \"svgelements\", \"tqdm\", \"watc"
+      },
+      {
+        "repo": "carbon-app/carbon",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "koajs/koa",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "swisskyrepo/PayloadsAllTheThings",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "HKUDS/CLI-Anything",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "RVC-Boss/GPT-SoVITS",
+        "reason": "heavy_packages: ['onnxruntime-gpu', 'torchaudio']"
+      },
+      {
+        "repo": "oobabooga/textgen",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "exo-explore/exo",
+        "reason": "python_version_incompatible: pyproject [project].requires-python '==3.13.*' excludes 3.11.0"
+      },
+      {
+        "repo": "666ghj/MiroFish",
+        "reason": "non_python_ecosystems: ['node', 'python']"
+      },
+      {
+        "repo": "addyosmani/agent-skills",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "LAION-AI/Open-Assistant",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "openai/whisper",
+        "reason": "heavy_packages: ['torch', 'triton']"
+      },
+      {
+        "repo": "charlax/professional-programming",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "chartjs/Chart.js",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "microsoft/markitdown",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "hiyouga/LlamaFactory",
+        "reason": "heavy_packages: ['torch', 'torchaudio', 'torchvision']"
+      },
+      {
+        "repo": "minimaxir/big-list-of-naughty-strings",
+        "reason": "non_python_ecosystems: ['node', 'python']"
+      },
+      {
+        "repo": "anthropics/claude-plugins-official",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "sansan0/TrendRadar",
+        "reason": "python_version_incompatible: pyproject [project].requires-python '>=3.12' excludes 3.11.0"
+      },
+      {
+        "repo": "ashishpatel26/500-AI-Agents-Projects",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "mvanhorn/last30days-skill",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "karpathy/nanoGPT",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "wshobson/agents",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "goabstract/Awesome-Design-Tools",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "airbnb/javascript",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "zai-org/ChatGLM-6B",
+        "reason": "heavy_packages: ['torch']"
+      },
+      {
+        "repo": "rohitg00/ai-engineering-from-scratch",
+        "reason": "heavy_packages: ['torch', 'torchaudio', 'torchvision']"
+      },
+      {
+        "repo": "TesterTesterov/AI5WINScriptTool",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "MorvanZhou/Tensorflow-Tutorial",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "diademoff/2ch",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "new92/instatools",
+        "reason": "oracle_unwinnable: {\"failed_steps\": [\"install requirements.txt\"], \"missing_required\": [], \"pip_check\": \"instagrapi 2.6.9 has requirement requests==2.34.2, but you have requests 2.33.0.\\n\", \"stderr\": \"ERROR: Cannot install -r requirements.txt (line 1), -r requirements.txt (line 5) and requests==2.33.0 because these pac"
+      },
+      {
+        "repo": "MorvanZhou/Evolutionary-Algorithm",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "codingforentrepreneurs/Try-Django-2.2",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "v0di/landsat8image",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "czl9707/build-your-own-openclaw",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "twtrubiks/docker-tutorial",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "selierlin/Share-SSR-V2ray",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "TesterTesterov/mesScriptAsseAndDisassembler",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "mouredev/portafolio-template",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "OmkarPathak/Python-Programs",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "geoffklee/git2jss",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "yhangf/PythonCrawler",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "TesterTesterov/SLGSystemScriptTool",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "Windy3f3f3f3f/claude-code-from-scratch",
+        "reason": "non_python_ecosystems: ['node', 'python']"
+      },
+      {
+        "repo": "JarryShaw/MacDaily",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "sipeed/MaixPy-v1_scripts",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "enormandeau/Scripts",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "hackersandslackers/flask-blueprint-tutorial",
+        "reason": "python_version_incompatible: pyproject [tool.poetry.dependencies].python '>=3.12,<4.0,<4' excludes 3.11.0"
+      },
+      {
+        "repo": "Saganaki22/Sora-Code-Gen",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "econchick/mayhem",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "GDSC-RCCIIT/General-Purpose-Scripts",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "AndrzejLach89/AutoCAD-Plant-3D-Script-Tester",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "Rookie-wb-WH/ql_scripts",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "lucasayres/python-tools",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "globocom/zabbix-scripts",
+        "reason": "oracle_unwinnable: {\"failed_steps\": [\"install requirements.txt\", \"install logprint==0.1.1\", \"install netdiscovery==0.2.1\", \"install progressbar==2.3\", \"install wsgiref==0.1.2\"], \"missing_required\": [\"logprint\", \"netdiscovery\", \"progressbar\", \"wsgiref\"], \"pip_check\": null, \"stderr\": \"error: subprocess-exited-with-error"
+      },
+      {
+        "repo": "astorfi/CNTK-World",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "lgy112112/ikan",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "wesammustafa/Claude-Code-Everything-You-Need-to-Know",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "thomasdutraa07/Trading-Bot-for-Binance-Future",
+        "reason": "scan_error: UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte"
+      },
+      {
+        "repo": "TesterTesterov/gscScriptCompAndDecompiler",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "x1ah/Daily_scripts",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "emilwallner/Coloring-greyscale-images",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "njanakiev/blender-scripting",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "MorvanZhou/NLP-Tutorials",
+        "reason": "heavy_packages: ['tensorflow']"
+      },
+      {
+        "repo": "robertmartin8/MachineLearningStocks",
+        "reason": "oracle_unwinnable: {\"failed_steps\": [\"install requirements.txt\", \"install numpy==1.12.1\", \"install pandas==0.22.0\", \"install scikit-learn==0.19.1\"], \"missing_required\": [\"numpy\", \"pandas\", \"scikit-learn\", \"tqdm\"], \"pip_check\": null, \"stderr\": \"error: subprocess-exited-with-error\"}"
+      },
+      {
+        "repo": "aw-junaid/Python-System-Administration",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "mouredev/hello-sql",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "tobimensch/termsql",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "dusklinux/dusky",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "mouredev/Hello-Python",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "pkmital/pycadl",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "layumi/Person_reID_baseline_pytorch",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "Wolfterro/Projetos-em-Python",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "Sookhaal/auri_maya_rigging",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "xgfone/snippet",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "mytechnotalent/Python-For-Kids",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "boto/boto3",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "ansible/ansible",
+        "reason": "not_cloned"
+      },
+      {
+        "repo": "keras-team/keras",
+        "reason": "heavy_packages: ['jax', 'tensorflow-cpu', 'torch']"
+      },
+      {
+        "repo": "alembic/alembic",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "celery/celery",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "pypa/pip",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "django/django",
+        "reason": "non_python_ecosystems: ['node', 'python']"
+      },
+      {
+        "repo": "pytorch/pytorch",
+        "reason": "heavy_packages: ['pytorch']"
+      },
+      {
+        "repo": "scipy/scipy",
+        "reason": "python_version_incompatible: pyproject [project].requires-python '>=3.12' excludes 3.11.0"
+      }
+    ],
+    "val": [
+      {
+        "repo": "poteto/hiring-without-whiteboards",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "public-apis/public-apis",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "impress/impress.js",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "myshell-ai/OpenVoice",
+        "reason": "oracle_unwinnable: {\"failed_steps\": [\"install requirements.txt\", \"install faster-whisper==0.9.0\"], \"missing_required\": [\"faster-whisper\", \"librosa\", \"numpy\", \"openai\", \"pypinyin\", \"python-dotenv\", \"unidecode\", \"wavmark\", \"whisper-timestamped\"], \"pip_check\": null, \"stderr\": \"error: subprocess-exited-with-error\"}"
+      },
+      {
+        "repo": "drawdb-io/drawdb",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "RVC-Project/Retrieval-based-Voice-Conversion-WebUI",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "google/zx",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "usestrix/strix",
+        "reason": "python_version_incompatible: pyproject [project].requires-python '>=3.12' excludes 3.11.0"
+      },
+      {
+        "repo": "louislam/uptime-kuma",
+        "reason": "non_python_ecosystems: ['node', 'python']"
+      },
+      {
+        "repo": "jquery/jquery",
+        "reason": "non_python_ecosystems: ['node']"
+      },
+      {
+        "repo": "geekcomputers/Python",
+        "reason": "heavy_packages: ['tensorflow']"
+      },
+      {
+        "repo": "ultralytics/yolov5",
+        "reason": "heavy_packages: ['torch', 'torchvision']"
+      },
+      {
+        "repo": "avilum/smart-url-fuzzer",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "DasyDong/norepeat",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "tzador/makedown",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "KhaelK138/authfinder",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "jankrepl/mildlyoverfitted",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "aquadzn/learn-x-by-doing-y",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "twtrubiks/docker-django-nginx-uwsgi-postgres-tutorial",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "liriansu-opus/liriansu-opus",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "alivx/redis-mirror",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "practical-tutorials/project-based-learning",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "huggingface/naacl_transfer_learning_tutorial",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "luongnv89/claude-howto",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "fancyboi999/ai-engineering-from-scratch-zh",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "hackersandslackers/flask-sqlalchemy-tutorial",
+        "reason": "non_python_ecosystems: []"
+      },
+      {
+        "repo": "pypa/setuptools",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "huggingface/transformers",
+        "reason": "no_declared_python_deps"
+      },
+      {
+        "repo": "scikit-learn/scikit-learn",
+        "reason": "no_declared_python_deps"
+      }
+    ]
+  },
+  "pilot_scan": {
+    "soxoj/maigret": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "aiodns",
+        "aiohttp",
+        "aiohttp-socks",
+        "alive-progress",
+        "asgiref",
+        "certifi",
+        "colorama",
+        "curl-cffi",
+        "flask",
+        "html5lib",
+        "jinja2",
+        "lxml",
+        "markupsafe",
+        "networkx",
+        "platformdirs",
+        "pycountry",
+        "pysocks",
+        "python-dateutil",
+        "pyvis",
+        "reportlab",
+        "requests",
+        "socid-extractor",
+        "soupsieve",
+        "typing-extensions",
+        "xmind",
+        "yarl"
+      ]
+    },
+    "scrapy/scrapy": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "aiohttp",
+        "backports-zstd",
+        "brotli",
+        "cryptography",
+        "cssselect",
+        "defusedxml",
+        "itemadapter",
+        "itemloaders",
+        "lxml",
+        "packaging",
+        "parsel",
+        "platformdirs",
+        "protego",
+        "pydispatcher",
+        "pyopenssl",
+        "queuelib",
+        "service-identity",
+        "tldextract",
+        "twisted",
+        "w3lib",
+        "zope-interface"
+      ]
+    },
+    "nvbn/thefuck": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "flake8",
+        "mock",
+        "pexpect",
+        "pypandoc",
+        "pytest",
+        "pytest-benchmark",
+        "pytest-docker-pexpect",
+        "pytest-mock",
+        "setuptools",
+        "twine",
+        "wheel"
+      ]
+    },
+    "zhayujie/CowAgent": {
+      "conflicts": true,
+      "manifest_files": [
+        "pyproject.toml",
+        "requirements.txt"
+      ],
+      "required": [
+        "aiohttp",
+        "chardet",
+        "click",
+        "croniter",
+        "dashscope",
+        "dingtalk-stream",
+        "discord-py",
+        "json-repair",
+        "lark-oapi",
+        "numpy",
+        "pillow",
+        "pycryptodome",
+        "python-dotenv",
+        "python-telegram-bot",
+        "pyyaml",
+        "qrcode",
+        "regex",
+        "requests",
+        "slack-bolt",
+        "web-py",
+        "websocket-client",
+        "wechatpy",
+        "zai-sdk"
+      ]
+    },
+    "jingyaogong/minimind": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "datasets",
+        "datasketch",
+        "einops",
+        "flask",
+        "flask-cors",
+        "jieba",
+        "jinja2",
+        "jsonlines",
+        "marshmallow",
+        "modelscope",
+        "ngrok",
+        "nltk",
+        "numpy",
+        "openai",
+        "protobuf",
+        "psutil",
+        "pydantic",
+        "rich",
+        "scikit-learn",
+        "sentence-transformers",
+        "sentencepiece",
+        "simhash",
+        "streamlit",
+        "swanlab",
+        "tiktoken",
+        "transformers",
+        "trl",
+        "ujson",
+        "wandb"
+      ]
+    },
+    "ManimCommunity/manim": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "av",
+        "beautifulsoup4",
+        "click",
+        "cloup",
+        "decorator",
+        "isosurfaces",
+        "manimpango",
+        "mapbox-earcut",
+        "moderngl",
+        "moderngl-window",
+        "networkx",
+        "numpy",
+        "pillow",
+        "pycairo",
+        "pydub",
+        "pygments",
+        "rich",
+        "scipy",
+        "screeninfo",
+        "skia-pathops",
+        "srt",
+        "svgelements",
+        "tqdm",
+        "typing-extensions",
+        "watchdog"
+      ]
+    },
+    "psf/black": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "click",
+        "mypy-extensions",
+        "packaging",
+        "pathspec",
+        "platformdirs",
+        "pytokens"
+      ]
+    },
+    "google/langextract": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "absl-py",
+        "aiohttp",
+        "async-timeout",
+        "exceptiongroup",
+        "google-cloud-storage",
+        "google-genai",
+        "ml-collections",
+        "more-itertools",
+        "numpy",
+        "pandas",
+        "pydantic",
+        "python-dotenv",
+        "pyyaml",
+        "regex",
+        "requests",
+        "tqdm",
+        "typing-extensions"
+      ]
+    },
+    "VectifyAI/PageIndex": {
+      "conflicts": true,
+      "manifest_files": [
+        "pyproject.toml",
+        "requirements.txt"
+      ],
+      "required": [
+        "litellm",
+        "mcp",
+        "openai",
+        "openai-agents",
+        "pillow",
+        "pypdf2",
+        "pypdfium2",
+        "python-dotenv",
+        "pyyaml",
+        "regex",
+        "requests",
+        "sortedcontainers",
+        "urllib3"
+      ]
+    },
+    "lm-sys/FastChat": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "aiohttp",
+        "fastapi",
+        "httpx",
+        "markdown2",
+        "nh3",
+        "numpy",
+        "prompt-toolkit",
+        "psutil",
+        "pydantic",
+        "pydantic-settings",
+        "requests",
+        "rich",
+        "shortuuid",
+        "tiktoken",
+        "uvicorn"
+      ]
+    },
+    "browser-use/browser-use": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "aiohttp",
+        "anthropic",
+        "anyio",
+        "browser-harness",
+        "browser-use-sdk",
+        "bubus",
+        "cdp-use",
+        "click",
+        "cloudpickle",
+        "google-api-core",
+        "google-api-python-client",
+        "google-auth",
+        "google-auth-oauthlib",
+        "google-genai",
+        "groq",
+        "httpx",
+        "inquirerpy",
+        "markdownify",
+        "mcp",
+        "ollama",
+        "openai",
+        "pillow",
+        "posthog",
+        "psutil",
+        "pydantic",
+        "pyotp",
+        "pypdf",
+        "python-docx",
+        "python-dotenv",
+        "reportlab",
+        "requests",
+        "rich",
+        "screeninfo",
+        "typing-extensions",
+        "uuid7"
+      ]
+    },
+    "TauricResearch/TradingAgents": {
+      "conflicts": true,
+      "manifest_files": [
+        "pyproject.toml",
+        "requirements.txt"
+      ],
+      "required": [
+        "backtrader",
+        "langchain-anthropic",
+        "langchain-core",
+        "langchain-experimental",
+        "langchain-google-genai",
+        "langchain-openai",
+        "langgraph",
+        "langgraph-checkpoint-sqlite",
+        "pandas",
+        "parsel",
+        "python-dotenv",
+        "pytz",
+        "questionary",
+        "redis",
+        "requests",
+        "rich",
+        "setuptools",
+        "stockstats",
+        "tqdm",
+        "typer",
+        "typing-extensions",
+        "yfinance"
+      ]
+    },
+    "new92/instatools": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "colorama",
+        "instagrapi",
+        "instaloader",
+        "prettytable",
+        "requests",
+        "rich",
+        "tabulate"
+      ]
+    },
+    "grplyler/cisco-cheatsheet": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "pyftpdlib"
+      ]
+    },
+    "deanishe/alfred-appscripts": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "alfred-workflow",
+        "docopt"
+      ]
+    },
+    "shareAI-lab/learn-claude-code": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "anthropic",
+        "python-dotenv",
+        "pyyaml"
+      ]
+    },
+    "fronzbot/docker-pycron": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "python-crontab",
+        "ruamel-yaml"
+      ]
+    },
+    "UltiRequiem/chuy": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "colorama",
+        "colores",
+        "toml"
+      ]
+    },
+    "twtrubiks/django-rest-framework-tutorial": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "django",
+        "djangorestframework"
+      ]
+    },
+    "saadhaxxan/Python-For-Ethical-Hacking": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "termcolor"
+      ]
+    },
+    "globocom/zabbix-scripts": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "logprint",
+        "netdiscovery",
+        "progressbar",
+        "pyzabbix",
+        "requests",
+        "wsgiref"
+      ]
+    },
+    "sibtc/django-beginners-guide": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "dj-database-url",
+        "django",
+        "django-widget-tweaks",
+        "markdown",
+        "python-decouple",
+        "requests"
+      ]
+    },
+    "AlexMathew/scrapple": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "colorama",
+        "cssselect",
+        "docopt",
+        "flask",
+        "jinja2",
+        "lxml",
+        "requests"
+      ]
+    },
+    "protonmeacc/Not-Pixel-bot": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "aiocfscrape",
+        "aiofiles",
+        "aiohttp",
+        "aiohttp-proxy",
+        "aiosignal",
+        "annotated-types",
+        "async-timeout",
+        "attrs",
+        "beautifulsoup4",
+        "better-proxy",
+        "brotli",
+        "colorama",
+        "datetime",
+        "frozenlist",
+        "js2py",
+        "loguru",
+        "multidict",
+        "numpy",
+        "pillow",
+        "pyaes",
+        "pydantic",
+        "pydantic-core",
+        "pydantic-settings",
+        "pyjsparser",
+        "pyrogram",
+        "pysocks",
+        "python-dotenv",
+        "pytz",
+        "six",
+        "soupsieve",
+        "tgcrypto",
+        "typing-extensions",
+        "tzdata",
+        "tzlocal",
+        "websockets",
+        "win32-setctime",
+        "yarl",
+        "zope-interface"
+      ]
+    },
+    "codingforentrepreneurs/Try-Django-3.2": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "boto3",
+        "django",
+        "django-dotenv",
+        "django-htmx",
+        "django-storages",
+        "gunicorn",
+        "pillow",
+        "pint",
+        "psycopg2-binary",
+        "requests"
+      ]
+    },
+    "sebp/PyGObject-Tutorial": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "jinja2",
+        "sphinx",
+        "sphinx-autobuild",
+        "sphinx-intl",
+        "sphinx-rtd-theme"
+      ]
+    },
+    "nfsi-canada/OrientPy": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "geographiclib",
+        "numpy",
+        "obspy"
+      ]
+    },
+    "trozler/myfpl-cli": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "requests"
+      ]
+    },
+    "robertmartin8/MachineLearningStocks": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "fix-yahoo-finance",
+        "numpy",
+        "pandas",
+        "pandas-datareader",
+        "pytest",
+        "requests",
+        "scikit-learn",
+        "tqdm"
+      ]
+    },
+    "ceccopierangiolieugenio/pyTermTk": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "dumbpainttool",
+        "pytermtk",
+        "tlogg",
+        "ttkdesigner",
+        "ttkode"
+      ]
+    },
+    "balsi2001/FCU": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "ddddocr",
+        "selenium"
+      ]
+    },
+    "FakerPK/BlessNetworkBot": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "aiohttp",
+        "aiohttp-socks",
+        "colorama",
+        "psutil"
+      ]
+    },
+    "reluce/szurubooru-toolkit": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "click",
+        "gallery-dl",
+        "httpx",
+        "loguru",
+        "pillow",
+        "tqdm"
+      ]
+    },
+    "sanjit-sinha/Tg-UsenetBot": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "aiofiles",
+        "apscheduler",
+        "beautifulsoup4",
+        "cachetools",
+        "httpx",
+        "pillow",
+        "psutil",
+        "pyrate-limiter",
+        "pyrogram",
+        "python-dotenv",
+        "requests",
+        "speedtest-cli",
+        "telegraph",
+        "tgcrypto",
+        "uvloop"
+      ]
+    },
+    "dask/dask": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "click",
+        "cloudpickle",
+        "fsspec",
+        "importlib-metadata",
+        "packaging",
+        "partd",
+        "pyyaml",
+        "toolz"
+      ]
+    },
+    "pallets/flask": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "blinker",
+        "click",
+        "itsdangerous",
+        "jinja2",
+        "markupsafe",
+        "werkzeug"
+      ]
+    },
+    "sqlalchemy/sqlalchemy": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "typing-extensions"
+      ]
+    },
+    "encode/django-rest-framework": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "django"
+      ]
+    },
+    "psf/requests": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "certifi",
+        "charset-normalizer",
+        "idna",
+        "urllib3"
+      ]
+    },
+    "virattt/ai-hedge-fund": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "langchain-anthropic",
+        "langchain-deepseek",
+        "langchain-google-genai",
+        "langchain-openai",
+        "langchain-xai",
+        "matplotlib",
+        "numpy",
+        "pandas",
+        "pydantic",
+        "python-dotenv",
+        "pyyaml",
+        "requests",
+        "rich",
+        "scipy",
+        "textual"
+      ]
+    },
+    "myshell-ai/OpenVoice": {
+      "conflicts": false,
+      "manifest_files": [
+        "requirements.txt"
+      ],
+      "required": [
+        "cn2an",
+        "eng-to-ipa",
+        "faster-whisper",
+        "gradio",
+        "inflect",
+        "jieba",
+        "langid",
+        "librosa",
+        "numpy",
+        "openai",
+        "pydub",
+        "pypinyin",
+        "python-dotenv",
+        "unidecode",
+        "wavmark",
+        "whisper-timestamped"
+      ]
+    },
+    "Textualize/rich": {
+      "conflicts": false,
+      "manifest_files": [
+        "pyproject.toml"
+      ],
+      "required": [
+        "markdown-it-py",
+        "pygments"
+      ]
+    }
+  },
+  "oracle_candidates": {
+    "train": [
+      {
+        "repo": "soxoj/maigret",
+        "category": "manifest_present",
+        "stars": 37128,
+        "size_kb": 25700,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/soxoj/maigret.git",
+        "sha": "da0fe665"
+      },
+      {
+        "repo": "scrapy/scrapy",
+        "category": "manifest_present",
+        "stars": 64082,
+        "size_kb": 32014,
+        "default_branch": "master",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/scrapy/scrapy.git",
+        "sha": "latest"
+      },
+      {
+        "repo": "nvbn/thefuck",
+        "category": "manifest_present",
+        "stars": 97748,
+        "size_kb": 4043,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/nvbn/thefuck.git",
+        "sha": "c7e7e1d8"
+      },
+      {
+        "repo": "zhayujie/CowAgent",
+        "category": "manifest_present",
+        "stars": 46713,
+        "size_kb": 13699,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/zhayujie/CowAgent.git",
+        "sha": "latest"
+      },
+      {
+        "repo": "jingyaogong/minimind",
+        "category": "manifest_present",
+        "stars": 55122,
+        "size_kb": 39400,
+        "default_branch": "master",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/jingyaogong/minimind.git",
+        "sha": "7a6fddd6"
+      },
+      {
+        "repo": "ManimCommunity/manim",
+        "category": "manifest_present",
+        "stars": 40508,
+        "size_kb": 47824,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/ManimCommunity/manim.git",
+        "sha": "cafc6391"
+      },
+      {
+        "repo": "psf/black",
+        "category": "manifest_present",
+        "stars": 41820,
+        "size_kb": 8318,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/psf/black.git",
+        "sha": "8947c48e"
+      },
+      {
+        "repo": "google/langextract",
+        "category": "manifest_present",
+        "stars": 38501,
+        "size_kb": 12772,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/google/langextract.git",
+        "sha": "9853e446"
+      },
+      {
+        "repo": "VectifyAI/PageIndex",
+        "category": "manifest_present",
+        "stars": 35385,
+        "size_kb": 28395,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/VectifyAI/PageIndex.git",
+        "sha": "b058e036"
+      },
+      {
+        "repo": "lm-sys/FastChat",
+        "category": "manifest_present",
+        "stars": 39526,
+        "size_kb": 35323,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/lm-sys/FastChat.git",
+        "sha": "587d5cfa"
+      },
+      {
+        "repo": "browser-use/browser-use",
+        "category": "manifest_present",
+        "stars": 111599,
+        "size_kb": 34818,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/browser-use/browser-use.git",
+        "sha": "cf0b917f"
+      },
+      {
+        "repo": "TauricResearch/TradingAgents",
+        "category": "manifest_present",
+        "stars": 101622,
+        "size_kb": 5233,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/TauricResearch/TradingAgents.git",
+        "sha": "2448d0a1"
+      },
+      {
+        "repo": "new92/instatools",
+        "category": "manifest_less",
+        "stars": 331,
+        "size_kb": 14056,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/new92/instatools.git",
+        "sha": "0223418a"
+      },
+      {
+        "repo": "grplyler/cisco-cheatsheet",
+        "category": "manifest_less",
+        "stars": 536,
+        "size_kb": 90,
+        "default_branch": "master",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/grplyler/cisco-cheatsheet.git",
+        "sha": "f7659805"
+      },
+      {
+        "repo": "deanishe/alfred-appscripts",
+        "category": "manifest_less",
+        "stars": 90,
+        "size_kb": 2904,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/deanishe/alfred-appscripts.git",
+        "sha": "43915688"
+      },
+      {
+        "repo": "shareAI-lab/learn-claude-code",
+        "category": "manifest_less",
+        "stars": 75568,
+        "size_kb": 6035,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/shareAI-lab/learn-claude-code.git",
+        "sha": "0dcafa2a"
+      },
+      {
+        "repo": "fronzbot/docker-pycron",
+        "category": "manifest_less",
+        "stars": 12,
+        "size_kb": 50,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/fronzbot/docker-pycron.git",
+        "sha": "180eab79"
+      },
+      {
+        "repo": "UltiRequiem/chuy",
+        "category": "manifest_less",
+        "stars": 13,
+        "size_kb": 158,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/UltiRequiem/chuy.git",
+        "sha": "d9395e3f"
+      },
+      {
+        "repo": "twtrubiks/django-rest-framework-tutorial",
+        "category": "manifest_less",
+        "stars": 875,
+        "size_kb": 75,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/twtrubiks/django-rest-framework-tutorial.git",
+        "sha": "26bc92d8"
+      },
+      {
+        "repo": "saadhaxxan/Python-For-Ethical-Hacking",
+        "category": "manifest_less",
+        "stars": 50,
+        "size_kb": 1044,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/saadhaxxan/Python-For-Ethical-Hacking.git",
+        "sha": "87ef18b2"
+      },
+      {
+        "repo": "globocom/zabbix-scripts",
+        "category": "manifest_less",
+        "stars": 18,
+        "size_kb": 60,
+        "default_branch": "master",
+        "license": "BSD-3-Clause",
+        "clone_url": "https://github.com/globocom/zabbix-scripts.git",
+        "sha": "1eef0c1e"
+      },
+      {
+        "repo": "sibtc/django-beginners-guide",
+        "category": "manifest_less",
+        "stars": 1263,
+        "size_kb": 406,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/sibtc/django-beginners-guide.git",
+        "sha": "cb376b92"
+      },
+      {
+        "repo": "AlexMathew/scrapple",
+        "category": "manifest_less",
+        "stars": 503,
+        "size_kb": 1211,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/AlexMathew/scrapple.git",
+        "sha": "0c19c7a2"
+      },
+      {
+        "repo": "protonmeacc/Not-Pixel-bot",
+        "category": "manifest_less",
+        "stars": 28,
+        "size_kb": 51,
+        "default_branch": "main",
+        "license": "Apache-2.0",
+        "clone_url": "https://github.com/protonmeacc/Not-Pixel-bot.git",
+        "sha": "c5704620"
+      },
+      {
+        "repo": "codingforentrepreneurs/Try-Django-3.2",
+        "category": "manifest_less",
+        "stars": 345,
+        "size_kb": 295,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/codingforentrepreneurs/Try-Django-3.2.git",
+        "sha": "8e9c900e"
+      },
+      {
+        "repo": "sebp/PyGObject-Tutorial",
+        "category": "manifest_less",
+        "stars": 392,
+        "size_kb": 2935,
+        "default_branch": "master",
+        "license": "LGPL-2.1",
+        "clone_url": "https://github.com/sebp/PyGObject-Tutorial.git",
+        "sha": "f98a6e51"
+      },
+      {
+        "repo": "nfsi-canada/OrientPy",
+        "category": "manifest_less",
+        "stars": 53,
+        "size_kb": 10424,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/nfsi-canada/OrientPy.git",
+        "sha": "f02ea919"
+      },
+      {
+        "repo": "trozler/myfpl-cli",
+        "category": "manifest_less",
+        "stars": 14,
+        "size_kb": 88,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/trozler/myfpl-cli.git",
+        "sha": "3a764f5b"
+      },
+      {
+        "repo": "robertmartin8/MachineLearningStocks",
+        "category": "manifest_less",
+        "stars": 1961,
+        "size_kb": 7533,
+        "default_branch": "master",
+        "license": "MIT",
+        "clone_url": "https://github.com/robertmartin8/MachineLearningStocks.git",
+        "sha": "1c3712af"
+      },
+      {
+        "repo": "ceccopierangiolieugenio/pyTermTk",
+        "category": "manifest_less",
+        "stars": 912,
+        "size_kb": 13208,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/ceccopierangiolieugenio/pyTermTk.git",
+        "sha": "390eb49a"
+      },
+      {
+        "repo": "balsi2001/FCU",
+        "category": "manifest_less",
+        "stars": 12,
+        "size_kb": 27742,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/balsi2001/FCU.git",
+        "sha": "60c2f9f2"
+      },
+      {
+        "repo": "FakerPK/BlessNetworkBot",
+        "category": "manifest_less",
+        "stars": 22,
+        "size_kb": 104,
+        "default_branch": "main",
+        "license": "AGPL-3.0",
+        "clone_url": "https://github.com/FakerPK/BlessNetworkBot.git",
+        "sha": "49535978"
+      },
+      {
+        "repo": "reluce/szurubooru-toolkit",
+        "category": "manifest_less",
+        "stars": 73,
+        "size_kb": 1318,
+        "default_branch": "main",
+        "license": "GPL-3.0",
+        "clone_url": "https://github.com/reluce/szurubooru-toolkit.git",
+        "sha": "9d1133c8"
+      },
+      {
+        "repo": "sanjit-sinha/Tg-UsenetBot",
+        "category": "manifest_less",
+        "stars": 58,
+        "size_kb": 176,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/sanjit-sinha/Tg-UsenetBot.git",
+        "sha": "a837e5d6"
+      },
+      {
+        "repo": "dask/dask",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/dask/dask.git",
+        "sha": "latest",
+        "curated": true
+      },
+      {
+        "repo": "pallets/flask",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/pallets/flask.git",
+        "sha": "d318b683",
+        "curated": true
+      },
+      {
+        "repo": "sqlalchemy/sqlalchemy",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/sqlalchemy/sqlalchemy.git",
+        "sha": "latest",
+        "curated": true
+      },
+      {
+        "repo": "encode/django-rest-framework",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/encode/django-rest-framework.git",
+        "sha": "latest",
+        "curated": true
+      },
+      {
+        "repo": "psf/requests",
+        "category": "known_conflict",
+        "stars": -1,
+        "size_kb": -1,
+        "default_branch": "main",
+        "license": "",
+        "clone_url": "https://github.com/psf/requests.git",
+        "sha": "5460f467",
+        "curated": true
+      }
+    ],
+    "val": [
+      {
+        "repo": "virattt/ai-hedge-fund",
+        "category": "manifest_present",
+        "stars": 63078,
+        "size_kb": 3714,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/virattt/ai-hedge-fund.git",
+        "sha": "78b779c1"
+      },
+      {
+        "repo": "myshell-ai/OpenVoice",
+        "category": "manifest_present",
+        "stars": 37347,
+        "size_kb": 3944,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/myshell-ai/OpenVoice.git",
+        "sha": "74a1d147"
+      },
+      {
+        "repo": "Textualize/rich",
+        "category": "manifest_present",
+        "stars": 57271,
+        "size_kb": 50632,
+        "default_branch": "main",
+        "license": "MIT",
+        "clone_url": "https://github.com/Textualize/rich.git",
+        "sha": "9d8f9a37"
+      }
+    ]
+  },
+  "pilot_val_moves": [
+    "zhayujie/CowAgent",
+    "browser-use/browser-use",
+    "AlexMathew/scrapple",
+    "nfsi-canada/OrientPy"
+  ]
+}

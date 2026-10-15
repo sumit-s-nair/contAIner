@@ -166,10 +166,14 @@ def step_and_record(
         record["verified"] = info.get("verified")
         record["reward"] = reward
         record["returncode"] = info.get("returncode")
+        record["tier_override"] = info.get("tier_override")
         record["stdout_tail"] = info.get("stdout_tail")
         record["stderr_tail"] = info.get("stderr_tail")
         record["done"] = done
         record["truncated"] = truncated
+        if env_instance._execution_history:
+            record["stdout"] = env_instance._execution_history[-1].stdout
+            record["stderr"] = env_instance._execution_history[-1].stderr
     except Exception as exc:
         record["status"] = "ENV_ERROR"
         record["error"] = f"{type(exc).__name__}: {exc}"
@@ -370,13 +374,47 @@ def main() -> None:
         }
 
     # Step g: In MAIN, step INSTALL and CHECK
-    # Main INSTALL
+    # Main INSTALL (first_dep)
     try:
         print(f"[Step g.1] Main: step INSTALL ({first_dep})...")
         rec_g_inst = step_and_record(env, step_install, "main_install")
         diagnostic_log["steps"]["step_g1_main_install"] = rec_g_inst
     except Exception as exc:
         diagnostic_log["steps"]["step_g1_main_install"] = {
+            "status": "ERROR",
+            "error": f"{type(exc).__name__}: {exc}",
+            "traceback": traceback.format_exc(),
+        }
+
+    # Main INSTALL PyYAML
+    step_install_pyyaml = PlannedStep(
+        action_type=ActionType.INSTALL,
+        target="PyYAML",
+        description="Install PyYAML",
+    )
+    try:
+        print("[Step g.1b] Main: step INSTALL (PyYAML)...")
+        rec_g_pyyaml = step_and_record(env, step_install_pyyaml, "main_install_pyyaml")
+        diagnostic_log["steps"]["step_g1b_main_install_pyyaml"] = rec_g_pyyaml
+    except Exception as exc:
+        diagnostic_log["steps"]["step_g1b_main_install_pyyaml"] = {
+            "status": "ERROR",
+            "error": f"{type(exc).__name__}: {exc}",
+            "traceback": traceback.format_exc(),
+        }
+
+    # Main INSTALL requests>=2.0
+    step_install_requests = PlannedStep(
+        action_type=ActionType.INSTALL,
+        target="requests>=2.0",
+        description="Install requests>=2.0",
+    )
+    try:
+        print("[Step g.1c] Main: step INSTALL (requests>=2.0)...")
+        rec_g_req = step_and_record(env, step_install_requests, "main_install_requests")
+        diagnostic_log["steps"]["step_g1c_main_install_requests"] = rec_g_req
+    except Exception as exc:
+        diagnostic_log["steps"]["step_g1c_main_install_requests"] = {
             "status": "ERROR",
             "error": f"{type(exc).__name__}: {exc}",
             "traceback": traceback.format_exc(),
@@ -441,19 +479,23 @@ def main() -> None:
         ("Main ISOLATE", diagnostic_log["steps"].get("step_b_main_isolate")),
         ("Fork INSTALL", diagnostic_log["steps"].get("step_e_fork_install")),
         ("Fork CHECK", diagnostic_log["steps"].get("step_f_fork_check")),
-        ("Main INSTALL", diagnostic_log["steps"].get("step_g1_main_install")),
+        ("Main INSTALL (first_dep)", diagnostic_log["steps"].get("step_g1_main_install")),
+        ("Main INSTALL (PyYAML)", diagnostic_log["steps"].get("step_g1b_main_install_pyyaml")),
+        ("Main INSTALL (requests>=2.0)", diagnostic_log["steps"].get("step_g1c_main_install_requests")),
         ("Main CHECK", diagnostic_log["steps"].get("step_g2_main_check")),
     ]
 
     print("\n=== STEP RESULTS ===")
     for name, s_data in step_items:
         if not s_data:
-            print(f"{name}: status=UNKNOWN reward=UNKNOWN returncode=UNKNOWN")
+            print(f"{name}: UNKNOWN / UNKNOWN / UNKNOWN / UNKNOWN / UNKNOWN")
         else:
             status = s_data.get("status")
+            verified = s_data.get("verified")
             reward = s_data.get("reward")
             rc = s_data.get("returncode")
-            print(f"{name}: status={status} reward={reward} returncode={rc}")
+            to = s_data.get("tier_override")
+            print(f"{name}: {status} / {verified} / {reward} / {rc} / {to}")
 
 
 if __name__ == "__main__":

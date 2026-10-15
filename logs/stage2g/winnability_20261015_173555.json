@@ -1,0 +1,1887 @@
+{
+  "summary": {
+    "oracle_episodes": 42,
+    "oracle_won": 36,
+    "oracle_totals": {
+      "soxoj/maigret": 7.9,
+      "scrapy/scrapy": 7.805,
+      "nvbn/thefuck": 7.536,
+      "zhayujie/CowAgent": 9.8,
+      "jingyaogong/minimind": -1.248,
+      "ManimCommunity/manim": -3.16,
+      "psf/black": 7.567,
+      "google/langextract": 7.9,
+      "VectifyAI/PageIndex": 9.8,
+      "lm-sys/FastChat": 7.9,
+      "browser-use/browser-use": 7.9,
+      "TauricResearch/TradingAgents": 9.709,
+      "new92/instatools": 5.2,
+      "grplyler/cisco-cheatsheet": 7.9,
+      "deanishe/alfred-appscripts": 7.9,
+      "shareAI-lab/learn-claude-code": 7.9,
+      "fronzbot/docker-pycron": 7.9,
+      "UltiRequiem/chuy": 7.9,
+      "twtrubiks/django-rest-framework-tutorial": 7.9,
+      "saadhaxxan/Python-For-Ethical-Hacking": 7.9,
+      "globocom/zabbix-scripts": -5.367,
+      "sibtc/django-beginners-guide": 7.9,
+      "AlexMathew/scrapple": 7.9,
+      "protonmeacc/Not-Pixel-bot": 7.9,
+      "codingforentrepreneurs/Try-Django-3.2": 7.9,
+      "sebp/PyGObject-Tutorial": 7.9,
+      "nfsi-canada/OrientPy": 5.6,
+      "trozler/myfpl-cli": 7.9,
+      "robertmartin8/MachineLearningStocks": -2.3,
+      "ceccopierangiolieugenio/pyTermTk": 7.9,
+      "balsi2001/FCU": 7.9,
+      "FakerPK/BlessNetworkBot": 7.9,
+      "reluce/szurubooru-toolkit": 7.9,
+      "sanjit-sinha/Tg-UsenetBot": -0.867,
+      "dask/dask": 7.65,
+      "pallets/flask": 7.9,
+      "sqlalchemy/sqlalchemy": 7.9,
+      "encode/django-rest-framework": 7.9,
+      "psf/requests": 7.9,
+      "virattt/ai-hedge-fund": 7.9,
+      "myshell-ai/OpenVoice": -0.675,
+      "Textualize/rich": 7.9
+    },
+    "spam_total": null,
+    "spam_below_oracle": false
+  },
+  "episodes": [
+    {
+      "label": "oracle",
+      "repo": "soxoj/maigret",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "26/26",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 39.3,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 51.8
+    },
+    {
+      "label": "oracle",
+      "repo": "scrapy/scrapy",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.805,
+          "execution_label": "success_verified",
+          "install_progress": 0.9523809523809523,
+          "required": "21/21",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 30.7,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.805,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 52.9
+    },
+    {
+      "label": "oracle",
+      "repo": "nvbn/thefuck",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.536,
+          "execution_label": "success_verified",
+          "install_progress": 0.8181818181818182,
+          "required": "11/11",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 20.6,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.536,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 37.4
+    },
+    {
+      "label": "oracle",
+      "repo": "zhayujie/CowAgent",
+      "steps": [
+        {
+          "action": "isolate .venv",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.9,
+          "execution_label": "success_verified",
+          "install_progress": null,
+          "required": "0/23",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.4,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "23/23",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 65.3,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 9.8,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 101.2
+    },
+    {
+      "label": "oracle",
+      "repo": "jingyaogong/minimind",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/29",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 421.6,
+          "stderr_tail": "  error: subprocess-exited-with-error\n  \n  \u00d7 Building wheel for ujson (pyproject.toml) did not run successfully.\n  \u2502 exit code: 1\n  \u2570\u2500> [19 lines of output]\n      /tmp/pip-build-env-xtpz_6zz/overlay/lib/python3.11/site-packages/setuptools/dist.py:765: SetuptoolsDeprecationWarning: License classifiers are deprecated.\n      !!\n      \n              ********************************************************************************\n              Please consider removing the following classifiers in favor of a SPDX license expression:\n      \n              License :: OSI Approved :: BSD License\n      \n              See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.\n              ********************************************************************************\n      \n      !!\n        self._finalize_license_expression()\n      running bdist_wheel\n      running build\n      running build_ext\n      building 'ujson' extension\n      g++ -Wsign-compare -DNDEBUG -g -fwrapv -O3 -Wall -fPIC -I./python -I./lib -I./deps/double-conversion/double-conversion -I/usr/local/include/python3.11 -c ./deps/double-conversion/double-conversion/bignum-dtoa.cc -o build/temp.linux-x86_64-cpython-311/deps/double-conversion/double-conversion/bignum-dtoa.o -D_GNU_SOURCE\n      error: [Errno 2] No such file or directory: 'g++'\n      [end of output]\n  \n  note: This error originates from a subprocess, and is likely not a problem with pip.\n  ERROR: Failed building wheel for ujson\nERROR: Could not build wheels for ujson, which is required to install pyproject.toml-based projects\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        },
+        {
+          "action": "install datasets",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.038,
+          "execution_label": "success_verified",
+          "install_progress": 0.06896551724137931,
+          "required": "2/29",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 36.7,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install datasketch",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.031,
+          "execution_label": "success_verified",
+          "install_progress": 0.034482758620689655,
+          "required": "3/29",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 13.3,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install einops",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.031,
+          "execution_label": "success_verified",
+          "install_progress": 0.034482758620689655,
+          "required": "4/29",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.6,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install flask",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.038,
+          "execution_label": "success_verified",
+          "install_progress": 0.06896551724137931,
+          "required": "6/29",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install flask-cors",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.031,
+          "execution_label": "success_verified",
+          "install_progress": 0.034482758620689655,
+          "required": "7/29",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.7,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install jieba",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.031,
+          "execution_label": "success_verified",
+          "install_progress": 0.034482758620689655,
+          "required": "8/29",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.1,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install jinja2",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.9,
+          "execution_label": "success_verified_no_progress",
+          "install_progress": 0.0,
+          "required": "8/29",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.1,
+          "stderr_tail": ""
+        }
+      ],
+      "total": -1.248,
+      "complete": false,
+      "ended": "truncated",
+      "missing_required": [
+        "jsonlines",
+        "marshmallow",
+        "modelscope",
+        "ngrok",
+        "nltk",
+        "openai",
+        "protobuf",
+        "psutil",
+        "pydantic",
+        "rich",
+        "scikit-learn",
+        "sentence-transformers",
+        "sentencepiece",
+        "simhash",
+        "streamlit",
+        "swanlab",
+        "tiktoken",
+        "transformers",
+        "trl",
+        "ujson",
+        "wandb"
+      ],
+      "seconds": 509.6
+    },
+    {
+      "label": "oracle",
+      "repo": "ManimCommunity/manim",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/25",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 26.5,
+          "stderr_tail": "-lynskmrl/pycairo_40ce6e573c6a48e5a8690703470131b3 /tmp/pip-install-lynskmrl/pycairo_40ce6e573c6a48e5a8690703470131b3/.mesonpy-gdogdci9 -Dbuildtype=release -Db_ndebug=if-release -Db_vscrt=md -Dwheel=true -Dtests=false --native-file=/tmp/pip-install-lynskmrl/pycairo_40ce6e573c6a48e5a8690703470131b3/.mesonpy-gdogdci9/meson-python-native-file.ini\n      The Meson build system\n      Version: 1.12.1\n      Source dir: /tmp/pip-install-lynskmrl/pycairo_40ce6e573c6a48e5a8690703470131b3\n      Build dir: /tmp/pip-install-lynskmrl/pycairo_40ce6e573c6a48e5a8690703470131b3/.mesonpy-gdogdci9\n      Build type: native build\n      Project name: pycairo\n      Project version: 1.29.2\n      \n      ../meson.build:1:0: ERROR: Unknown compiler(s): [['cc'], ['gcc'], ['clang'], ['nvc'], ['pgcc'], ['icc'], ['icx']]\n      The following exception(s) were encountered:\n      Running `cc --version` gave \"[Errno 2] No such file or directory: 'cc'\"\n      Running `gcc --version` gave \"[Errno 2] No such file or directory: 'gcc'\"\n      Running `clang --version` gave \"[Errno 2] No such file or directory: 'clang'\"\n      Running `nvc --version` gave \"[Errno 2] No such file or directory: 'nvc'\"\n      Running `pgcc --version` gave \"[Errno 2] No such file or directory: 'pgcc'\"\n      Running `icc --version` gave \"[Errno 2] No such file or directory: 'icc'\"\n      Running `icx --version` gave \"[Errno 2] No such file or directory: 'icx'\"\n      \n      A full log can be found at /tmp/pip-install-lynskmrl/pycairo_40ce6e573c6a48e5a8690703470131b3/.mesonpy-gdogdci9/meson-logs/meson-log.txt\n      [end of output]\n  \n  note: This error originates from a subprocess, and is likely not a problem with pip.\nerror: metadata-generation-failed\n\n\u00d7 Encountered error while generating package metadata.\n\u2570\u2500> See above for output.\n\nnote: This is an issue with the package mentioned above, not pip.\nhint: See above for details.\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        },
+        {
+          "action": "install av",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.02,
+          "execution_label": "success_verified",
+          "install_progress": 0.04,
+          "required": "1/25",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 14.0,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install beautifulsoup4",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.06,
+          "execution_label": "success_verified",
+          "install_progress": 0.08,
+          "required": "3/25",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.7,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install click",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.02,
+          "execution_label": "success_verified",
+          "install_progress": 0.04,
+          "required": "4/25",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.3,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install cloup",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.02,
+          "execution_label": "success_verified",
+          "install_progress": 0.04,
+          "required": "5/25",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.4,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install decorator",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.02,
+          "execution_label": "success_verified",
+          "install_progress": 0.04,
+          "required": "6/25",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.3,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install isosurfaces",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.06,
+          "execution_label": "success_verified",
+          "install_progress": 0.08,
+          "required": "8/25",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install manimpango",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -1.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "8/25",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 9.7,
+          "stderr_tail": " running bdist_wheel\n      running build\n      running build_py\n      creating build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/utils.py -> build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/__init__.py -> build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/_version.py -> build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/register_font.py -> build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/cairo.pxd -> build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/pango.pxd -> build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/glib.pxd -> build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/cmanimpango.pxd -> build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/_register_font.pxd -> build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/cmanimpango.pyx -> build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/enums.pyx -> build/lib.linux-x86_64-cpython-311/manimpango\n      copying manimpango/_register_font.pyx -> build/lib.linux-x86_64-cpython-311/manimpango\n      running build_ext\n      building 'manimpango.cmanimpango' extension\n      gcc -Wsign-compare -DNDEBUG -g -fwrapv -O3 -Wall -fPIC -I/usr/local/include/python3.11 -c /tmp/pip-install-dz8329d3/manimpango_4bf3188ac1cb42c4bb8cbc77ce74f287/manimpango/cmanimpango.c -o build/temp.linux-x86_64-cpython-311/tmp/pip-install-dz8329d3/manimpango_4bf3188ac1cb42c4bb8cbc77ce74f287/manimpango/cmanimpango.o\n      error: [Errno 2] No such file or directory: 'gcc'\n      [end of output]\n  \n  note: This error originates from a subprocess, and is likely not a problem with pip.\n  ERROR: Failed building wheel for manimpango\nERROR: Could not build wheels for manimpango, which is required to install pyproject.toml-based projects\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        }
+      ],
+      "total": -3.16,
+      "complete": false,
+      "ended": "truncated",
+      "missing_required": [
+        "manimpango",
+        "mapbox-earcut",
+        "moderngl",
+        "moderngl-window",
+        "networkx",
+        "pillow",
+        "pycairo",
+        "pydub",
+        "pygments",
+        "rich",
+        "scipy",
+        "screeninfo",
+        "skia-pathops",
+        "srt",
+        "svgelements",
+        "tqdm",
+        "watchdog"
+      ],
+      "seconds": 114.7
+    },
+    {
+      "label": "oracle",
+      "repo": "psf/black",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.567,
+          "execution_label": "success_verified",
+          "install_progress": 0.8333333333333334,
+          "required": "6/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 11.6,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.567,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 33.0
+    },
+    {
+      "label": "oracle",
+      "repo": "google/langextract",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "17/17",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 45.0,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 60.8
+    },
+    {
+      "label": "oracle",
+      "repo": "VectifyAI/PageIndex",
+      "steps": [
+        {
+          "action": "isolate .venv",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.9,
+          "execution_label": "success_verified",
+          "install_progress": null,
+          "required": "0/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 8.1,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "13/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 58.6,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 9.8,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 85.9
+    },
+    {
+      "label": "oracle",
+      "repo": "lm-sys/FastChat",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "15/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 37.7,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 54.2
+    },
+    {
+      "label": "oracle",
+      "repo": "browser-use/browser-use",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "35/35",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 63.3,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 86.5
+    },
+    {
+      "label": "oracle",
+      "repo": "TauricResearch/TradingAgents",
+      "steps": [
+        {
+          "action": "isolate .venv",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.9,
+          "execution_label": "success_verified",
+          "install_progress": null,
+          "required": "1/22",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.5,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.809,
+          "execution_label": "success_verified",
+          "install_progress": 0.9545454545454546,
+          "required": "22/22",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 86.8,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 9.709,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 108.4
+    },
+    {
+      "label": "oracle",
+      "repo": "new92/instatools",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.4,
+          "stderr_tail": "ERROR: Cannot install -r requirements.txt (line 1), -r requirements.txt (line 5) and requests==2.33.0 because these package versions have conflicting dependencies.\nERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/#dealing-with-dependency-conflicts\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        },
+        {
+          "action": "install colorama",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "1/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.2,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install instagrapi",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.471,
+          "execution_label": "success_verified",
+          "install_progress": 0.2857142857142857,
+          "required": "3/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 13.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install instaloader",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "4/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.2,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install prettytable",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "5/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.8,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install requests",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.1,
+          "execution_label": "success_verified_no_progress",
+          "install_progress": 0.0,
+          "required": "5/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.0,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install rich",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "6/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.3,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install tabulate",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 6.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "7/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.2,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 5.2,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 51.9
+    },
+    {
+      "label": "oracle",
+      "repo": "grplyler/cisco-cheatsheet",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.3,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 18.1
+    },
+    {
+      "label": "oracle",
+      "repo": "deanishe/alfred-appscripts",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.7,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 16.9
+    },
+    {
+      "label": "oracle",
+      "repo": "shareAI-lab/learn-claude-code",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "3/3",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 11.9,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 31.1
+    },
+    {
+      "label": "oracle",
+      "repo": "fronzbot/docker-pycron",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.5,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 17.4
+    },
+    {
+      "label": "oracle",
+      "repo": "UltiRequiem/chuy",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "3/3",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.6,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 17.5
+    },
+    {
+      "label": "oracle",
+      "repo": "twtrubiks/django-rest-framework-tutorial",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 8.3,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 19.5
+    },
+    {
+      "label": "oracle",
+      "repo": "saadhaxxan/Python-For-Ethical-Hacking",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 2.9,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 13.5
+    },
+    {
+      "label": "oracle",
+      "repo": "globocom/zabbix-scripts",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 1.8,
+          "stderr_tail": "ERROR: Could not find a version that satisfies the requirement logprint==0.1.1 (from versions: 0.1)\nERROR: No matching distribution found for logprint==0.1.1\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        },
+        {
+          "action": "install logprint",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.233,
+          "execution_label": "success_verified",
+          "install_progress": 0.16666666666666666,
+          "required": "1/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.6,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install netdiscovery",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "1/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 1.8,
+          "stderr_tail": "ERROR: Could not find a version that satisfies the requirement netdiscovery (from versions: none)\nERROR: No matching distribution found for netdiscovery\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        },
+        {
+          "action": "install progressbar",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.233,
+          "execution_label": "success_verified",
+          "install_progress": 0.16666666666666666,
+          "required": "2/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install pyzabbix",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.567,
+          "execution_label": "success_verified",
+          "install_progress": 0.3333333333333333,
+          "required": "4/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.4,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install requests",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.1,
+          "execution_label": "success_verified_no_progress",
+          "install_progress": 0.0,
+          "required": "4/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 2.8,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install wsgiref",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "4/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 2.0,
+          "stderr_tail": "  error: subprocess-exited-with-error\n  \n  \u00d7 python setup.py egg_info did not run successfully.\n  \u2502 exit code: 1\n  \u2570\u2500> [9 lines of output]\n      Traceback (most recent call last):\n        File \"<string>\", line 2, in <module>\n        File \"<pip-setuptools-caller>\", line 34, in <module>\n        File \"/tmp/pip-install-hfcvfaba/wsgiref_76e5f9fa19624539b7e325406fc473e5/setup.py\", line 5, in <module>\n          import ez_setup\n        File \"/tmp/pip-install-hfcvfaba/wsgiref_76e5f9fa19624539b7e325406fc473e5/ez_setup/__init__.py\", line 170\n          print \"Setuptools version\",version,\"or greater has been installed.\"\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n      SyntaxError: Missing parentheses in call to 'print'. Did you mean print(...)?\n      [end of output]\n  \n  note: This error originates from a subprocess, and is likely not a problem with pip.\nerror: metadata-generation-failed\n\n\u00d7 Encountered error while generating package metadata.\n\u2570\u2500> See above for output.\n\nnote: This is an issue with the package mentioned above, not pip.\nhint: See above for details.\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        }
+      ],
+      "total": -5.367,
+      "complete": false,
+      "ended": "plan_exhausted",
+      "missing_required": [
+        "netdiscovery",
+        "wsgiref"
+      ],
+      "seconds": 33.3
+    },
+    {
+      "label": "oracle",
+      "repo": "sibtc/django-beginners-guide",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "6/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 14.9,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 27.6
+    },
+    {
+      "label": "oracle",
+      "repo": "AlexMathew/scrapple",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "7/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 10.1,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 23.5
+    },
+    {
+      "label": "oracle",
+      "repo": "protonmeacc/Not-Pixel-bot",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "38/38",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 50.3,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 68.2
+    },
+    {
+      "label": "oracle",
+      "repo": "codingforentrepreneurs/Try-Django-3.2",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "10/10",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 29.7,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 47.0
+    },
+    {
+      "label": "oracle",
+      "repo": "sebp/PyGObject-Tutorial",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "5/5",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 24.1,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 40.2
+    },
+    {
+      "label": "oracle",
+      "repo": "nfsi-canada/OrientPy",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/3",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 13.5,
+          "stderr_tail": "  error: subprocess-exited-with-error\n  \n  \u00d7 Preparing metadata (pyproject.toml) did not run successfully.\n  \u2502 exit code: 1\n  \u2570\u2500> [20 lines of output]\n      + meson setup /workspace_rw /workspace_rw/.mesonpy-uz1qsah_ -Dbuildtype=release -Db_ndebug=if-release -Db_vscrt=md --native-file=/workspace_rw/.mesonpy-uz1qsah_/meson-python-native-file.ini\n      The Meson build system\n      Version: 1.12.1\n      Source dir: /workspace_rw\n      Build dir: /workspace_rw/.mesonpy-uz1qsah_\n      Build type: native build\n      Project name: orientpy\n      Project version: 0.2.2\n      \n      ../meson.build:1:0: ERROR: Unknown compiler(s): [['cc'], ['gcc'], ['clang'], ['nvc'], ['pgcc'], ['icc'], ['icx']]\n      The following exception(s) were encountered:\n      Running `cc --version` gave \"[Errno 2] No such file or directory: 'cc'\"\n      Running `gcc --version` gave \"[Errno 2] No such file or directory: 'gcc'\"\n      Running `clang --version` gave \"[Errno 2] No such file or directory: 'clang'\"\n      Running `nvc --version` gave \"[Errno 2] No such file or directory: 'nvc'\"\n      Running `pgcc --version` gave \"[Errno 2] No such file or directory: 'pgcc'\"\n      Running `icc --version` gave \"[Errno 2] No such file or directory: 'icc'\"\n      Running `icx --version` gave \"[Errno 2] No such file or directory: 'icx'\"\n      \n      A full log can be found at /workspace_rw/.mesonpy-uz1qsah_/meson-logs/meson-log.txt\n      [end of output]\n  \n  note: This error originates from a subprocess, and is likely not a problem with pip.\nerror: metadata-generation-failed\n\n\u00d7 Encountered error while generating package metadata.\n\u2570\u2500> See above for output.\n\nnote: This is an issue with the package mentioned above, not pip.\nhint: See above for details.\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        },
+        {
+          "action": "install geographiclib",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.567,
+          "execution_label": "success_verified",
+          "install_progress": 0.3333333333333333,
+          "required": "1/3",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.1,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install numpy",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.567,
+          "execution_label": "success_verified",
+          "install_progress": 0.3333333333333333,
+          "required": "2/3",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.3,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install obspy",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 6.567,
+          "execution_label": "success_verified",
+          "install_progress": 0.3333333333333333,
+          "required": "3/3",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 34.5,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 5.6,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 74.7
+    },
+    {
+      "label": "oracle",
+      "repo": "trozler/myfpl-cli",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.4,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 24.3
+    },
+    {
+      "label": "oracle",
+      "repo": "robertmartin8/MachineLearningStocks",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 19.2,
+          "stderr_tail": "\"/tmp/pip-install-d8c8f_af/numpy_9350b3cdfdd54088b6fba9c9d28a5ba3/numpy/distutils/misc_util.py\", line 15, in <module>\n                from distutils.msvccompiler import get_build_architecture\n            ModuleNotFoundError: No module named 'distutils.msvccompiler'\n            [end of output]\n      \n        note: This error originates from a subprocess, and is likely not a problem with pip.\n        ERROR: Failed building wheel for numpy\n        Running setup.py clean for numpy\n        error: subprocess-exited-with-error\n      \n        \u00d7 python setup.py clean did not run successfully.\n        \u2502 exit code: 1\n        \u2570\u2500> [10 lines of output]\n            Running from numpy source directory.\n      \n            `setup.py clean` is not supported, use one of the following instead:\n      \n              - `git clean -xdf` (cleans all files)\n              - `git clean -Xdf` (cleans all versioned files, doesn't touch\n                                  files that aren't checked into the git repo)\n      \n            Add `--force` to your command to use it anyway if you must (unsupported).\n      \n            [end of output]\n      \n        note: This error originates from a subprocess, and is likely not a problem with pip.\n        ERROR: Failed cleaning build dir for numpy\n      Failed to build numpy\n      ERROR: Could not build wheels for numpy, which is required to install pyproject.toml-based projects\n      \n      [notice] A new release of pip is available: 24.0 -> 26.2.1\n      [notice] To update, run: pip install --upgrade pip\n      [end of output]\n  \n  note: This error originates from a subprocess, and is likely not a problem with pip.\nerror: subprocess-exited-with-error\n\n\u00d7 pip subprocess to install build dependencies did not run successfully.\n\u2502 exit code: 1\n\u2570\u2500> See above for output.\n\nnote: This error originates from a subprocess, and is likely not a problem with pip.\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        },
+        {
+          "action": "install fix-yahoo-finance",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 2.0,
+          "stderr_tail": "  error: subprocess-exited-with-error\n  \n  \u00d7 python setup.py egg_info did not run successfully.\n  \u2502 exit code: 1\n  \u2570\u2500> [8 lines of output]\n      Traceback (most recent call last):\n        File \"<string>\", line 2, in <module>\n        File \"<pip-setuptools-caller>\", line 34, in <module>\n        File \"/tmp/pip-install-jy7k0tci/fix-yahoo-finance_a00b169a5f1649d78451ae7e6b95d6cf/setup.py\", line 19, in <module>\n          from fix_yahoo_finance import __version__\n        File \"/tmp/pip-install-jy7k0tci/fix-yahoo-finance_a00b169a5f1649d78451ae7e6b95d6cf/fix_yahoo_finance/__init__.py\", line 22, in <module>\n          import yfinance\n      ModuleNotFoundError: No module named 'yfinance'\n      [end of output]\n  \n  note: This error originates from a subprocess, and is likely not a problem with pip.\nerror: metadata-generation-failed\n\n\u00d7 Encountered error while generating package metadata.\n\u2570\u2500> See above for output.\n\nnote: This is an issue with the package mentioned above, not pip.\nhint: See above for details.\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        },
+        {
+          "action": "install numpy",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.15,
+          "execution_label": "success_verified",
+          "install_progress": 0.125,
+          "required": "1/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.2,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install pandas",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.15,
+          "execution_label": "success_verified",
+          "install_progress": 0.125,
+          "required": "2/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 11.7,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install pandas-datareader",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.4,
+          "execution_label": "success_verified",
+          "install_progress": 0.25,
+          "required": "4/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.2,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install pytest",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.15,
+          "execution_label": "success_verified",
+          "install_progress": 0.125,
+          "required": "5/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.8,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install requests",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.1,
+          "execution_label": "success_verified_no_progress",
+          "install_progress": 0.0,
+          "required": "5/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install scikit-learn",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.15,
+          "execution_label": "success_verified",
+          "install_progress": 0.125,
+          "required": "6/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 18.2,
+          "stderr_tail": ""
+        }
+      ],
+      "total": -2.3,
+      "complete": false,
+      "ended": "truncated",
+      "missing_required": [
+        "fix-yahoo-finance",
+        "tqdm"
+      ],
+      "seconds": 88.9
+    },
+    {
+      "label": "oracle",
+      "repo": "ceccopierangiolieugenio/pyTermTk",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "5/5",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 18.0,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 50.7
+    },
+    {
+      "label": "oracle",
+      "repo": "balsi2001/FCU",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 29.4,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 42.3
+    },
+    {
+      "label": "oracle",
+      "repo": "FakerPK/BlessNetworkBot",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "4/4",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 10.1,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 22.9
+    },
+    {
+      "label": "oracle",
+      "repo": "reluce/szurubooru-toolkit",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "6/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 12.3,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 26.2
+    },
+    {
+      "label": "oracle",
+      "repo": "sanjit-sinha/Tg-UsenetBot",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 14.7,
+          "stderr_tail": "consider removing the following classifiers in favor of a SPDX license expression:\n      \n              License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)\n      \n              See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.\n              ********************************************************************************\n      \n      !!\n        self._finalize_license_expression()\n      running bdist_wheel\n      running build\n      running build_py\n      creating build/lib.linux-x86_64-cpython-311/tests\n      copying tests/__init__.py -> build/lib.linux-x86_64-cpython-311/tests\n      creating build/lib.linux-x86_64-cpython-311/tests/ige\n      copying tests/ige/__init__.py -> build/lib.linux-x86_64-cpython-311/tests/ige\n      copying tests/ige/test_ige.py -> build/lib.linux-x86_64-cpython-311/tests/ige\n      creating build/lib.linux-x86_64-cpython-311/tests/cbc\n      copying tests/cbc/__init__.py -> build/lib.linux-x86_64-cpython-311/tests/cbc\n      copying tests/cbc/test_cbc.py -> build/lib.linux-x86_64-cpython-311/tests/cbc\n      creating build/lib.linux-x86_64-cpython-311/tests/ctr\n      copying tests/ctr/__init__.py -> build/lib.linux-x86_64-cpython-311/tests/ctr\n      copying tests/ctr/test_ctr.py -> build/lib.linux-x86_64-cpython-311/tests/ctr\n      running build_ext\n      building 'tgcrypto' extension\n      gcc -Wsign-compare -DNDEBUG -g -fwrapv -O3 -Wall -fPIC -I/usr/local/include/python3.11 -c tgcrypto/aes256.c -o build/temp.linux-x86_64-cpython-311/tgcrypto/aes256.o\n      error: [Errno 2] No such file or directory: 'gcc'\n      [end of output]\n  \n  note: This error originates from a subprocess, and is likely not a problem with pip.\n  ERROR: Failed building wheel for TgCrypto\nERROR: Could not build wheels for TgCrypto, which is required to install pyproject.toml-based projects\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        },
+        {
+          "action": "install aiofiles",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.033,
+          "execution_label": "success_verified",
+          "install_progress": 0.06666666666666667,
+          "required": "1/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.2,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install apscheduler",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.033,
+          "execution_label": "success_verified",
+          "install_progress": 0.06666666666666667,
+          "required": "2/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.8,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install beautifulsoup4",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.033,
+          "execution_label": "success_verified",
+          "install_progress": 0.06666666666666667,
+          "required": "3/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.0,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install cachetools",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.033,
+          "execution_label": "success_verified",
+          "install_progress": 0.06666666666666667,
+          "required": "4/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.7,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install httpx",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.033,
+          "execution_label": "success_verified",
+          "install_progress": 0.06666666666666667,
+          "required": "5/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install pillow",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.033,
+          "execution_label": "success_verified",
+          "install_progress": 0.06666666666666667,
+          "required": "6/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.7,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install psutil",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.033,
+          "execution_label": "success_verified",
+          "install_progress": 0.06666666666666667,
+          "required": "7/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.2,
+          "stderr_tail": ""
+        }
+      ],
+      "total": -0.867,
+      "complete": false,
+      "ended": "truncated",
+      "missing_required": [
+        "pyrate-limiter",
+        "pyrogram",
+        "python-dotenv",
+        "requests",
+        "speedtest-cli",
+        "telegraph",
+        "tgcrypto",
+        "uvloop"
+      ],
+      "seconds": 58.0
+    },
+    {
+      "label": "oracle",
+      "repo": "dask/dask",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.65,
+          "execution_label": "success_verified",
+          "install_progress": 0.875,
+          "required": "8/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 13.5,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.65,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 37.6
+    },
+    {
+      "label": "oracle",
+      "repo": "pallets/flask",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "6/6",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.8,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 24.1
+    },
+    {
+      "label": "oracle",
+      "repo": "sqlalchemy/sqlalchemy",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 16.2,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 45.0
+    },
+    {
+      "label": "oracle",
+      "repo": "encode/django-rest-framework",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 13.2,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 44.0
+    },
+    {
+      "label": "oracle",
+      "repo": "psf/requests",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "4/4",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.6,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 22.5
+    },
+    {
+      "label": "oracle",
+      "repo": "virattt/ai-hedge-fund",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "15/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 84.0,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 98.3
+    },
+    {
+      "label": "oracle",
+      "repo": "myshell-ai/OpenVoice",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/16",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 26.2,
+          "stderr_tail": "  error: subprocess-exited-with-error\n  \n  \u00d7 Getting requirements to build wheel did not run successfully.\n  \u2502 exit code: 1\n  \u2570\u2500> [1 lines of output]\n      pkg-config is required for building PyAV\n      [end of output]\n  \n  note: This error originates from a subprocess, and is likely not a problem with pip.\nerror: subprocess-exited-with-error\n\n\u00d7 Getting requirements to build wheel did not run successfully.\n\u2502 exit code: 1\n\u2570\u2500> See above for output.\n\nnote: This error originates from a subprocess, and is likely not a problem with pip.\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        },
+        {
+          "action": "install cn2an",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.025,
+          "execution_label": "success_verified",
+          "install_progress": 0.0625,
+          "required": "1/16",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install eng-to-ipa",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.025,
+          "execution_label": "success_verified",
+          "install_progress": 0.0625,
+          "required": "2/16",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.5,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install faster-whisper",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.15,
+          "execution_label": "success_verified",
+          "install_progress": 0.125,
+          "required": "4/16",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 29.7,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install gradio",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.15,
+          "execution_label": "success_verified",
+          "install_progress": 0.125,
+          "required": "6/16",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 33.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install inflect",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.025,
+          "execution_label": "success_verified",
+          "install_progress": 0.0625,
+          "required": "7/16",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install jieba",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.025,
+          "execution_label": "success_verified",
+          "install_progress": 0.0625,
+          "required": "8/16",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.2,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install langid",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.025,
+          "execution_label": "success_verified",
+          "install_progress": 0.0625,
+          "required": "9/16",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.1,
+          "stderr_tail": ""
+        }
+      ],
+      "total": -0.675,
+      "complete": false,
+      "ended": "truncated",
+      "missing_required": [
+        "librosa",
+        "openai",
+        "pypinyin",
+        "python-dotenv",
+        "unidecode",
+        "wavmark",
+        "whisper-timestamped"
+      ],
+      "seconds": 129.0
+    },
+    {
+      "label": "oracle",
+      "repo": "Textualize/rich",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.7,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 30.8
+    }
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "summary": {
+    "oracle_episodes": 6,
+    "oracle_won": 3,
+    "oracle_totals": {
+      "hackersandslackers/flask-blueprint-tutorial": -0.3,
+      "FoundationAgents/OpenManus": -2.1,
+      "AlexMathew/scrapple": 7.9,
+      "balsi2001/FCU": 7.9,
+      "soxoj/maigret": 1.693,
+      "twtrubiks/django-rest-framework-tutorial": 7.9
+    },
+    "spam_total": -1.8,
+    "spam_below_oracle": true
+  },
+  "episodes": [
+    {
+      "label": "oracle",
+      "repo": "hackersandslackers/flask-blueprint-tutorial",
+      "steps": [
+        {
+          "action": "isolate .venv",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.9,
+          "execution_label": "success_verified",
+          "install_progress": null,
+          "required": "0/12",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.8,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.1,
+          "execution_label": "success_verified_no_progress",
+          "install_progress": 0.0,
+          "required": "0/12",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 2.0,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install pyproject.toml",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/12",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 12.9,
+          "stderr_tail": "ERROR: Package 'flask-blueprint-tutorial' requires a different Python: 3.11.16 not in '<4.0,>=3.12'\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        }
+      ],
+      "total": -0.3,
+      "complete": false,
+      "ended": "plan_exhausted",
+      "seconds": 35.1
+    },
+    {
+      "label": "check_spam",
+      "repo": "hackersandslackers/flask-blueprint-tutorial",
+      "steps": [
+        {
+          "action": "check .",
+          "status": "success",
+          "verified": false,
+          "rc": 5,
+          "reward": -0.1,
+          "execution_label": "success_unverified_no_progress",
+          "install_progress": null,
+          "required": "0/12",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.0,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "success",
+          "verified": false,
+          "rc": 5,
+          "reward": -0.1,
+          "execution_label": "success_unverified_no_progress",
+          "install_progress": null,
+          "required": "0/12",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 2.7,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "success",
+          "verified": false,
+          "rc": 5,
+          "reward": -0.1,
+          "execution_label": "success_unverified_no_progress",
+          "install_progress": null,
+          "required": "0/12",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.7,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "success",
+          "verified": false,
+          "rc": 5,
+          "reward": -0.1,
+          "execution_label": "success_unverified_no_progress",
+          "install_progress": null,
+          "required": "0/12",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.4,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "success",
+          "verified": false,
+          "rc": 5,
+          "reward": -0.1,
+          "execution_label": "success_unverified_no_progress",
+          "install_progress": null,
+          "required": "0/12",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.6,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "success",
+          "verified": false,
+          "rc": 5,
+          "reward": -0.1,
+          "execution_label": "success_unverified_no_progress",
+          "install_progress": null,
+          "required": "0/12",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "success",
+          "verified": false,
+          "rc": 5,
+          "reward": -0.1,
+          "execution_label": "success_unverified_no_progress",
+          "install_progress": null,
+          "required": "0/12",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.1,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "success",
+          "verified": false,
+          "rc": 5,
+          "reward": -1.1,
+          "execution_label": "success_unverified_no_progress",
+          "install_progress": null,
+          "required": "0/12",
+          "new_ordering_violations": [],
+          "missing_at_end": [
+            "isolate",
+            "install"
+          ],
+          "seconds": 2.4,
+          "stderr_tail": ""
+        }
+      ],
+      "total": -1.8,
+      "complete": false,
+      "ended": "truncated",
+      "seconds": 40.3
+    },
+    {
+      "label": "oracle",
+      "repo": "FoundationAgents/OpenManus",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "failed",
+          "verified": false,
+          "rc": -1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "1/36",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 600.7,
+          "stderr_tail": "[timeout] Command exceeded 600s wall-clock limit and was killed: 'python -m pip install -r requirements.txt'"
+        }
+      ],
+      "total": -2.1,
+      "complete": false,
+      "ended": "plan_exhausted",
+      "seconds": 621.6
+    },
+    {
+      "label": "oracle",
+      "repo": "AlexMathew/scrapple",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "7/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 10.2,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 23.9
+    },
+    {
+      "label": "oracle",
+      "repo": "balsi2001/FCU",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 40.1,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 52.0
+    },
+    {
+      "label": "oracle",
+      "repo": "soxoj/maigret",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.693,
+          "execution_label": "success_verified",
+          "install_progress": 0.896551724137931,
+          "required": "26/29",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 49.0,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 1.693,
+      "complete": false,
+      "ended": "plan_exhausted",
+      "seconds": 63.4
+    },
+    {
+      "label": "oracle",
+      "repo": "twtrubiks/django-rest-framework-tutorial",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "2/2",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 13.5,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 24.7
+    }
+  ]
+}

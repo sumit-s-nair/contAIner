@@ -98,10 +98,17 @@ class Dependency:
     declared_constraint: str
     resolved_version: Optional[str] = None
     sources: List[SourceRef] = field(default_factory=list)
+    # Every constraint declared for this package, one per declaration (e.g.
+    # requirements.txt AND pyproject.toml).  ``declared_constraint`` keeps the
+    # first one for backwards compatibility; the Stage 2G reward needs all of
+    # them because satisfying ANY declaring manifest counts.
+    constraints: List[str] = field(default_factory=list)
 
     # Keep name normalisation in one place so callers don't have to guess.
     def __post_init__(self) -> None:
         self.name = self.name.lower()
+        if not self.constraints:
+            self.constraints = [self.declared_constraint]
 
 
 # ---------------------------------------------------------------------------
@@ -145,6 +152,7 @@ class EcosystemManifest:
         else:
             existing = self.dependencies[key]
             existing.sources.extend(dep.sources)
+            existing.constraints.extend(dep.constraints)
             # Prefer tighter constraint from lock-file if not already set.
             if dep.resolved_version and not existing.resolved_version:
                 existing.resolved_version = dep.resolved_version

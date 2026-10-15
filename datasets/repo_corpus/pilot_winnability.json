@@ -1,0 +1,471 @@
+{
+  "updated_at": "2026-10-15T18:59:49",
+  "criterion": "oracle (manifests + per-package pinned tail) reaches episode_complete with total > 0; required = installed at a version satisfying a declared constraint, and pip check passes",
+  "repos": {
+    "soxoj/maigret": {
+      "sha": "da0fe665",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 63.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "scrapy/scrapy": {
+      "sha": "latest",
+      "won": true,
+      "total": 7.805,
+      "ended": "terminated",
+      "seconds": 55.1,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "nvbn/thefuck": {
+      "sha": "c7e7e1d8",
+      "won": true,
+      "total": 7.536,
+      "ended": "terminated",
+      "seconds": 42.2,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "zhayujie/CowAgent": {
+      "sha": "latest",
+      "won": true,
+      "total": 9.8,
+      "ended": "terminated",
+      "seconds": 110.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "jingyaogong/minimind": {
+      "sha": "7a6fddd6",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 363.4,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "ManimCommunity/manim": {
+      "sha": "cafc6391",
+      "won": false,
+      "total": -3.16,
+      "ended": "truncated",
+      "seconds": 66.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install pyproject.toml",
+          "install manimpango<1.0.0,>=0.6.1"
+        ],
+        "missing_required": [
+          "manimpango",
+          "mapbox-earcut",
+          "moderngl",
+          "moderngl-window",
+          "networkx",
+          "pillow",
+          "pycairo",
+          "pydub",
+          "pygments",
+          "rich",
+          "scipy",
+          "screeninfo",
+          "skia-pathops",
+          "srt",
+          "svgelements",
+          "tqdm",
+          "watchdog"
+        ],
+        "pip_check": null,
+        "stderr": "error: subprocess-exited-with-error"
+      }
+    },
+    "psf/black": {
+      "sha": "8947c48e",
+      "won": true,
+      "total": 7.567,
+      "ended": "terminated",
+      "seconds": 32.6,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "google/langextract": {
+      "sha": "9853e446",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 66.1,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "VectifyAI/PageIndex": {
+      "sha": "b058e036",
+      "won": true,
+      "total": 9.8,
+      "ended": "terminated",
+      "seconds": 95.1,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "lm-sys/FastChat": {
+      "sha": "587d5cfa",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 54.8,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "browser-use/browser-use": {
+      "sha": "cf0b917f",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 83.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "TauricResearch/TradingAgents": {
+      "sha": "2448d0a1",
+      "won": true,
+      "total": 9.8,
+      "ended": "terminated",
+      "seconds": 121.1,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "new92/instatools": {
+      "sha": "0223418a",
+      "won": false,
+      "total": 0.2,
+      "ended": "truncated",
+      "seconds": 56.2,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install requirements.txt"
+        ],
+        "missing_required": [],
+        "pip_check": "instagrapi 2.6.9 has requirement requests==2.34.2, but you have requests 2.33.0.\n",
+        "stderr": "ERROR: Cannot install -r requirements.txt (line 1), -r requirements.txt (line 5) and requests==2.33.0 because these package versions have conflicting dependencies."
+      }
+    },
+    "grplyler/cisco-cheatsheet": {
+      "sha": "f7659805",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 13.3,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "deanishe/alfred-appscripts": {
+      "sha": "43915688",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 15.1,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "shareAI-lab/learn-claude-code": {
+      "sha": "0dcafa2a",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 32.4,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "fronzbot/docker-pycron": {
+      "sha": "180eab79",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 14.1,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "UltiRequiem/chuy": {
+      "sha": "d9395e3f",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 16.0,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "twtrubiks/django-rest-framework-tutorial": {
+      "sha": "26bc92d8",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 20.3,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "saadhaxxan/Python-For-Ethical-Hacking": {
+      "sha": "87ef18b2",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 13.8,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "globocom/zabbix-scripts": {
+      "sha": "1eef0c1e",
+      "won": false,
+      "total": -10.033,
+      "ended": "plan_exhausted",
+      "seconds": 24.5,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install requirements.txt",
+          "install logprint==0.1.1",
+          "install netdiscovery==0.2.1",
+          "install progressbar==2.3",
+          "install wsgiref==0.1.2"
+        ],
+        "missing_required": [
+          "logprint",
+          "netdiscovery",
+          "progressbar",
+          "wsgiref"
+        ],
+        "pip_check": null,
+        "stderr": "error: subprocess-exited-with-error"
+      }
+    },
+    "sibtc/django-beginners-guide": {
+      "sha": "cb376b92",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 23.5,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "AlexMathew/scrapple": {
+      "sha": "0c19c7a2",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 19.8,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "protonmeacc/Not-Pixel-bot": {
+      "sha": "c5704620",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 49.9,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "codingforentrepreneurs/Try-Django-3.2": {
+      "sha": "8e9c900e",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 37.8,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "sebp/PyGObject-Tutorial": {
+      "sha": "f98a6e51",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 34.4,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "nfsi-canada/OrientPy": {
+      "sha": "f02ea919",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 62.3,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "trozler/myfpl-cli": {
+      "sha": "3a764f5b",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 17.9,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "robertmartin8/MachineLearningStocks": {
+      "sha": "1c3712af",
+      "won": false,
+      "total": -6.8,
+      "ended": "truncated",
+      "seconds": 64.3,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install requirements.txt",
+          "install numpy==1.12.1",
+          "install pandas==0.22.0",
+          "install scikit-learn==0.19.1"
+        ],
+        "missing_required": [
+          "numpy",
+          "pandas",
+          "scikit-learn",
+          "tqdm"
+        ],
+        "pip_check": null,
+        "stderr": "error: subprocess-exited-with-error"
+      }
+    },
+    "ceccopierangiolieugenio/pyTermTk": {
+      "sha": "390eb49a",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 46.8,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "balsi2001/FCU": {
+      "sha": "60c2f9f2",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 38.9,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "FakerPK/BlessNetworkBot": {
+      "sha": "49535978",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 19.3,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "reluce/szurubooru-toolkit": {
+      "sha": "9d1133c8",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 24.0,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "sanjit-sinha/Tg-UsenetBot": {
+      "sha": "a837e5d6",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 31.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "dask/dask": {
+      "sha": "latest",
+      "won": true,
+      "total": 7.65,
+      "ended": "terminated",
+      "seconds": 37.5,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "pallets/flask": {
+      "sha": "d318b683",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 21.0,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "sqlalchemy/sqlalchemy": {
+      "sha": "latest",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 90.2,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "encode/django-rest-framework": {
+      "sha": "latest",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 37.6,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "psf/requests": {
+      "sha": "5460f467",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 20.3,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "virattt/ai-hedge-fund": {
+      "sha": "78b779c1",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 97.1,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "myshell-ai/OpenVoice": {
+      "sha": "74a1d147",
+      "won": false,
+      "total": -2.925,
+      "ended": "truncated",
+      "seconds": 110.8,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install requirements.txt",
+          "install faster-whisper==0.9.0"
+        ],
+        "missing_required": [
+          "faster-whisper",
+          "librosa",
+          "numpy",
+          "openai",
+          "pypinyin",
+          "python-dotenv",
+          "unidecode",
+          "wavmark",
+          "whisper-timestamped"
+        ],
+        "pip_check": null,
+        "stderr": "error: subprocess-exited-with-error"
+      }
+    },
+    "Textualize/rich": {
+      "sha": "9d8f9a37",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 27.3,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    }
+  }
+}

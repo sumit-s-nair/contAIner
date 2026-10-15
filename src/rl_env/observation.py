@@ -105,6 +105,8 @@ class Observation:
     episode_steps:    List[str]      = field(default_factory=list)
     step_index:       int            = 0
     max_steps:        int            = 8
+    manifest_paths:   Dict[str, List[str]] = field(default_factory=dict)
+    """Stage 2G: repo-relative manifest files per ecosystem (INSTALL targets)."""
 
 
 # ---------------------------------------------------------------------------
@@ -164,6 +166,7 @@ class ObservationSerializer:
                 "manifest_present": len(eco.manifest_files) > 0,
                 "has_lock":         len(eco.lock_files) > 0,
                 "inferred_count":   len(eco.inferred_dependencies),
+                "manifest_files":   list(obs.manifest_paths.get(eco_name, [])),
             })
 
         # 2. Per-dependency explain() — cap at MAX_DEPS
@@ -247,8 +250,9 @@ class ObservationSerializer:
             "You are the System 2 Planner. Your job is to select the next logical high-level "
             "action to execute in order to accomplish the user's intent. "
             "Output your response strictly as a JSON object representing a PlannedStep with the following keys:\n"
-            "- \"action_type\": The high-level action to perform. Must be one of: ISOLATE, INSTALL, CHECK, UPDATE, DETECT, FIX, ESCALATE, BUILD.\n"
-            "- \"target\": The specific dependency, file, or target of the action (e.g. 'requests' or 'src/app.py'). Leave empty if not applicable.\n"
+            "- \"action_type\": The high-level action to perform. Must be one of: ISOLATE, INSTALL, CHECK.\n"
+            "- \"target\": For INSTALL: a manifest file listed in the ecosystem summary (e.g. 'requirements.txt' or 'pyproject.toml'), "
+            "or one or more package specifiers (e.g. 'requests>=2.0' or 'requests flask'). For ISOLATE: '.venv'. For CHECK: a test path such as '.'.\n"
             "- \"description\": A brief human-readable explanation of what this step does.\n"
             "- \"rationale\": The reasoning behind selecting this action."
         )
@@ -268,10 +272,12 @@ class ObservationSerializer:
         eco_lines = ["Ecosystem Summary:"]
         for eco_name, eco in obs.repo_manifest.ecosystems.items():
             manifest_status = "present" if eco.manifest_files else "missing"
+            rel = obs.manifest_paths.get(eco_name, [])
+            files = f"; files: {', '.join(rel)}" if rel else ""
             eco_lines.append(
                 f"- {eco_name}: "
                 f"{len(eco.dependencies) + len(eco.inferred_dependencies)} dependencies "
-                f"(manifest {manifest_status})"
+                f"(manifest {manifest_status}{files})"
             )
         eco_lines.append("")
 

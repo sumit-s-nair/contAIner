@@ -196,7 +196,79 @@ def _extract_all_verbs(command: str) -> list[str]:
 # ---------------------------------------------------------------------------
 # Each entry is (compiled_regex, human_reason).
 
-_REVIEW_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+# ---------------------------------------------------------------------------
+# Output redirection matcher (Stage 2E-fix2)
+# ---------------------------------------------------------------------------
+
+def _mask_quoted(command: str) -> Optional[str]:
+    """Return *command* with every character inside shell quotes replaced by 'x'.
+
+    POSIX rules: inside single quotes everything is literal; inside double
+    quotes a backslash escapes the next character; outside quotes an escaped
+    character is kept verbatim (so an escaped quote cannot open a masked
+    region, and an escaped '>' still matches conservatively).  Quote marks
+    themselves are kept.
+
+    Returns None when quotes are unbalanced (caller falls back to the raw
+    command, i.e. the original regex behaviour).
+    """
+    out: list[str] = []
+    state = None  # None | "'" | '"'
+    i, n = 0, len(command)
+    while i < n:
+        ch = command[i]
+        if state is None:
+            if ch == "\\" and i + 1 < n:
+                # Escaped char outside quotes: keep it verbatim (conservative:
+                # an escaped '>' still matches, as with the original regex)
+                # but do not let an escaped quote open a quoted region.
+                out.append(command[i : i + 2])
+                i += 2
+                continue
+            if ch in ("'", '"'):
+                state = ch
+            out.append(ch)
+        elif state == "'":
+            if ch == "'":
+                state = None
+                out.append(ch)
+            else:
+                out.append("x")
+        else:  # double quotes
+            if ch == "\\" and i + 1 < n:
+                out.append("xx")
+                i += 2
+                continue
+            if ch == '"':
+                state = None
+                out.append(ch)
+            else:
+                out.append("x")
+        i += 1
+    if state is not None:
+        return None
+    return "".join(out)
+
+
+class _OutputRedirectPattern:
+    """Detects shell output redirection that may overwrite an existing file.
+
+    Stage 2E-fix2: quoted text (e.g. the version specifier in
+    ``pip install 'requests>=2.0'``) is masked before matching, so '>' inside
+    quotes is not a redirect.  For commands without quotes the behaviour is
+    byte-identical to the original regex.  Unbalanced quotes fall back to the
+    original regex on the raw command.
+    """
+
+    pattern: str = r"(?<!>)>\s*(?!/dev/null)[^\s>]"
+    _regex: re.Pattern[str] = _tok(pattern)
+
+    def search(self, command: str) -> Optional[re.Match[str]]:
+        masked = _mask_quoted(command)
+        return self._regex.search(command if masked is None else masked)
+
+
+_REVIEW_PATTERNS: list[tuple[object, str]] = [
     # --- file/directory deletion ---------------------------------------------
     (
         _tok(r"\brm\s"),
@@ -264,8 +336,9 @@ _REVIEW_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     # --- overwrite without backup --------------------------------------------
     # Shell output redirect to a pre-existing file is only heuristic here;
     # we flag "> " followed by a path that doesn't look like /dev/null.
+    # Quoted text is masked first (see _OutputRedirectPattern).
     (
-        _tok(r"(?<!>)>\s*(?!/dev/null)[^\s>]"),
+        _OutputRedirectPattern(),
         "Output redirect that may overwrite an existing file without a backup.",
     ),
     (

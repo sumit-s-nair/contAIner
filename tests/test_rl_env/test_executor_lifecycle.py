@@ -264,8 +264,8 @@ class TestStartEpisode:
         )
 
     def test_per_ecosystem_image_python(self) -> None:
-        """Python ecosystem → python:3.11-slim image."""
-        assert select_image(["python"]) == "python:3.11-slim"
+        """Python ecosystem → local sandbox image (python:3.11-slim + git)."""
+        assert select_image(["python"]) == "contai-sandbox-python:3.11"
 
     def test_per_ecosystem_image_javascript(self) -> None:
         """JavaScript ecosystem → node:20-slim image."""
@@ -279,9 +279,9 @@ class TestStartEpisode:
         )
 
     def test_per_ecosystem_image_default_for_empty(self) -> None:
-        """None or empty ecosystems → python:3.11-slim fallback."""
-        assert select_image(None) == "python:3.11-slim"
-        assert select_image([]) == "python:3.11-slim"
+        """None or empty ecosystems → local sandbox image fallback."""
+        assert select_image(None) == "contai-sandbox-python:3.11"
+        assert select_image([]) == "contai-sandbox-python:3.11"
 
     def test_multi_ecosystem_fallback_logs_warning(self) -> None:
         """Multi-ecosystem without combined image falls back to priority and logs explicitly."""

@@ -1,0 +1,315 @@
+{
+  "summary": {
+    "oracle_episodes": 6,
+    "oracle_won": 2,
+    "oracle_totals": {
+      "VectifyAI/PageIndex": 3.433,
+      "soxoj/maigret": 1.693,
+      "encode/django-rest-framework": 7.9,
+      "new92/instatools": -2.1,
+      "dask/dask": -2.1,
+      "trozler/myfpl-cli": 7.9
+    },
+    "spam_total": -17.8,
+    "spam_below_oracle": true
+  },
+  "episodes": [
+    {
+      "label": "oracle",
+      "repo": "VectifyAI/PageIndex",
+      "steps": [
+        {
+          "action": "isolate .venv",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.9,
+          "execution_label": "success_verified",
+          "install_progress": null,
+          "required": "0/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.7,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.633,
+          "execution_label": "success_verified",
+          "install_progress": 0.8666666666666667,
+          "required": "13/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 76.5,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.1,
+          "execution_label": "success_verified_no_progress",
+          "install_progress": 0.0,
+          "required": "13/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 10.5,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 3.433,
+      "complete": false,
+      "ended": "plan_exhausted",
+      "seconds": 112.0
+    },
+    {
+      "label": "check_spam",
+      "repo": "VectifyAI/PageIndex",
+      "steps": [
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 7.7,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.8,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.8,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.8,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -3.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/15",
+          "new_ordering_violations": [],
+          "missing_at_end": [
+            "isolate",
+            "install"
+          ],
+          "seconds": 3.5,
+          "stderr_tail": ""
+        }
+      ],
+      "total": -17.8,
+      "complete": false,
+      "ended": "truncated",
+      "seconds": 47.6
+    },
+    {
+      "label": "oracle",
+      "repo": "soxoj/maigret",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.693,
+          "execution_label": "success_verified",
+          "install_progress": 0.896551724137931,
+          "required": "26/29",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 34.6,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 1.693,
+      "complete": false,
+      "ended": "plan_exhausted",
+      "seconds": 45.6
+    },
+    {
+      "label": "oracle",
+      "repo": "encode/django-rest-framework",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 12.5,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 36.2
+    },
+    {
+      "label": "oracle",
+      "repo": "new92/instatools",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.2,
+          "stderr_tail": "ERROR: Cannot install -r requirements.txt (line 1), -r requirements.txt (line 5) and requests==2.33.0 because these package versions have conflicting dependencies.\nERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/#dealing-with-dependency-conflicts\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        }
+      ],
+      "total": -2.1,
+      "complete": false,
+      "ended": "plan_exhausted",
+      "seconds": 15.5
+    },
+    {
+      "label": "oracle",
+      "repo": "dask/dask",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "1/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.7,
+          "stderr_tail": "OLS_SCM_PRETEND_VERSION_FOR_DASK or VCS_VERSIONING_PRETEND_VERSION_FOR_DASK, as described in https://setuptools-scm.readthedocs.io/en/latest/config/\n      [end of output]\n  \n  note: This error originates from a subprocess, and is likely not a problem with pip.\nerror: subprocess-exited-with-error\n\n\u00d7 Getting requirements to build wheel did not run successfully.\n\u2502 exit code: 1\n\u2570\u2500> See above for output.\n\nnote: This error originates from a subprocess, and is likely not a problem with pip.\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        }
+      ],
+      "total": -2.1,
+      "complete": false,
+      "ended": "plan_exhausted",
+      "seconds": 24.8
+    },
+    {
+      "label": "oracle",
+      "repo": "trozler/myfpl-cli",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.6,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 19.2
+    }
+  ]
+}

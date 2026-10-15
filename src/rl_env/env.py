@@ -62,7 +62,8 @@ from src.system2_planner.templates import TEMPLATES
 from .docker_executor import DockerEpisodeExecutor, DockerExecutorConfig
 from .dry_run_executor import DryRunExecutor, TrainingReviewPolicy
 from .observation import CanonicalIntent, Observation, ObservationSerializer
-from .reward import RewardConfig, compute_reward
+from .reward import (RewardConfig, canonicalize_package, compute_reward, required_packages,
+                     satisfied_required)
 
 
 class EnvForkError(RuntimeError):
@@ -182,6 +183,23 @@ _INTENT_TEXTS = {
 }
 
 
+def _rel_manifest_paths(manifest, local_path) -> Dict[str, List[str]]:
+    """Stage 2G: manifest files per ecosystem, relative to the repo root
+    (= the container working dir /workspace_rw), POSIX style."""
+    root = Path(local_path).resolve() if local_path else None
+    out: Dict[str, List[str]] = {}
+    for eco_name, eco in manifest.ecosystems.items():
+        rels = set()
+        for f in eco.manifest_files:
+            p = Path(f)
+            try:
+                rels.add(p.resolve().relative_to(root).as_posix() if root else p.name)
+            except (ValueError, OSError):
+                rels.add(p.name)
+        out[eco_name] = sorted(rels)
+    return out
+
+
 # ---------------------------------------------------------------------------
 # PlannerEnv
 # ---------------------------------------------------------------------------
@@ -271,6 +289,7 @@ class PlannerEnv:
             episode_steps=[],
             step_index=0,
             max_steps=self._cfg.max_steps,
+            manifest_paths=_rel_manifest_paths(manifest, local_path),
         )
 
         # --- Fresh executor for this episode ------------------------------
@@ -285,6 +304,13 @@ class PlannerEnv:
         self._plan_so_far = []
         self._execution_history = []
         self._done = False
+        # Stage 2G ground truth: installed packages in the container
+        # (name -> version) and the high-water set of required packages already
+        # credited.  A required package counts only at a version satisfying one
+        # of the repo's declared constraints (satisfied_required).  Packages
+        # satisfied at reset (base image) are pre-credited: no free reward.
+        self._installed_now = self._query_installed()
+        self._credited_required = satisfied_required(self._instance, self._installed_now)
 
         info = {
             "repo":     repo_entry["repo"],
@@ -329,6 +355,7 @@ class PlannerEnv:
         all_verified = True
         final_returncode = 0
         last_res = None
+        step_tier_override = None  # any atomic step's REVIEW->SAFE override
         
         for a_step in atomic_steps:
             if a_step.command == "__UNMAPPED_ACTION__":
@@ -342,6 +369,9 @@ class PlannerEnv:
             else:
                 res = self._executor.execute(a_step)
             last_res = res
+            res_override = getattr(res, "tier_override", None) or (res.extra or {}).get("tier_override")
+            if res_override and step_tier_override is None:
+                step_tier_override = res_override
             # Tier escalates to highest risk
             if res.tier == RiskTier.BLOCKED:
                 aggregated_tier = RiskTier.BLOCKED
@@ -355,6 +385,9 @@ class PlannerEnv:
                 break
                 
             if a_step.verify_command and not res.verified:
+                all_verified = False
+            unverified_rcs = getattr(a_step, "unverified_returncodes", frozenset()) or frozenset()
+            if res.returncode is not None and res.returncode in unverified_rcs:
                 all_verified = False
         
         final_atomic_step = atomic_steps[-1] if atomic_steps else AtomicStep(command="noop", description="Empty expansion")
@@ -375,11 +408,31 @@ class PlannerEnv:
             stderr=final_stderr,
             verify_stdout=final_verify_stdout,
             verify_returncode=final_verify_returncode,
+            tier_override=step_tier_override,
         )
+
+        # --- Ground truth (Stage 2G) -------------------------------------
+        install_progress: Optional[float] = None
+        if (exec_result.status == ExecutionStatus.SUCCESS
+                and action.action_type in (ActionType.INSTALL, ActionType.ISOLATE)):
+            now = self._query_installed()
+            if now is not None:
+                self._installed_now = now
+        if action.action_type == ActionType.INSTALL and self._installed_now is not None:
+            required = required_packages(self._instance)
+            if required:
+                newly = set()
+                if exec_result.status == ExecutionStatus.SUCCESS:
+                    newly = satisfied_required(self._instance, self._installed_now) - self._credited_required
+                    self._credited_required |= newly
+                install_progress = len(newly) / len(required)
 
         # --- Accumulate plan ----------------------------------------------
         self._plan_so_far.append(action)
-        self._obs.episode_steps.append(action.description)
+        outcome = exec_result.status.value
+        if exec_result.status == ExecutionStatus.SUCCESS:
+            outcome += ", verified" if exec_result.verified else ", not verified"
+        self._obs.episode_steps.append(f"{action.description} [{outcome}]")
         self._obs.step_index += 1
         self._execution_history.append(exec_result)
 
@@ -389,6 +442,7 @@ class PlannerEnv:
             or exec_result.status == ExecutionStatus.BLOCKED
         )
 
+        dep_check: Optional[Tuple[bool, str]] = None
         expected_actions = self._instance.get_expected_actions()
         expected_types = [a.action_type for a in expected_actions]
         
@@ -409,32 +463,29 @@ class PlannerEnv:
                 break
                 
         if episode_complete and ActionType.INSTALL in expected_types:
-            from src.repo_scan.import_scan import IMPORT_TO_PACKAGE
-            alias_map = {k.lower(): v.lower() for k, v in IMPORT_TO_PACKAGE.items()}
-            alias_map["node"] = "nodejs"  # explicitly handle node/nodejs alias
-
-            def _canonicalize(pkg: str) -> str:
-                pkg_lower = pkg.lower()
-                return alias_map.get(pkg_lower, pkg_lower)
-
-            required_packages = set()
-            for eco in self._instance.manifest.ecosystems.values():
-                for declared_dep in eco.dependencies.keys():
-                    required_packages.add(_canonicalize(declared_dep))
-                for d in eco.inferred_dependencies:
-                    pkg = d.guessed_package_name or d.import_name
-                    required_packages.add(_canonicalize(pkg))
-                    
-            if required_packages:
+            # Stage 2F: shared PEP 508 / PEP 503 canonicalisation (reward.py),
+            # so 'requests>=2.0' counts as 'requests'.
+            required = required_packages(self._instance)
+            if required and self._installed_now is not None:
+                # Ground truth: everything required is installed right now, at
+                # a version satisfying a declared constraint.
+                if not required.issubset(satisfied_required(self._instance, self._installed_now)):
+                    episode_complete = False
+                else:
+                    # ... and the installed set is consistent (pip check).
+                    dep_check = self._dependency_check()
+                    if dep_check is not None and not dep_check[0]:
+                        episode_complete = False
+            elif required:
                 verified_installs = {
-                    _canonicalize(p.target)
+                    canonicalize_package(p.target)
                     for p, e in zip(self._plan_so_far, self._execution_history)
                     if p.action_type == ActionType.INSTALL 
                     and e.verified 
                     and e.status == ExecutionStatus.SUCCESS
                     and p.target
                 }
-                if not required_packages.issubset(verified_installs):
+                if not required.issubset(verified_installs):
                     episode_complete = False
 
         episode_complete = episode_complete and not blocked
@@ -450,6 +501,9 @@ class PlannerEnv:
             execution_result=exec_result,
             episode_complete=episode_complete,
             config=self._cfg.reward_config,
+            history=self._execution_history[:-1],
+            episode_done=terminated or truncated,
+            install_progress=install_progress,
         )
 
         if terminated or truncated:
@@ -467,6 +521,20 @@ class PlannerEnv:
             "stderr_tail":      (exec_result.stderr or "")[-2000:],
             "returncode":       exec_result.returncode,
         }
+        if getattr(exec_result, "tier_override", None):
+            info["tier_override"] = exec_result.tier_override
+        elif "tier_override" in getattr(exec_result, "extra", {}):
+            info["tier_override"] = exec_result.extra["tier_override"]
+        if install_progress is not None:
+            info["install_progress"] = install_progress
+        if dep_check is not None:
+            info["dependency_check_ok"] = dep_check[0]
+            if not dep_check[0]:
+                info["dependency_check_output"] = dep_check[1]
+        if self._installed_now is not None:
+            req = required_packages(self._instance)
+            info["required_installed"] = len(satisfied_required(self._instance, self._installed_now))
+            info["required_total"] = len(req)
         if exec_result.verify_stdout:
             info["verify_stdout_tail"] = exec_result.verify_stdout[-2000:]
         if exec_result.verify_returncode is not None:
@@ -540,6 +608,38 @@ class PlannerEnv:
             self._executor.end_episode()
             self._executor = None
 
+    def _dependency_check(self) -> Optional[Tuple[bool, str]]:
+        """``pip check`` via the executor, or None (unsupported / dry run / failure)."""
+        fn = getattr(self._executor, "dependency_check", None)
+        if fn is None:
+            return None
+        try:
+            return fn()
+        except Exception as exc:  # never let the probe crash a rollout
+            print(f"[PlannerEnv] WARNING: dependency_check() failed: {type(exc).__name__}: {exc}")
+            return None
+
+    def _query_installed(self) -> Optional[Dict[str, Optional[str]]]:
+        """Container ground truth via the executor: canonical name -> version,
+        or None (dry run / failure).  Executors exposing only
+        installed_packages() (a set) give version None, which satisfies only
+        unconstrained requirements."""
+        fn = getattr(self._executor, "installed_versions", None)
+        name = "installed_versions"
+        if fn is None:
+            fn = getattr(self._executor, "installed_packages", None)
+            name = "installed_packages"
+        if fn is None:
+            return None
+        try:
+            got = fn()
+        except Exception as exc:  # never let the probe crash a rollout
+            print(f"[PlannerEnv] WARNING: {name}() failed: {type(exc).__name__}: {exc}")
+            return None
+        if got is None:
+            return None
+        return dict(got) if isinstance(got, dict) else {n: None for n in got}
+
     def end_episode(self) -> None:
         """Release episode resources (delegates to close())."""
         self.close()
@@ -578,6 +678,8 @@ class PlannerEnv:
         forked._local_path = copy.deepcopy(self._local_path)
         forked._done = copy.deepcopy(self._done)
         forked._repo_entry = copy.deepcopy(self._repo_entry)
+        forked._installed_now = copy.deepcopy(getattr(self, "_installed_now", None))
+        forked._credited_required = copy.deepcopy(getattr(self, "_credited_required", set()))
 
         repo_entry = forked._repo_entry
         manifest = forked._instance.manifest
@@ -611,6 +713,8 @@ class PlannerEnv:
                 forked._obs.episode_steps = []
                 forked._obs.step_index = 0
                 forked._done = False
+                forked._installed_now = forked._query_installed()
+                forked._credited_required = satisfied_required(forked._instance, forked._installed_now)
 
                 for past_step in parent_plan:
                     forked.step(past_step)

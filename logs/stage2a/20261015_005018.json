@@ -1,0 +1,411 @@
+{
+  "timestamp": "20261015_005018",
+  "json_path": "logs\\stage2a\\20261015_005018.json",
+  "steps": {
+    "step_a_reset": {
+      "status": "SUCCESS",
+      "repo": "fronzbot/docker-pycron",
+      "container_id": "cd40bb338f60bbe55aa67a180c012473dd1d47e2741f13fccad974ede5c56a59",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "none"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          }
+        ]
+      }
+    },
+    "step_b_commit": {
+      "status": "SUCCESS",
+      "snapshot_tag": "grpo-snapshot-331f0204",
+      "inspect_returncode": 0
+    },
+    "step_c_fork": {
+      "status": "SUCCESS",
+      "fork_container_id": "feb6fe5e508f1605b7b033a0f912d98e61f328ec7b8c458e9a426917b82121f5",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "none"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          }
+        ]
+      }
+    },
+    "step_d_fork_isolate": {
+      "step_label": "fork_isolate",
+      "action": {
+        "action_type": "isolate",
+        "target": ".venv",
+        "description": "Create virtual environment in .venv"
+      },
+      "expanded_command": [
+        "python -m venv .venv"
+      ],
+      "tier": "SAFE",
+      "status": "failed",
+      "verified": false,
+      "reward": -2.85,
+      "returncode": 1,
+      "stdout_tail": "",
+      "stderr_tail": "Error: [Errno 30] Read-only file system: '/workspace/.venv'\n",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "none"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          }
+        ]
+      },
+      "done": false,
+      "truncated": false
+    },
+    "step_e_fork_install": {
+      "step_label": "fork_install",
+      "action": {
+        "action_type": "install",
+        "target": "ruamel.yaml",
+        "description": "Install first manifest dependency: ruamel.yaml"
+      },
+      "expanded_command": [
+        "pip install ruamel.yaml"
+      ],
+      "tier": "SAFE",
+      "status": "failed",
+      "verified": false,
+      "reward": -1.1,
+      "returncode": 1,
+      "stdout_tail": "",
+      "stderr_tail": "WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x71270460dfd0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/ruamel-yaml/\nWARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x712704624310>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/ruamel-yaml/\nWARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x712704627310>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/ruamel-yaml/\nWARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x712704648550>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/ruamel-yaml/\nWARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x712704648d90>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/ruamel-yaml/\nERROR: Could not find a version that satisfies the requirement ruamel.yaml (from versions: none)\nERROR: No matching distribution found for ruamel.yaml\n",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "none"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          }
+        ]
+      },
+      "done": false,
+      "truncated": false
+    },
+    "step_f_fork_check": {
+      "step_label": "fork_check",
+      "action": {
+        "action_type": "check",
+        "target": ".",
+        "description": "Run test check on ."
+      },
+      "expanded_command": [
+        "pytest ."
+      ],
+      "tier": "REVIEW",
+      "status": "aborted",
+      "verified": false,
+      "reward": -0.1,
+      "returncode": null,
+      "stdout_tail": "",
+      "stderr_tail": "[DockerEpisodeExecutor] REVIEW step auto-denied (effective policy: AUTO_DENY): 'pytest .'",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "none"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          }
+        ]
+      },
+      "done": false,
+      "truncated": false
+    },
+    "step_g1_main_isolate": {
+      "step_label": "main_isolate",
+      "action": {
+        "action_type": "isolate",
+        "target": ".venv",
+        "description": "Create virtual environment in .venv"
+      },
+      "expanded_command": [
+        "python -m venv .venv"
+      ],
+      "tier": "SAFE",
+      "status": "failed",
+      "verified": false,
+      "reward": -2.85,
+      "returncode": 1,
+      "stdout_tail": "",
+      "stderr_tail": "Error: [Errno 30] Read-only file system: '/workspace/.venv'\n",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "none"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          }
+        ]
+      },
+      "done": false,
+      "truncated": false
+    },
+    "step_g2_main_install": {
+      "step_label": "main_install",
+      "action": {
+        "action_type": "install",
+        "target": "ruamel.yaml",
+        "description": "Install first manifest dependency: ruamel.yaml"
+      },
+      "expanded_command": [
+        "pip install ruamel.yaml"
+      ],
+      "tier": "SAFE",
+      "status": "failed",
+      "verified": false,
+      "reward": -1.1,
+      "returncode": 1,
+      "stdout_tail": "",
+      "stderr_tail": "WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x77bba791f010>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/ruamel-yaml/\nWARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x77bba791f3d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/ruamel-yaml/\nWARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x77bba795e750>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/ruamel-yaml/\nWARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x77bba795f810>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/ruamel-yaml/\nWARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x77bba79840d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/ruamel-yaml/\nERROR: Could not find a version that satisfies the requirement ruamel.yaml (from versions: none)\nERROR: No matching distribution found for ruamel.yaml\n",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "none"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          }
+        ]
+      },
+      "done": false,
+      "truncated": false
+    },
+    "step_g3_main_check": {
+      "step_label": "main_check",
+      "action": {
+        "action_type": "check",
+        "target": ".",
+        "description": "Run test check on ."
+      },
+      "expanded_command": [
+        "pytest ."
+      ],
+      "tier": "REVIEW",
+      "status": "aborted",
+      "verified": false,
+      "reward": -0.1,
+      "returncode": null,
+      "stdout_tail": "",
+      "stderr_tail": "[DockerEpisodeExecutor] REVIEW step auto-denied (effective policy: AUTO_DENY): 'pytest .'",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "none"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          }
+        ]
+      },
+      "done": false,
+      "truncated": false
+    },
+    "step_h_cleanup": {
+      "fork_end_episode": "SUCCESS",
+      "main_end_episode": "SUCCESS",
+      "docker_rmi": {
+        "tag": "grpo-snapshot-331f0204",
+        "returncode": 0,
+        "stdout": "Untagged: grpo-snapshot-331f0204:latest\nDeleted: sha256:a86870cebe4264fc54fcc4430cfb129caf18c13ce6119a196f6b348d66b94c31",
+        "stderr": ""
+      }
+    }
+  },
+  "summary": [],
+  "chosen_repo": {
+    "repo": "fronzbot/docker-pycron",
+    "category": "manifest_less",
+    "stars": 12,
+    "size_kb": 50,
+    "default_branch": "master",
+    "license": "MIT",
+    "clone_url": "https://github.com/fronzbot/docker-pycron.git",
+    "sha": "180eab79"
+  },
+  "chosen_reason": "Smallest Python repository in corpus v3 train split (size_kb=50) with a requirements.txt/pyproject.toml declaring at least 1 dependency (2 declared dependencies found; first='ruamel.yaml').",
+  "first_dep": "ruamel.yaml"
+}

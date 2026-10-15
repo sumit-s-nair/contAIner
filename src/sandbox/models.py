@@ -96,6 +96,10 @@ class AtomicStep:
     Example: after ``pip install requests``, verify with
     ``python -c "import requests"`` rather than trusting the exit code alone.
     """
+    unverified_returncodes: frozenset[int] = frozenset()
+    """Main-command return codes that count as SUCCESS but NOT verified (e.g. pytest 5 = no tests collected)."""
+    timeout: Optional[int] = None
+    """Per-step main-command timeout in seconds; None = executor's step_timeout (Stage 2G: manifest installs)."""
 
 
 # ---------------------------------------------------------------------------
@@ -204,6 +208,8 @@ class ExecutionResult:
     leave it unset — this is conservatively treated as "unverified" by the
     reward function.
     """
+    tier_override: Optional[str] = None
+    """REVIEW->SAFE override applied by DockerEpisodeExecutor (sandbox_safe_overrides), else None."""
 
     verify_stdout: str = ""
     """Captured stdout of the verify command, if one was run."""

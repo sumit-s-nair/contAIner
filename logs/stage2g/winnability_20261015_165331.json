@@ -1,0 +1,414 @@
+{
+  "summary": {
+    "oracle_episodes": 6,
+    "oracle_won": 6,
+    "oracle_totals": {
+      "VectifyAI/PageIndex": 9.8,
+      "soxoj/maigret": 7.9,
+      "encode/django-rest-framework": 7.9,
+      "new92/instatools": 5.2,
+      "dask/dask": 7.65,
+      "trozler/myfpl-cli": 7.9
+    },
+    "spam_total": -17.8,
+    "spam_below_oracle": true
+  },
+  "episodes": [
+    {
+      "label": "oracle",
+      "repo": "VectifyAI/PageIndex",
+      "steps": [
+        {
+          "action": "isolate .venv",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 1.9,
+          "execution_label": "success_verified",
+          "install_progress": null,
+          "required": "0/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.0,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "13/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 62.3,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 9.8,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 81.7
+    },
+    {
+      "label": "check_spam",
+      "repo": "VectifyAI/PageIndex",
+      "steps": [
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 6.2,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.0,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.0,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 2.9,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.1,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.2,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 2.8,
+          "stderr_tail": ""
+        },
+        {
+          "action": "check .",
+          "status": "failed",
+          "verified": false,
+          "rc": 2,
+          "reward": -3.1,
+          "execution_label": "failed",
+          "install_progress": null,
+          "required": "0/13",
+          "new_ordering_violations": [],
+          "missing_at_end": [
+            "isolate",
+            "install"
+          ],
+          "seconds": 2.9,
+          "stderr_tail": ""
+        }
+      ],
+      "total": -17.8,
+      "complete": false,
+      "ended": "truncated",
+      "missing_required": [
+        "litellm",
+        "mcp",
+        "openai",
+        "openai-agents",
+        "pillow",
+        "pypdf2",
+        "pypdfium2",
+        "python-dotenv",
+        "pyyaml",
+        "regex",
+        "requests",
+        "sortedcontainers",
+        "urllib3"
+      ],
+      "seconds": 37.1
+    },
+    {
+      "label": "oracle",
+      "repo": "soxoj/maigret",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "26/26",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 42.2,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 53.2
+    },
+    {
+      "label": "oracle",
+      "repo": "encode/django-rest-framework",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 11.8,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 33.2
+    },
+    {
+      "label": "oracle",
+      "repo": "new92/instatools",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "failed",
+          "verified": false,
+          "rc": 1,
+          "reward": -2.1,
+          "execution_label": "failed",
+          "install_progress": 0.0,
+          "required": "0/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.5,
+          "stderr_tail": "ERROR: Cannot install -r requirements.txt (line 1), -r requirements.txt (line 5) and requests==2.33.0 because these package versions have conflicting dependencies.\nERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/#dealing-with-dependency-conflicts\n\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n"
+        },
+        {
+          "action": "install colorama",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "1/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 2.5,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install instagrapi",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.471,
+          "execution_label": "success_verified",
+          "install_progress": 0.2857142857142857,
+          "required": "3/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 15.1,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install instaloader",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "4/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.4,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install prettytable",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "5/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.4,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install requests",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.1,
+          "execution_label": "success_verified_no_progress",
+          "install_progress": 0.0,
+          "required": "5/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 2.3,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install rich",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 0.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "6/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 5.0,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install tabulate",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 6.186,
+          "execution_label": "success_verified",
+          "install_progress": 0.14285714285714285,
+          "required": "7/7",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 3.0,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 5.2,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 48.3
+    },
+    {
+      "label": "oracle",
+      "repo": "dask/dask",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.65,
+          "execution_label": "success_verified",
+          "install_progress": 0.875,
+          "required": "8/8",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 13.7,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.65,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 34.2
+    },
+    {
+      "label": "oracle",
+      "repo": "trozler/myfpl-cli",
+      "steps": [
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": 7.9,
+          "execution_label": "success_verified",
+          "install_progress": 1.0,
+          "required": "1/1",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 4.0,
+          "stderr_tail": ""
+        }
+      ],
+      "total": 7.9,
+      "complete": true,
+      "ended": "terminated",
+      "seconds": 12.4
+    }
+  ]
+}

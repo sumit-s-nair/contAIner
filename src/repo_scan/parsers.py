@@ -245,6 +245,12 @@ def parse_pyproject_toml(path: str) -> Tuple[List[Dependency], Optional[str]]:
         data.get("tool", {}).get("poetry", {}).get("dependencies", {})
     )
     for pkg_name, constraint_val in poetry_deps.items():
+        if _poetry_is_optional(constraint_val):
+            # ``optional = true`` deps are only installed via [tool.poetry.extras]
+            # (``pip install pkg[extra]``); a plain ``pip install .`` skips them,
+            # exactly like PEP 621 [project.optional-dependencies], which is not
+            # read here either.
+            continue
         if pkg_name.lower() == "python":
             # Treat as requires-python equivalent if not already set
             if not requires_python:
@@ -279,6 +285,16 @@ def parse_pyproject_toml(path: str) -> Tuple[List[Dependency], Optional[str]]:
 # ---------------------------------------------------------------------------
 # package.json
 # ---------------------------------------------------------------------------
+
+def _poetry_is_optional(constraint_val: Any) -> bool:
+    """True for a Poetry dep declared ``{version = ..., optional = true}`` (or a
+    multiple-constraints list whose every entry is optional)."""
+    if isinstance(constraint_val, dict):
+        return bool(constraint_val.get("optional", False))
+    if isinstance(constraint_val, list) and constraint_val:
+        return all(isinstance(c, dict) and c.get("optional", False) for c in constraint_val)
+    return False
+
 
 def parse_package_json(path: str) -> Tuple[List[Dependency], Optional[str]]:
     """

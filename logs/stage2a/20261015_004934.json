@@ -1,0 +1,118 @@
+{
+  "timestamp": "20261015_004934",
+  "json_path": "logs\\stage2a\\20261015_004934.json",
+  "steps": {
+    "step_a_reset": {
+      "status": "ERROR",
+      "error": "UnicodeEncodeError: 'charmap' codec can't encode character '\\u2192' in position 67: character maps to <undefined>",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\scripts\\diagnostics\\stage2a_real_env_walk.py\", line 207, in main\n    obs, info = env.reset(repo_entry)\n                ~~~~~~~~~^^^^^^^^^^^^\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\src\\rl_env\\env.py\", line 251, in reset\n    manifest, local_path = self._prepare_repo(repo_entry)\n                           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\src\\rl_env\\env.py\", line 714, in _prepare_repo\n    manifest, local_path = loader.load(repo_entry)\n                           ~~~~~~~~~~~^^^^^^^^^^^^\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\src\\rl_env\\repo_loader.py\", line 95, in load\n    self._clone(clone_url, local_path, default_branch)\n    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\src\\rl_env\\repo_loader.py\", line 128, in _clone\n    print(f\"[RepoLoader] Cloning {clone_url} \u2192 {dest} ...\")\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\sumit\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\encodings\\cp1252.py\", line 19, in encode\n    return codecs.charmap_encode(input,self.errors,encoding_table)[0]\n           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nUnicodeEncodeError: 'charmap' codec can't encode character '\\u2192' in position 67: character maps to <undefined>\n"
+    },
+    "step_b_commit": {
+      "status": "ERROR",
+      "error": "RuntimeError: Main env._docker_executor is None.",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\scripts\\diagnostics\\stage2a_real_env_walk.py\", line 226, in main\n    raise RuntimeError(\"Main env._docker_executor is None.\")\nRuntimeError: Main env._docker_executor is None.\n"
+    },
+    "step_c_fork": {
+      "status": "ERROR",
+      "error": "EnvForkError: Cannot fork an environment that has not been reset(). Call reset() first.",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\scripts\\diagnostics\\stage2a_real_env_walk.py\", line 249, in main\n    forked_env = env.fork(snapshot_image=snapshot_tag)\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\src\\rl_env\\env.py\", line 560, in fork\n    raise EnvForkError(\"Cannot fork an environment that has not been reset(). Call reset() first.\")\nsrc.rl_env.env.EnvForkError: Cannot fork an environment that has not been reset(). Call reset() first.\n"
+    },
+    "step_d_fork_isolate": {
+      "status": "SKIPPED",
+      "reason": "forked_env is None"
+    },
+    "step_e_fork_install": {
+      "status": "SKIPPED",
+      "reason": "forked_env is None"
+    },
+    "step_f_fork_check": {
+      "status": "SKIPPED",
+      "reason": "forked_env is None"
+    },
+    "step_g1_main_isolate": {
+      "step_label": "main_isolate",
+      "action": {
+        "action_type": "isolate",
+        "target": ".venv",
+        "description": "Create virtual environment in .venv"
+      },
+      "expanded_command": [
+        "python -m venv .venv"
+      ],
+      "tier": null,
+      "status": "ENV_ERROR",
+      "verified": null,
+      "reward": null,
+      "returncode": null,
+      "stdout_tail": null,
+      "stderr_tail": null,
+      "docker_inspect": {
+        "error": "No container ID available for inspect"
+      },
+      "error": "RuntimeError: Call reset() before step().",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\scripts\\diagnostics\\stage2a_real_env_walk.py\", line 151, in step_and_record\n    obs, reward, done, truncated, info = env_instance.step(action)\n                                         ~~~~~~~~~~~~~~~~~^^^^^^^^\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\src\\rl_env\\env.py\", line 321, in step\n    raise RuntimeError(\"Call reset() before step().\")\nRuntimeError: Call reset() before step().\n"
+    },
+    "step_g2_main_install": {
+      "step_label": "main_install",
+      "action": {
+        "action_type": "install",
+        "target": "ruamel.yaml",
+        "description": "Install first manifest dependency: ruamel.yaml"
+      },
+      "expanded_command": [
+        "pip install ruamel.yaml"
+      ],
+      "tier": null,
+      "status": "ENV_ERROR",
+      "verified": null,
+      "reward": null,
+      "returncode": null,
+      "stdout_tail": null,
+      "stderr_tail": null,
+      "docker_inspect": {
+        "error": "No container ID available for inspect"
+      },
+      "error": "RuntimeError: Call reset() before step().",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\scripts\\diagnostics\\stage2a_real_env_walk.py\", line 151, in step_and_record\n    obs, reward, done, truncated, info = env_instance.step(action)\n                                         ~~~~~~~~~~~~~~~~~^^^^^^^^\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\src\\rl_env\\env.py\", line 321, in step\n    raise RuntimeError(\"Call reset() before step().\")\nRuntimeError: Call reset() before step().\n"
+    },
+    "step_g3_main_check": {
+      "step_label": "main_check",
+      "action": {
+        "action_type": "check",
+        "target": ".",
+        "description": "Run test check on ."
+      },
+      "expanded_command": [
+        "pytest ."
+      ],
+      "tier": null,
+      "status": "ENV_ERROR",
+      "verified": null,
+      "reward": null,
+      "returncode": null,
+      "stdout_tail": null,
+      "stderr_tail": null,
+      "docker_inspect": {
+        "error": "No container ID available for inspect"
+      },
+      "error": "RuntimeError: Call reset() before step().",
+      "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\scripts\\diagnostics\\stage2a_real_env_walk.py\", line 151, in step_and_record\n    obs, reward, done, truncated, info = env_instance.step(action)\n                                         ~~~~~~~~~~~~~~~~~^^^^^^^^\n  File \"C:\\Users\\sumit\\Documents\\contAIner\\src\\rl_env\\env.py\", line 321, in step\n    raise RuntimeError(\"Call reset() before step().\")\nRuntimeError: Call reset() before step().\n"
+    },
+    "step_h_cleanup": {
+      "main_end_episode": "SUCCESS"
+    }
+  },
+  "summary": [],
+  "chosen_repo": {
+    "repo": "fronzbot/docker-pycron",
+    "category": "manifest_less",
+    "stars": 12,
+    "size_kb": 50,
+    "default_branch": "master",
+    "license": "MIT",
+    "clone_url": "https://github.com/fronzbot/docker-pycron.git",
+    "sha": ""
+  },
+  "chosen_reason": "Smallest Python repository in corpus v3 train split (size_kb=50) with a requirements.txt/pyproject.toml declaring at least 1 dependency (2 declared dependencies found; first='ruamel.yaml').",
+  "first_dep": "ruamel.yaml"
+}

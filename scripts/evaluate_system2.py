@@ -1,3 +1,4 @@
+import argparse
 import os
 import json
 import torch
@@ -9,6 +10,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import PeftModel
 
 from src.rl_env.env import PlannerEnv, EnvConfig, TrainingReviewPolicy
+from src.rl_env.docker_executor import DockerExecutorConfig, NetworkConfig
 from src.system2_planner.models import PlannedStep, ActionType
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -57,9 +59,14 @@ def extract_step_dict(completion_text: str):
     except json.JSONDecodeError:
         return None
 
-def evaluate_model(model_name: str, model, tokenizer, test_repos, demo_repos, out_dir: Path):
-    logger.info(f"Evaluating {model_name}...")
-    env_cfg = EnvConfig(dry_run=False, review_policy=TrainingReviewPolicy.AUTO_DENY, corpus_manifest_path="datasets/repo_corpus/corpus_manifest_v3.json")
+def evaluate_model(model_name: str, model, tokenizer, test_repos, demo_repos, out_dir: Path, network: str = "proxy"):
+    logger.info(f"Evaluating {model_name} (network mode: {network})...")
+    env_cfg = EnvConfig(
+        dry_run=False,
+        review_policy=TrainingReviewPolicy.AUTO_DENY,
+        corpus_manifest_path="datasets/repo_corpus/corpus_manifest_v3.json",
+        docker_config=DockerExecutorConfig(network=NetworkConfig(mode=network)),
+    )
     env = PlannerEnv(config=env_cfg)
     
     metrics = {
@@ -268,8 +275,16 @@ def evaluate_model(model_name: str, model, tokenizer, test_repos, demo_repos, ou
     )
     return metrics
 
-def main():
-    logger.info("Starting System 2 Evaluation...")
+def get_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="System 2 Evaluation")
+    parser.add_argument("--network", choices=["proxy", "none"], default="proxy", help="Docker network isolation mode")
+    return parser
+
+def main(cli_args=None):
+    parser = get_parser()
+    args = parser.parse_args(cli_args)
+
+    logger.info(f"Starting System 2 Evaluation (network mode: {args.network})...")
     out_dir = Path("results/system2_evaluation")
     out_dir.mkdir(parents=True, exist_ok=True)
     
@@ -288,7 +303,7 @@ def main():
     
     # Base Model
     model, tokenizer = load_base_model()
-    base_metrics = evaluate_model("Base_Untrained", model, tokenizer, test_repos, demo_repos, out_dir)
+    base_metrics = evaluate_model("Base_Untrained", model, tokenizer, test_repos, demo_repos, out_dir, network=args.network)
     all_metrics["Base_Untrained"] = base_metrics
     
     del model
@@ -297,7 +312,7 @@ def main():
     
     # Trained Model
     model, tokenizer = load_trained_model()
-    trained_metrics = evaluate_model("Trained_GRPO", model, tokenizer, test_repos, demo_repos, out_dir)
+    trained_metrics = evaluate_model("Trained_GRPO", model, tokenizer, test_repos, demo_repos, out_dir, network=args.network)
     all_metrics["Trained_GRPO"] = trained_metrics
     
     with open(out_dir / "test_metrics.json", "w") as f:

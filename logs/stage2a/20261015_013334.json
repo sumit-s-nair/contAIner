@@ -1,0 +1,364 @@
+{
+  "timestamp": "20261015_013334",
+  "json_path": "logs\\stage2a\\20261015_013334.json",
+  "steps": {
+    "step_a_reset": {
+      "status": "SUCCESS",
+      "repo": "fronzbot/docker-pycron",
+      "container_id": "25f51fbe5364c146d6f5588bfe095745f730f03941e5253460d0ce083eee5b8b",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "contai_sandbox"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          }
+        ]
+      }
+    },
+    "step_b_main_isolate": {
+      "step_label": "main_isolate",
+      "action": {
+        "action_type": "isolate",
+        "target": ".venv",
+        "description": "Create virtual environment in .venv"
+      },
+      "expanded_command": [
+        "python -m venv .venv"
+      ],
+      "tier": "SAFE",
+      "status": "success",
+      "verified": true,
+      "reward": 1.15,
+      "returncode": 0,
+      "stdout_tail": "",
+      "stderr_tail": "",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "contai_sandbox"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          }
+        ]
+      },
+      "done": false,
+      "truncated": false
+    },
+    "step_c_commit": {
+      "status": "SUCCESS",
+      "snapshot_tag": "grpo-snapshot-3765994d",
+      "inspect_returncode": 0
+    },
+    "step_d_fork": {
+      "status": "SUCCESS",
+      "fork_container_id": "e45a02e9c91adbbb7154c381c82f66c4fd1ea2e100b20b1fee159e91b0013d23",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "contai_sandbox"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          }
+        ]
+      }
+    },
+    "fork_pre_step_checks": {
+      "has_venv_python": true,
+      "ls_workspace_rw": "total 80\ndrwxrwxrwx 6 root root  4096 Oct 14 20:03 .\ndrwxr-xr-x 1 root root  4096 Oct 14 20:03 ..\n-rwxrwxrwx 1 root root    59 Aug 31 18:25 .dockerignore\ndrwxrwxrwx 7 root root  4096 Oct 14 20:03 .git\ndrwxr-xr-x 5 root root  4096 Oct 14 20:03 .venv\n-rwxrwxrwx 1 root root   747 Aug 31 18:25 Dockerfile\n-rwxrwxrwx 1 root root  1092 Aug 31 18:25 LICENSE\n-rwxrwxrwx 1 root root  3470 Aug 31 18:25 README.md\n-rwxrwxrwx 1 root root     4 Aug 31 18:25 VERSION\ndrwxrwxrwx 3 root root  4096 Aug 31 18:25 app\n-rwxrwxrwx 1 root root    89 Aug 31 18:25 build.sh\n-rwxrwxrwx 1 root root 20322 Aug 31 18:25 python-logo.png\n-rwxrwxrwx 1 root root   247 Aug 31 18:25 release.sh\n-rwxrwxrwx 1 root root    45 Aug 31 18:25 requirements.txt\n-rwxrwxrwx 1 root root   194 Aug 31 18:25 run.sh\ndrwxrwxrwx 2 root root  4096 Aug 31 18:25 system"
+    },
+    "step_e_fork_install": {
+      "step_label": "fork_install",
+      "action": {
+        "action_type": "install",
+        "target": "ruamel.yaml",
+        "description": "Install first manifest dependency: ruamel.yaml"
+      },
+      "expanded_command": [
+        "pip install ruamel.yaml"
+      ],
+      "tier": "SAFE",
+      "status": "success",
+      "verified": true,
+      "reward": 2.9,
+      "returncode": 0,
+      "stdout_tail": "",
+      "stderr_tail": "\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "contai_sandbox"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          }
+        ]
+      },
+      "done": false,
+      "truncated": false
+    },
+    "step_f_fork_check": {
+      "step_label": "fork_check",
+      "action": {
+        "action_type": "check",
+        "target": ".",
+        "description": "Run test check on ."
+      },
+      "expanded_command": [
+        "pytest ."
+      ],
+      "tier": "REVIEW",
+      "status": "aborted",
+      "verified": false,
+      "reward": -0.1,
+      "returncode": null,
+      "stdout_tail": "",
+      "stderr_tail": "[DockerEpisodeExecutor] REVIEW step auto-denied (effective policy: AUTO_DENY): 'pytest .'",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "contai_sandbox"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          }
+        ]
+      },
+      "done": false,
+      "truncated": false
+    },
+    "step_g1_main_install": {
+      "step_label": "main_install",
+      "action": {
+        "action_type": "install",
+        "target": "ruamel.yaml",
+        "description": "Install first manifest dependency: ruamel.yaml"
+      },
+      "expanded_command": [
+        "pip install ruamel.yaml"
+      ],
+      "tier": "SAFE",
+      "status": "success",
+      "verified": true,
+      "reward": 2.9,
+      "returncode": 0,
+      "stdout_tail": "Collecting ruamel.yaml\n  Using cached ruamel_yaml-0.19.1-py3-none-any.whl.metadata (16 kB)\nUsing cached ruamel_yaml-0.19.1-py3-none-any.whl (118 kB)\nInstalling collected packages: ruamel.yaml\nSuccessfully installed ruamel.yaml-0.19.1\n",
+      "stderr_tail": "\n[notice] A new release of pip is available: 24.0 -> 26.2.1\n[notice] To update, run: pip install --upgrade pip\n",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "contai_sandbox"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          }
+        ]
+      },
+      "done": false,
+      "truncated": false
+    },
+    "step_g2_main_check": {
+      "step_label": "main_check",
+      "action": {
+        "action_type": "check",
+        "target": ".",
+        "description": "Run test check on ."
+      },
+      "expanded_command": [
+        "pytest ."
+      ],
+      "tier": "REVIEW",
+      "status": "aborted",
+      "verified": false,
+      "reward": -0.1,
+      "returncode": null,
+      "stdout_tail": "",
+      "stderr_tail": "[DockerEpisodeExecutor] REVIEW step auto-denied (effective policy: AUTO_DENY): 'pytest .'",
+      "docker_inspect": {
+        "HostConfig": {
+          "NetworkMode": "contai_sandbox"
+        },
+        "Config": {
+          "WorkingDir": "/workspace"
+        },
+        "Mounts": [
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\repo_clones\\fronzbot_docker-pycron_180eab79",
+            "Destination": "/workspace",
+            "Mode": "ro",
+            "RW": false
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\pip",
+            "Destination": "/cache/pip",
+            "Mode": "",
+            "RW": true
+          },
+          {
+            "Type": "bind",
+            "Source": "C:\\Users\\sumit\\Documents\\contAIner\\cache\\docker_pkg_cache\\npm",
+            "Destination": "/cache/npm",
+            "Mode": "",
+            "RW": true
+          }
+        ]
+      },
+      "done": false,
+      "truncated": false
+    },
+    "step_h_cleanup": {
+      "fork_end_episode": "SUCCESS",
+      "main_end_episode": "SUCCESS",
+      "docker_rmi": {
+        "tag": "grpo-snapshot-3765994d",
+        "returncode": 0,
+        "stdout": "Untagged: grpo-snapshot-3765994d:latest\nDeleted: sha256:4b3580fd90c69f7f8dc891e12fb4c58102184fe6ff22b5597c30016bd80d78ae",
+        "stderr": ""
+      }
+    }
+  },
+  "summary": [],
+  "chosen_repo": {
+    "repo": "fronzbot/docker-pycron",
+    "category": "manifest_less",
+    "stars": 12,
+    "size_kb": 50,
+    "default_branch": "master",
+    "license": "MIT",
+    "clone_url": "https://github.com/fronzbot/docker-pycron.git",
+    "sha": "180eab79"
+  },
+  "chosen_reason": "Smallest Python repository in corpus v3 train split (size_kb=50) with a requirements.txt/pyproject.toml declaring at least 1 dependency (2 declared dependencies found; first='ruamel.yaml').",
+  "first_dep": "ruamel.yaml"
+}

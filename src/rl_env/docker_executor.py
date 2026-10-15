@@ -165,10 +165,17 @@ _NETWORK_VERIFIED_LABEL_VALUE = "allowlist-v1"
 # Per-ecosystem image selection
 # ---------------------------------------------------------------------------
 
+#: Local Python sandbox image: python:3.11-slim + git (VCS-versioned builds
+#: such as setuptools-scm need git for ``pip install .``).  Built by
+#: scripts/build_sandbox_image.py from docker/sandbox_python/Dockerfile; never
+#: pulled from a registry.
+PYTHON_SANDBOX_IMAGE = "contai-sandbox-python:3.11"
+_LOCAL_IMAGES = {PYTHON_SANDBOX_IMAGE: "python scripts/build_sandbox_image.py"}
+
 #: Mapping from detected ecosystem name → Docker base image.
 #: Extend this dict to add support for additional runtimes.
 ECOSYSTEM_IMAGES: dict[str, str] = {
-    "python":     "python:3.11-slim",
+    "python":     PYTHON_SANDBOX_IMAGE,
     "javascript": "node:20-slim",
     "node":       "node:20-slim",
     "typescript": "node:20-slim",
@@ -180,7 +187,7 @@ ECOSYSTEM_IMAGES: dict[str, str] = {
 
 # Combined Python+Node image for repos with both ecosystems.
 _MULTI_PYTHON_NODE_IMAGE = "nikolaik/python-nodejs:python3.11-nodejs20"
-_DEFAULT_IMAGE = "python:3.11-slim"
+_DEFAULT_IMAGE = PYTHON_SANDBOX_IMAGE
 
 # Ordered priority when multiple ecosystems are detected but no combined image exists.
 _ECO_PRIORITY = (
@@ -203,7 +210,7 @@ def select_image(ecosystems: Optional[List[str]]) -> str:
     Returns
     -------
     str
-        Docker image name.  Falls back to ``python:3.11-slim`` for unknown or
+        Docker image name.  Falls back to ``PYTHON_SANDBOX_IMAGE`` for unknown or
         empty ecosystem lists.
 
     Notes
@@ -216,13 +223,13 @@ def select_image(ecosystems: Optional[List[str]]) -> str:
     Examples
     --------
     >>> select_image(["python"])
-    'python:3.11-slim'
+    'contai-sandbox-python:3.11'
     >>> select_image(["javascript"])
     'node:20-slim'
     >>> select_image(["python", "javascript"])
     'nikolaik/python-nodejs:python3.11-nodejs20'
     >>> select_image(None)
-    'python:3.11-slim'
+    'contai-sandbox-python:3.11'
     """
     if not ecosystems:
         return _DEFAULT_IMAGE
@@ -255,6 +262,57 @@ def select_image(ecosystems: Optional[List[str]]) -> str:
             return chosen
 
     return _DEFAULT_IMAGE
+
+
+# ---------------------------------------------------------------------------
+# Image PATH inspection cache
+# ---------------------------------------------------------------------------
+
+_IMAGE_DEFAULT_PATH_CACHE: Dict[str, str] = {}
+_FALLBACK_DEFAULT_PATH = "/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+
+def get_image_default_path(image: str) -> str:
+    """Read the default PATH environment variable from the Docker image metadata.
+
+    Cached per image tag to avoid repeated subprocess calls.
+    """
+    if image in _IMAGE_DEFAULT_PATH_CACHE:
+        return _IMAGE_DEFAULT_PATH_CACHE[image]
+
+    try:
+        res = subprocess.run(
+            ["docker", "image", "inspect", image, "--format", "{{json .Config.Env}}"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if res.returncode == 0 and res.stdout.strip():
+            raw = json.loads(res.stdout.strip())
+            env_list: List[str] = []
+            if isinstance(raw, list):
+                if raw and isinstance(raw[0], dict) and "Config" in raw[0]:
+                    env_list = raw[0].get("Config", {}).get("Env", []) or []
+                elif raw and isinstance(raw[0], str):
+                    env_list = raw
+            elif isinstance(raw, dict):
+                env_list = raw.get("Config", {}).get("Env", []) or []
+
+            for item in env_list:
+                if isinstance(item, str) and item.startswith("PATH="):
+                    path_val = item.split("=", 1)[1]
+                    _IMAGE_DEFAULT_PATH_CACHE[image] = path_val
+                    return path_val
+    except Exception:
+        pass
+
+    print(
+        f"[DockerEpisodeExecutor] WARNING: get_image_default_path({image!r}) failed; "
+        f"falling back to default PATH {_FALLBACK_DEFAULT_PATH!r}",
+        file=sys.stderr,
+    )
+    _IMAGE_DEFAULT_PATH_CACHE[image] = _FALLBACK_DEFAULT_PATH
+    return _FALLBACK_DEFAULT_PATH
 
 
 # ---------------------------------------------------------------------------
@@ -391,6 +449,7 @@ class DockerExecutorConfig:
     verify_timeout: int           = 10       # seconds
     pull_policy:    str           = "missing"
     network:        NetworkConfig = field(default_factory=NetworkConfig)
+    sandbox_safe_overrides: List[str] = field(default_factory=lambda: ["pytest", "python -m pytest"])
 
 
 # ---------------------------------------------------------------------------
@@ -533,6 +592,12 @@ class DockerEpisodeExecutor:
                 "--env", f"npm_config_https_proxy={proxy_url}",
             ]
 
+        img_default_path = get_image_default_path(image)
+        if img_default_path.startswith("/workspace_rw/.venv/bin:"):
+            runtime_path = img_default_path
+        else:
+            runtime_path = f"/workspace_rw/.venv/bin:{img_default_path}"
+
         cmd: List[str] = [
             "docker", "run",
             "--detach",
@@ -558,6 +623,7 @@ class DockerEpisodeExecutor:
             "--volume", f"{self._pip_cache_host}:/cache/pip",
             "--volume", f"{self._npm_cache_host}:/cache/npm",
             # --- Package manager environment --------------------------------------
+            "--env", f"PATH={runtime_path}",
             "--env", "PYTHONUSERBASE=/workspace_rw",
             "--env", "PIP_CACHE_DIR=/cache/pip",      # persistent host-side cache
             "--env", "NPM_CONFIG_PREFIX=/workspace_rw",
@@ -692,10 +758,59 @@ class DockerEpisodeExecutor:
         if classification.tier == RiskTier.BLOCKED:
             return self._handle_blocked(step, classification)
 
+        tier_override: Optional[str] = None
         if classification.tier == RiskTier.REVIEW:
-            return self._handle_review(step, classification)
+            if self._matches_safe_override(step.command):
+                tier_override = "REVIEW->SAFE"
+            else:
+                return self._handle_review(step, classification)
 
-        return self._handle_safe(step, classification)
+        return self._handle_safe(step, classification, tier_override=tier_override)
+
+    def installed_packages(self) -> Optional[set]:
+        """Canonical names only (see installed_versions)."""
+        v = self.installed_versions()
+        return None if v is None else set(v)
+
+    def dependency_check(self) -> Optional[Tuple[bool, str]]:
+        """``python -m pip check`` on the active interpreter: (consistent, output).
+
+        Stage 2G-fix-3 completion gate: every required package at a declared
+        version is not enough if the set is broken (pip warns and installs
+        anyway when pins are mutually incompatible, e.g. new92/instatools).
+        Returns None if no container is running."""
+        if self._container_id is None:
+            return None
+        res = self._run_docker_exec("python -m pip check --disable-pip-version-check", timeout=60)
+        return res.returncode == 0, ((res.stdout or "") + (res.stderr or ""))[-2000:]
+
+    def installed_versions(self) -> Optional[dict]:
+        """Ground truth (Stage 2G): canonical name -> version of the Python distributions
+        installed for the ``python`` on the container PATH (the .venv after
+        ISOLATE, else the image interpreter).
+
+        Runs ``python -m pip list --format=json`` directly (not a planner
+        action; not classified, not rewarded).  Returns None if no container
+        is running or the query fails, so callers can fall back.
+        """
+        if self._container_id is None:
+            return None
+        import json as _json
+        from src.rl_env.reward import canonicalize_package
+        res = self._run_docker_exec(
+            "python -m pip list --format=json --disable-pip-version-check",
+            timeout=60,
+        )
+        if res.returncode != 0:
+            print(f"[DockerEpisodeExecutor] WARNING: pip list failed rc={res.returncode}: {(res.stderr or '')[-300:]}")
+            return None
+        try:
+            data = _json.loads(res.stdout)
+        except ValueError:
+            print(f"[DockerEpisodeExecutor] WARNING: pip list output not JSON: {(res.stdout or '')[:200]!r}")
+            return None
+        return {canonicalize_package(d["name"]): d.get("version")
+                for d in data if isinstance(d, dict) and d.get("name")}
 
     def snapshot(self, tag: Optional[str] = None) -> str:
         """
@@ -914,10 +1029,32 @@ class DockerEpisodeExecutor:
             ),
         )
 
+    def _matches_safe_override(self, command: str) -> bool:
+        r"""Check if command matches any prefix in sandbox_safe_overrides.
+
+        Refuses commands containing dangerous shell characters (;&|$\<>() or newline)
+        even inside quotes. Also accepts 'python -m pytest' in addition to configured overrides.
+        """
+        dangerous_chars = {";", "&", "|", "$", "\\", "`", "<", ">", "(", ")", "\n", "\r"}
+        if any(ch in dangerous_chars for ch in command):
+            return False
+
+        cmd = command.strip()
+        overrides = list(self._config.sandbox_safe_overrides or [])
+        if "python -m pytest" not in overrides:
+            overrides.append("python -m pytest")
+        for prefix in overrides:
+            p = prefix.strip()
+            if cmd == p or cmd.startswith(p + " ") or cmd.startswith(p + "\t"):
+                return True
+        return False
+
     def _handle_safe(
         self,
         step:           AtomicStep,
         classification: ClassificationResult,
+        *,
+        tier_override:  Optional[str] = None,
     ) -> ExecutionResult:
         """
         Run a SAFE step via docker exec and optionally run its verify command.
@@ -932,14 +1069,21 @@ class DockerEpisodeExecutor:
         same environment, with ``PYTHONUSERBASE=/workspace_rw`` already set
         so packages installed during this episode are visible.
         """
-        # --- Overwrite verify_command from the lookup table (not policy) ----
-        step = inject_verify_command(step)
+        # --- Inject verify_command from lookup table if not already set ---
+        if not step.verify_command:
+            step = inject_verify_command(step)
 
-        main = self._run_docker_exec(step.command, timeout=self._config.step_timeout)
-        main_status = (
-            ExecutionStatus.SUCCESS if main.returncode == 0
-            else ExecutionStatus.FAILED
+        main = self._run_docker_exec(
+            step.command,
+            timeout=getattr(step, "timeout", None) or self._config.step_timeout,
         )
+        unverified_rcs = getattr(step, "unverified_returncodes", frozenset()) or frozenset()
+        if main.returncode == 0:
+            main_status = ExecutionStatus.SUCCESS
+        elif main.returncode in unverified_rcs:
+            main_status = ExecutionStatus.SUCCESS
+        else:
+            main_status = ExecutionStatus.FAILED
 
         verified:           bool         = False
         verify_stdout:      str          = ""
@@ -958,6 +1102,10 @@ class DockerEpisodeExecutor:
             verify_stdout     = verify.stdout
             verified          = (verify.returncode == 0)
 
+        extra = dict(step.extra) if hasattr(step, "extra") and step.extra else {}
+        if tier_override:
+            extra["tier_override"] = tier_override
+
         return ExecutionResult(
             step=step,
             status=main_status,
@@ -969,6 +1117,8 @@ class DockerEpisodeExecutor:
             verified=verified,
             verify_returncode=verify_returncode,
             verify_stdout=verify_stdout,
+            tier_override=tier_override,
+            extra=extra,
         )
 
     def _run_docker_exec(self, command: str, timeout: int) -> _ExecResult:
@@ -1111,6 +1261,18 @@ class DockerEpisodeExecutor:
     def _pull_image_if_needed(self, image: str) -> None:
         """Pull *image* according to the configured pull_policy."""
         policy = self._config.pull_policy
+
+        if image in _LOCAL_IMAGES:
+            # Locally built, not in any registry: never pull, fail with the fix.
+            if policy == "never":
+                return
+            result = subprocess.run(["docker", "image", "inspect", image], capture_output=True, timeout=10)
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"[DockerEpisodeExecutor] Sandbox image {image!r} not found locally. "
+                    f"Build it first: {_LOCAL_IMAGES[image]}"
+                )
+            return
 
         if policy == "never":
             return
