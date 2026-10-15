@@ -107,7 +107,8 @@ def test_install_progress_scales_execution_reward():
     assert half["execution"] == pytest.approx(CFG.w_execution * CFG.r_success * 0.5)
     _, zero = compute_reward(step=plan[-1], plan_so_far=plan, instance=inst, execution_result=_res(),
                              episode_complete=False, install_progress=0.0)
-    assert zero["execution"] == 0.0 and zero["progress"] is False
+    # Stage 2H: zero-progress success now costs r_no_progress (was 0.0)
+    assert zero["execution"] == pytest.approx(CFG.w_execution * CFG.r_no_progress) and zero["progress"] is False
 
 
 # --- env with ground truth -----------------------------------------------------

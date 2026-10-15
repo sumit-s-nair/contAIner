@@ -46,7 +46,7 @@ MAX_DEPS = 20
 # episode_history > dependency_details.  Only the dep list is truncated;
 # all other sections are always emitted in full.
 # Must match (or be <=) MAX_PROMPT_TOKENS in the training script.
-MAX_PROMPT_TOKENS = 512
+MAX_PROMPT_TOKENS = 1024  # Stage 2H: was 512; the rules + examples in the system turn need ~300 tokens
 
 
 # ---------------------------------------------------------------------------
@@ -254,7 +254,27 @@ class ObservationSerializer:
             "- \"target\": For INSTALL: a manifest file listed in the ecosystem summary (e.g. 'requirements.txt' or 'pyproject.toml'), "
             "or one or more package specifiers (e.g. 'requests>=2.0' or 'requests flask'). For ISOLATE: '.venv'. For CHECK: a test path such as '.'.\n"
             "- \"description\": A brief human-readable explanation of what this step does.\n"
-            "- \"rationale\": The reasoning behind selecting this action."
+            "- \"rationale\": The reasoning behind selecting this action.\n"
+            "\n"
+            "Rules:\n"
+            "- ISOLATE only when the prompt lists Conflicts, and only once. Without conflicts, do not ISOLATE.\n"
+            "- INSTALL target must be a manifest file from the Ecosystem Summary files list, or package names "
+            "from the Dependencies list. Never install '.venv', '.git', '.gitignore' or other dotfiles.\n"
+            "- Never repeat a step that already succeeded (see Episode History).\n"
+            "\n"
+            "Example 1 (no Conflicts; Ecosystem Summary shows 'files: requirements.txt'):\n"
+            '{"action_type": "INSTALL", "target": "requirements.txt", '
+            '"description": "Install the dependencies listed in requirements.txt.", '
+            '"rationale": "There are no conflicts, so install directly from the manifest."}\n'
+            "\n"
+            "Example 2 (Conflicts listed; files: pyproject.toml; Episode History is empty):\n"
+            '{"action_type": "ISOLATE", "target": ".venv", '
+            '"description": "Create an isolated virtual environment.", '
+            '"rationale": "Conflicts are listed, so isolate before installing."}\n'
+            "Then, after ISOLATE succeeded:\n"
+            '{"action_type": "INSTALL", "target": "pyproject.toml", '
+            '"description": "Install the project and its dependencies from pyproject.toml.", '
+            '"rationale": "The environment is isolated; now install from the manifest."}'
         )
 
         # ------------------------------------------------------------------ #

@@ -150,7 +150,7 @@ def evaluate_completion(
 
 
 # --- Configuration ---
-MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
+MODEL_ID = "Qwen/Qwen2.5-1.5B-Instruct"  # Stage 2H: 0.5B never sampled a correct INSTALL in pilot run_3997be
 # Stage 2G: pilot corpus = v3 train/val filtered to winnable repos (scripts/build_pilot_corpus.py)
 CORPUS_MANIFEST = "datasets/repo_corpus/corpus_manifest_v3_pilot.json"
 
@@ -606,6 +606,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--resume_from", type=str, help="Path to checkpoint directory to resume from")
     parser.add_argument("--test_checkpoint", action="store_true", help="Run the dry-run checkpoint test and exit")
     parser.add_argument("--network", choices=["proxy", "none"], default="proxy", help="Docker network isolation mode")
+    parser.add_argument("--model_id", type=str, default=MODEL_ID, help="HF model id for the policy")
     parser.add_argument("--max_episodes", type=int, default=MAX_EPISODES, help="Total episodes to run (pilot: e.g. 50)")
     return parser
 
@@ -642,16 +643,16 @@ def main(cli_args=None):
     logger.info("=== docker system df BEFORE pilot ===\n%s", _docker_df())
     
     # Initialize Model & Tokenizer
-    logger.info("Loading Qwen2.5-0.5B-Instruct in 4-bit...")
+    logger.info(f"Loading {args.model_id} in 4-bit...")
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
         bnb_4bit_compute_dtype=torch.float16,
         bnb_4bit_use_double_quant=True
     )
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_id)
     model = AutoModelForCausalLM.from_pretrained(
-        MODEL_ID,
+        args.model_id,
         quantization_config=bnb_config,
         device_map="auto"
     )

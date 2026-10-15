@@ -100,8 +100,9 @@ def test_no_per_step_validator_bonus_after_install():
     plan = [_ps(ActionType.INSTALL, "requests"), _ps(ActionType.CHECK, ".")]
     total, bd = _reward(plan, [_res()], _res(verified=False, rc=5), inst)
     assert bd["validator"] == 0.0
-    assert bd["execution"] == 0.0          # CHECK not expected by setup_project -> no progress
-    assert total == pytest.approx(-CFG.w_step_penalty)
+    # CHECK not expected by setup_project -> no progress (Stage 2H: costs r_no_progress, was 0)
+    assert bd["execution"] == pytest.approx(CFG.w_execution * CFG.r_no_progress)
+    assert total == pytest.approx(CFG.w_execution * CFG.r_no_progress - CFG.w_step_penalty)
 
 
 def test_ordering_violation_charged_once():
@@ -143,14 +144,15 @@ def test_duplicate_install_gets_no_execution_credit():
     inst = _inst(deps=(("requests", ""), ("flask", "")))
     plan = [_ps(ActionType.INSTALL, "requests"), _ps(ActionType.INSTALL, "requests>=2.0")]
     _, bd = _reward(plan, [_res()], _res(), inst)
-    assert bd["progress"] is False and bd["execution"] == 0.0
+    assert bd["progress"] is False
+    assert bd["execution"] == pytest.approx(CFG.w_execution * CFG.r_no_progress)  # Stage 2H: was 0.0
     assert bd["execution_label"] == "success_verified_no_progress"
 
 
 def test_unrelated_install_gets_no_execution_credit():
     inst = _inst()
     _, bd = _reward([_ps(ActionType.INSTALL, "numpy")], [], _res(), inst)
-    assert bd["execution"] == 0.0
+    assert bd["execution"] == pytest.approx(CFG.w_execution * CFG.r_no_progress)  # Stage 2H: was 0.0
 
 
 def test_verified_after_unverified_still_credited():
@@ -173,7 +175,8 @@ def test_isolate_credit_limited_to_expected_count():
     p = [_ps(ActionType.ISOLATE, ".venv")]
     _, first = _reward(p, [], _res(), inst)
     _, second = _reward(p + [_ps(ActionType.ISOLATE, ".venv2")], [_res()], _res(), inst)
-    assert first["execution"] > 0 and second["execution"] == 0.0
+    assert first["execution"] > 0
+    assert second["execution"] == pytest.approx(CFG.w_execution * CFG.r_no_progress)  # Stage 2H: was 0.0
 
 
 # --- reward ordering -------------------------------------------------------

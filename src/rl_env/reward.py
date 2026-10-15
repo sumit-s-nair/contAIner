@@ -42,9 +42,17 @@ toward the episode goal:
     (or, when no packages are required, fewer distinct installs credited than
     the template expects);
   * other types: fewer successes of that type credited than expected.
-A success with no progress gets 0 execution reward (label suffix
+A success with no progress gets ``r_no_progress`` (label suffix
 ``_no_progress``), so repeating or padding never pays.  Negative outcomes are
 never gated.
+
+Stage 2H (pilot run_3997be): with no-progress = 0 and r_failed = -1.0, an
+idle ISOLATE cost -0.1 while a failed INSTALL cost -2.1, and the policy
+collapsed onto ISOLATE (77% -> 96% of actions over 50 episodes, 0 positive
+rewards in 1,600 completions).  No-progress now costs r_no_progress and
+r_failed went -1.0 -> -0.75 (kept below r_review_denied so the Stage 2F
+ordering progress > no-progress > denied > failed > blocked still holds),
+so idling is no longer much cheaper than trying.
 
 Episode completion bonus
 ------------------------
@@ -119,8 +127,12 @@ class RewardConfig:
     r_success_unverified:  float = 0.2
         Partial credit: status == SUCCESS but verified == False.
         Strictly less than r_success, strictly greater than r_failed.
-    r_failed:              float = -1.0
-        Command ran and exited non-zero.
+    r_failed:              float = -0.75
+        Command ran and exited non-zero.  (Stage 2H: was -1.0.)  Must stay
+        below r_review_denied (ordering: denied > failed).
+    r_no_progress:         float = -0.25
+        A successful step that makes no new progress (padding, repeats,
+        actions the template does not expect).  Stage 2H: was implicitly 0.
     r_error:               float = -0.5
         Python-level exception during execution.
 
@@ -146,7 +158,8 @@ class RewardConfig:
     r_review_denied:       float = -0.5   # auto_deny during training
     r_success:             float = 1.0    # exit-0 AND verified
     r_success_unverified:  float = 0.2    # exit-0 but NOT verified
-    r_failed:              float = -1.0   # non-zero exit
+    r_failed:              float = -0.75  # non-zero exit (Stage 2H: was -1.0; must stay < r_review_denied)
+    r_no_progress:         float = -0.25  # success without progress (Stage 2H: was 0)
     r_error:               float = -0.5   # Python exception
     r_unmapped:            float = -0.5   # unmapped action
 
@@ -569,8 +582,8 @@ def compute_reward(
     else:
         progress = is_progress(step, plan_so_far, history, instance, execution_result)
     if e_reward > 0 and not progress:
-        e_reward = 0.0
-        e_breakdown["execution_raw"] = 0.0
+        e_breakdown["execution_raw"] = cfg.r_no_progress
+        e_reward = cfg.w_execution * cfg.r_no_progress
         e_breakdown["execution_label"] += "_no_progress"
     e_breakdown["progress"] = progress
     e_breakdown["install_progress"] = install_progress

@@ -432,7 +432,11 @@ class PlannerEnv:
         outcome = exec_result.status.value
         if exec_result.status == ExecutionStatus.SUCCESS:
             outcome += ", verified" if exec_result.verified else ", not verified"
-        self._obs.episode_steps.append(f"{action.description} [{outcome}]")
+        # Stage 2H: show the action and target, not only the model's own prose,
+        # so the policy can see what it already did (it repeated ISOLATE .venv).
+        self._obs.episode_steps.append(
+            f"{action.action_type.value.upper()} {action.target}: {action.description} [{outcome}]"
+        )
         self._obs.step_index += 1
         self._execution_history.append(exec_result)
 

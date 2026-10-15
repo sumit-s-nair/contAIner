@@ -1,0 +1,216 @@
+{
+  "summary": {
+    "oracle_episodes": 2,
+    "oracle_won": 0,
+    "oracle_totals": {
+      "hackersandslackers/flask-blueprint-tutorial": -0.3,
+      "pallets/flask": -0.85
+    },
+    "spam_total": -9.55,
+    "spam_below_oracle": true
+  },
+  "episodes": [
+    {
+      "label": "oracle",
+      "repo": "hackersandslackers/flask-blueprint-tutorial",
+      "steps": [
+        {
+          "action": "isolate .venv",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.1,
+          "execution_label": "success_verified_no_progress",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 0.0,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install requirements.txt",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.1,
+          "execution_label": "success_verified_no_progress",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 0.0,
+          "stderr_tail": ""
+        },
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.1,
+          "execution_label": "success_verified_no_progress",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 0.0,
+          "stderr_tail": ""
+        }
+      ],
+      "total": -0.3,
+      "complete": false,
+      "ended": "plan_exhausted",
+      "seconds": 0.0
+    },
+    {
+      "label": "check_spam",
+      "repo": "hackersandslackers/flask-blueprint-tutorial",
+      "steps": [
+        {
+          "action": "check .",
+          "status": "aborted",
+          "verified": false,
+          "rc": null,
+          "reward": -1.1,
+          "execution_label": "review_denied",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 0.0,
+          "stderr_tail": "[DryRunExecutor] REVIEW step auto-denied by policy 'TrainingReviewPolicy.AUTO_DENY': 'python -m pytest .'"
+        },
+        {
+          "action": "check .",
+          "status": "aborted",
+          "verified": false,
+          "rc": null,
+          "reward": -1.1,
+          "execution_label": "review_denied",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 0.0,
+          "stderr_tail": "[DryRunExecutor] REVIEW step auto-denied by policy 'TrainingReviewPolicy.AUTO_DENY': 'python -m pytest .'"
+        },
+        {
+          "action": "check .",
+          "status": "aborted",
+          "verified": false,
+          "rc": null,
+          "reward": -1.1,
+          "execution_label": "review_denied",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 0.0,
+          "stderr_tail": "[DryRunExecutor] REVIEW step auto-denied by policy 'TrainingReviewPolicy.AUTO_DENY': 'python -m pytest .'"
+        },
+        {
+          "action": "check .",
+          "status": "aborted",
+          "verified": false,
+          "rc": null,
+          "reward": -1.1,
+          "execution_label": "review_denied",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 0.0,
+          "stderr_tail": "[DryRunExecutor] REVIEW step auto-denied by policy 'TrainingReviewPolicy.AUTO_DENY': 'python -m pytest .'"
+        },
+        {
+          "action": "check .",
+          "status": "aborted",
+          "verified": false,
+          "rc": null,
+          "reward": -1.1,
+          "execution_label": "review_denied",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 0.0,
+          "stderr_tail": "[DryRunExecutor] REVIEW step auto-denied by policy 'TrainingReviewPolicy.AUTO_DENY': 'python -m pytest .'"
+        },
+        {
+          "action": "check .",
+          "status": "aborted",
+          "verified": false,
+          "rc": null,
+          "reward": -1.1,
+          "execution_label": "review_denied",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 0.0,
+          "stderr_tail": "[DryRunExecutor] REVIEW step auto-denied by policy 'TrainingReviewPolicy.AUTO_DENY': 'python -m pytest .'"
+        },
+        {
+          "action": "check .",
+          "status": "aborted",
+          "verified": false,
+          "rc": null,
+          "reward": -1.1,
+          "execution_label": "review_denied",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [],
+          "missing_at_end": [],
+          "seconds": 0.0,
+          "stderr_tail": "[DryRunExecutor] REVIEW step auto-denied by policy 'TrainingReviewPolicy.AUTO_DENY': 'python -m pytest .'"
+        },
+        {
+          "action": "check .",
+          "status": "aborted",
+          "verified": false,
+          "rc": null,
+          "reward": -1.85,
+          "execution_label": "review_denied",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [],
+          "missing_at_end": [
+            "install"
+          ],
+          "seconds": 0.0,
+          "stderr_tail": "[DryRunExecutor] REVIEW step auto-denied by policy 'TrainingReviewPolicy.AUTO_DENY': 'python -m pytest .'"
+        }
+      ],
+      "total": -9.55,
+      "complete": false,
+      "ended": "truncated",
+      "seconds": 0.0
+    },
+    {
+      "label": "oracle",
+      "repo": "pallets/flask",
+      "steps": [
+        {
+          "action": "install pyproject.toml",
+          "status": "success",
+          "verified": true,
+          "rc": 0,
+          "reward": -0.85,
+          "execution_label": "success_verified_no_progress",
+          "install_progress": null,
+          "required": "None/None",
+          "new_ordering_violations": [
+            "isolate->install"
+          ],
+          "missing_at_end": [],
+          "seconds": 0.0,
+          "stderr_tail": ""
+        }
+      ],
+      "total": -0.85,
+      "complete": false,
+      "ended": "plan_exhausted",
+      "seconds": 0.0
+    }
+  ]
+}
