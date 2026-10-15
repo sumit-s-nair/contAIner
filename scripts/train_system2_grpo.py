@@ -186,6 +186,29 @@ class RunState:
         self.global_step = sd.get("global_step", 0)
 
 
+# Stage 2H log fix: reward.compute_reward writes "completion_bonus" and
+# "step_penalty", and env.step sets info["episode_complete"].  The logger read
+# "completion" / "penalty" / "verified_complete", so comp_rate, Comp and
+# Penalty were always 0 (run beab44: logged 0.00, actual 47/50 completed).
+BREAKDOWN_KEYS = {
+    "validator": "validator",
+    "execution": "execution",
+    "completion": "completion_bonus",
+    "penalty": "step_penalty",
+}
+
+
+def accumulate_breakdown(acc: Dict[str, float], details: Dict[str, Any]) -> None:
+    """Add one step's reward breakdown into the episode accumulator."""
+    for log_key, src_key in BREAKDOWN_KEYS.items():
+        acc[log_key] += float(details.get(src_key, 0.0) or 0.0)
+
+
+def episode_completed(info: Dict[str, Any]) -> int:
+    """1 if the main trajectory's final step completed the episode."""
+    return 1 if info.get("episode_complete", False) else 0
+
+
 # Module-level sampling configuration for generate() and rollout logging
 SAMPLING_CONFIG: Dict[str, Any] = {
     "temperature": 0.8,
@@ -960,6 +983,11 @@ def main(cli_args=None):
                                         if old_snap:
                                             env._docker_executor.delete_snapshot(old_snap)
                                     else:
+                                        # Stage 2H: delete both images; dropping the
+                                        # references leaked them (run beab44).
+                                        env._docker_executor.delete_snapshot(new_snap)
+                                        if current_snapshot_tag:
+                                            env._docker_executor.delete_snapshot(current_snapshot_tag)
                                         current_snapshot_tag = None
                                         snapshot_failures_count += 1
                                         logger.warning(
@@ -967,6 +995,8 @@ def main(cli_args=None):
                                             new_snap
                                         )
                                 except Exception as snap_exc:
+                                    if current_snapshot_tag:
+                                        env._docker_executor.delete_snapshot(current_snapshot_tag)
                                     current_snapshot_tag = None
                                     snapshot_failures_count += 1
                                     logger.warning(
@@ -985,9 +1015,7 @@ def main(cli_args=None):
                     
                     # Track detailed breakdown
                     if best is not None:
-                        details = info.get("reward_breakdown", {})
-                        for k in step_breakdown:
-                            step_breakdown[k] += details.get(k, 0.0)
+                        accumulate_breakdown(step_breakdown, info.get("reward_breakdown", {}))
                             
                         # Log risks
                         if info.get("exec_tier") == RiskTier.BLOCKED.value:
@@ -1021,7 +1049,7 @@ def main(cli_args=None):
     
             # Post-episode processing
             rolling_rewards.append(episode_reward)
-            completed = 1 if info.get("verified_complete", False) else 0
+            completed = episode_completed(info)
             rolling_completion.append(completed)
             
             avg_reward = sum(rolling_rewards) / len(rolling_rewards)

@@ -155,3 +155,59 @@ def test_trainer_defaults_to_1_5b_and_accepts_overrides():
     assert a.max_episodes == 1000
     b = get_parser().parse_args(["--model_id", "Qwen/Qwen2.5-0.5B-Instruct", "--max_episodes", "50"])
     assert b.model_id == "Qwen/Qwen2.5-0.5B-Instruct" and b.max_episodes == 50
+
+
+# --- trainer logging (run beab44: comp_rate logged 0.00, 47/50 actually completed) ---
+
+def test_breakdown_logging_reads_reward_keys():
+    pytest.importorskip("torch")
+    from scripts.train_system2_grpo import accumulate_breakdown
+    inst = _inst()
+    _, bd = _r([_ps(ActionType.INSTALL, "requirements.txt")], [], _res(), inst, ip=1.0, complete=True)
+    acc = {"validator": 0.0, "execution": 0.0, "completion": 0.0, "penalty": 0.0}
+    accumulate_breakdown(acc, bd)
+    assert acc["completion"] == pytest.approx(CFG.w_completion)      # was always 0
+    assert acc["penalty"] == pytest.approx(CFG.w_step_penalty)       # was always 0
+    assert acc["validator"] + acc["execution"] + acc["completion"] - acc["penalty"] == pytest.approx(bd["total"])
+
+
+def test_episode_completed_reads_env_key():
+    pytest.importorskip("torch")
+    from scripts.train_system2_grpo import episode_completed
+    assert episode_completed({"episode_complete": True}) == 1
+    assert episode_completed({"episode_complete": False}) == 0
+    assert episode_completed({"verified_complete": True}) == 0       # the old, never-set key
+
+
+# --- snapshot leak (run beab44: images 1 GB -> 21.9 GB after 2 snapshot failures) ---
+
+def _bare_executor():
+    from src.rl_env.docker_executor import DockerEpisodeExecutor
+    ex = object.__new__(DockerEpisodeExecutor)
+    ex._container_id = "cid"
+    return ex
+
+
+@pytest.mark.parametrize("mode", ["timeout", "nonzero"])
+def test_failed_commit_removes_the_image(monkeypatch, mode):
+    import subprocess
+    from src.rl_env import docker_executor as de
+    calls = []
+
+    def fake_run(cmd, **kw):
+        calls.append(cmd)
+        if cmd[:2] == ["docker", "commit"]:
+            if mode == "timeout":
+                raise subprocess.TimeoutExpired(cmd, kw.get("timeout"))
+            return subprocess.CompletedProcess(cmd, 1, "", "boom")
+        return subprocess.CompletedProcess(cmd, 0, "", "")
+
+    monkeypatch.setattr(de.subprocess, "run", fake_run)
+    with pytest.raises(RuntimeError):
+        _bare_executor().snapshot(tag="grpo-snapshot-x")
+    assert ["docker", "rmi", "-f", "grpo-snapshot-x"] in calls
+
+
+def test_commit_timeout_raised_from_60():
+    from src.rl_env.docker_executor import SNAPSHOT_COMMIT_TIMEOUT
+    assert SNAPSHOT_COMMIT_TIMEOUT >= 300

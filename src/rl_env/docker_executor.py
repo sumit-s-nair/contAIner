@@ -93,6 +93,8 @@ from src.sandbox.models import (
 from src.rl_env.dry_run_executor import TrainingReviewPolicy
 from src.rl_env.verify_table import inject_verify_command
 
+SNAPSHOT_COMMIT_TIMEOUT = 300  # seconds; Stage 2H: was 60 (big installs timed out)
+
 # ---------------------------------------------------------------------------
 # Package cache configuration
 # ---------------------------------------------------------------------------
@@ -850,13 +852,25 @@ class DockerEpisodeExecutor:
             )
 
         new_tag = tag or f"grpo-snapshot-{uuid.uuid4().hex[:8]}"
-        result = subprocess.run(
-            ["docker", "commit", self._container_id, new_tag],
-            capture_output=True,
-            text=True,
-            timeout=60,
-        )
+        # Stage 2H: a client-side timeout does not stop the daemon, which
+        # finishes the commit and leaves a multi-GB image nobody references
+        # (run beab44: 2 snapshot failures, images 1 GB -> 21.9 GB).  Use a
+        # longer timeout and always remove new_tag on any failure path.
+        try:
+            result = subprocess.run(
+                ["docker", "commit", self._container_id, new_tag],
+                capture_output=True,
+                text=True,
+                timeout=SNAPSHOT_COMMIT_TIMEOUT,
+            )
+        except subprocess.TimeoutExpired as exc:
+            self.delete_snapshot(new_tag)
+            raise RuntimeError(
+                f"[DockerEpisodeExecutor] docker commit timed out after "
+                f"{SNAPSHOT_COMMIT_TIMEOUT}s for {new_tag!r}; removed it."
+            ) from exc
         if result.returncode != 0:
+            self.delete_snapshot(new_tag)
             raise RuntimeError(
                 f"[DockerEpisodeExecutor] docker commit failed for container "
                 f"{self._container_id!r} -> {new_tag!r}.\n"
