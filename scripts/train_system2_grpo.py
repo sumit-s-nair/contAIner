@@ -606,6 +606,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--resume_from", type=str, help="Path to checkpoint directory to resume from")
     parser.add_argument("--test_checkpoint", action="store_true", help="Run the dry-run checkpoint test and exit")
     parser.add_argument("--network", choices=["proxy", "none"], default="proxy", help="Docker network isolation mode")
+    parser.add_argument("--max_episodes", type=int, default=MAX_EPISODES, help="Total episodes to run (pilot: e.g. 50)")
     return parser
 
 def main(cli_args=None):
@@ -617,6 +618,7 @@ def main(cli_args=None):
         sys.exit(0)
 
     logger.info(f"Network mode: {args.network}")
+    logger.info(f"Max episodes: {args.max_episodes}")
 
     # Output directory versioning
     run_id = uuid.uuid4().hex[:6]
@@ -679,7 +681,7 @@ def main(cli_args=None):
     rolling_rewards = deque(maxlen=20)
     rolling_completion = deque(maxlen=20)
     
-    pbar = tqdm(total=MAX_EPISODES, initial=run_state.episode_idx, desc="Training")
+    pbar = tqdm(total=args.max_episodes, initial=run_state.episode_idx, desc="Training")
 
     # Fail-fast and tracking counters
     G = BATCH_SIZE
@@ -695,7 +697,7 @@ def main(cli_args=None):
     initial_corpus_len = len(env._corpus)
 
     try:
-        for ep in range(run_state.episode_idx, MAX_EPISODES):
+        for ep in range(run_state.episode_idx, args.max_episodes):
             run_state.episode_idx = ep
             tracker.reset_episode()
             ep_updates = 0
