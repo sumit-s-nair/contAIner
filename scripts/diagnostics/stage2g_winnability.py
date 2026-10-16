@@ -57,6 +57,10 @@ from src.system2_planner.models import ActionType, PlannedStep  # noqa: E402
 
 PILOT = "datasets/repo_corpus/corpus_manifest_v3_pilot.json"
 WINNABILITY = "datasets/repo_corpus/pilot_winnability.json"
+# Stage 2H: same oracle on the (never-filtered) test split, so the paper can
+# report completion on the oracle-winnable test subset.  Separate file: the
+# test verdicts must never feed build_pilot_corpus.py.
+TEST_WINNABILITY = "datasets/repo_corpus/test_winnability.json"
 PROJECT_FILES = {"pyproject.toml", "setup.py", "setup.cfg"}
 
 
@@ -70,6 +74,18 @@ def oracle_plan(scan: dict) -> list:
     for f in reqs + projs:
         plan.append(PlannedStep(action_type=ActionType.INSTALL, target=f, description=f"Install from {f}"))
     return plan
+
+
+def scan_via_env(env: PlannerEnv, entry: dict) -> dict:
+    """oracle_plan() input for a repo with no pilot_scan entry (the test split):
+    the env scans the repo on reset, exactly as it does for the policy."""
+    try:
+        obs, _ = env.reset(entry)
+        return {"conflicts": list(obs.repo_manifest.conflicts or []),
+                "manifest_files": list((obs.manifest_paths or {}).get("python", [])),
+                "required": []}
+    finally:
+        env.end_episode()
 
 
 def _tail_steps(env: PlannerEnv):
@@ -217,7 +233,12 @@ def main() -> int:
     ap.add_argument("--only-lost", action="store_true",
                     help="with --all: rerun only repos whose verdict at the same sha is NOT won "
                          "(use after a sandbox-image fix; won verdicts are kept)")
+    ap.add_argument("--split", choices=["pilot", "test"], default="pilot",
+                    help="with --all: 'test' runs the oracle on the test split and writes "
+                         f"{TEST_WINNABILITY} (evaluation subset only; never used for training data)")
     args = ap.parse_args()
+    if args.split == "test" and not args.all:
+        ap.error("--split test requires --all")
     pilot = json.loads((PROJECT_ROOT / PILOT).read_text(encoding="utf-8"))
     train = list(pilot["splits"]["train"])
     random.Random(args.seed).shuffle(train)
@@ -225,9 +246,15 @@ def main() -> int:
     conf = [e for e in train if pilot["pilot_scan"][e["repo"]]["conflicts"]]
     chosen = (conf[:1] + [e for e in train if e not in conf[:1]])[: args.n]
 
-    verdict_path = PROJECT_ROOT / WINNABILITY
+    verdict_path = PROJECT_ROOT / (TEST_WINNABILITY if args.split == "test" else WINNABILITY)
     verdicts: dict = {}
-    if args.all:
+    if args.all and args.split == "test":
+        chosen = list(pilot["splits"]["test"])
+        if verdict_path.exists():
+            verdicts = json.loads(verdict_path.read_text(encoding="utf-8")).get("repos", {})
+        chosen = _select(chosen, verdicts, resume=args.resume, only_lost=args.only_lost)
+        print(f"test split: {len(chosen)} repo(s) to run")
+    elif args.all:
         # The oracle must judge every repo that passed the STATIC filters, not
         # just the current splits: the splits already exclude repos an older
         # verdict marked unwinnable, so re-judging only the splits never gives
@@ -253,7 +280,14 @@ def main() -> int:
     print(f"sandbox image: {PYTHON_SANDBOX_IMAGE} ({image})")
     results = []
     for k, entry in enumerate(chosen):
-        scan = pilot["pilot_scan"][entry["repo"]]
+        if args.split == "test":
+            try:
+                scan = scan_via_env(env, entry)
+            except Exception as exc:  # run_episode's own reset records the error
+                print(f"   scan failed ({type(exc).__name__}: {exc}); oracle reset will retry")
+                scan = {"conflicts": [], "manifest_files": [], "required": []}
+        else:
+            scan = pilot["pilot_scan"][entry["repo"]]
         plan = oracle_plan(scan)
         print(f"\n[{k+1}/{len(chosen)}] {entry['repo']}  conflicts={scan['conflicts']}  "
               f"required={len(scan['required'])}  manifests={scan['manifest_files']}")
