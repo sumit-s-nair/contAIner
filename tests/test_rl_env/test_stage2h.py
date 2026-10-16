@@ -211,3 +211,41 @@ def test_failed_commit_removes_the_image(monkeypatch, mode):
 def test_commit_timeout_raised_from_60():
     from src.rl_env.docker_executor import SNAPSHOT_COMMIT_TIMEOUT
     assert SNAPSHOT_COMMIT_TIMEOUT >= 300
+
+
+# --- KL spikes (run b45f5d ep 92/228/265): EOS padding was inside the loss mask ---
+
+def test_completion_mask_stops_after_first_eos():
+    torch = pytest.importorskip("torch")
+    from scripts.train_system2_grpo import completion_mask
+    IM_END, ENDOFTEXT = 151645, 151643
+    gen = torch.tensor([
+        [11, 12, IM_END, IM_END, IM_END],   # finished early, padded with eos_token_id
+        [11, 12, 13, 14, 15],               # hit max_new_tokens, no EOS
+        [11, ENDOFTEXT, IM_END, IM_END, 9], # ended on the other EOS id
+    ])
+    m = completion_mask(gen, [ENDOFTEXT, IM_END])
+    assert m.tolist() == [
+        [1, 1, 1, 0, 0],   # the EOS itself is trained; the padding is not
+        [1, 1, 1, 1, 1],
+        [1, 1, 0, 0, 0],
+    ]
+
+
+def test_old_pad_mask_leaked_eos_padding():
+    """Documents the bug: pad_token_id != eos_token_id for Qwen2.5-Instruct."""
+    torch = pytest.importorskip("torch")
+    IM_END, ENDOFTEXT = 151645, 151643
+    gen = torch.tensor([[11, 12, IM_END, IM_END, IM_END]])
+    old = (gen != ENDOFTEXT).float()
+    assert old.sum().item() == 5     # two forced padding tokens were in the loss
+
+
+def test_eos_token_ids_merges_tokenizer_and_generation_config():
+    pytest.importorskip("torch")
+    from types import SimpleNamespace
+    from scripts.train_system2_grpo import eos_token_ids
+    tok = SimpleNamespace(eos_token_id=151645, pad_token_id=151643)
+    model = SimpleNamespace(generation_config=SimpleNamespace(eos_token_id=[151645, 151643]))
+    assert eos_token_ids(tok, model) == [151643, 151645]
+    assert eos_token_ids(SimpleNamespace(eos_token_id=2, pad_token_id=None)) == [2]

@@ -270,6 +270,41 @@ def compute_group_advantages(
     return advantages, valid_mask
 
 
+def eos_token_ids(tokenizer, model=None) -> List[int]:
+    """All token ids that end a completion (tokenizer EOS/pad + generation_config EOS)."""
+    ids = set()
+    for t in (getattr(tokenizer, "eos_token_id", None), getattr(tokenizer, "pad_token_id", None)):
+        if t is not None:
+            ids.add(int(t))
+    gen_cfg = getattr(model, "generation_config", None) if model is not None else None
+    g = getattr(gen_cfg, "eos_token_id", None) if gen_cfg is not None else None
+    if isinstance(g, int):
+        ids.add(g)
+    elif g is not None:
+        ids.update(int(x) for x in g)
+    return sorted(ids)
+
+
+def completion_mask(gen_ids: torch.Tensor, eos_ids: List[int]) -> torch.Tensor:
+    """
+    1.0 for completion tokens up to and including the first EOS, 0.0 after it.
+
+    Stage 2H (run b45f5d KL spikes): generate() pads finished rows with
+    tokenizer.eos_token_id (<|im_end|> for Qwen2.5-Instruct), but the old mask
+    excluded only tokenizer.pad_token_id (<|endoftext|>).  The trailing padding
+    entered the PG and K3-KL terms, so the policy was trained on forced
+    <|im_end|><|im_end|>... runs it never sampled.  Spikes (ep 92/228/265) all
+    hit single-step groups with a long completion next to short ones; ep 265 had
+    identical rewards (zero advantage) and still grad_norm 350 from KL alone.
+    """
+    is_eos = torch.zeros_like(gen_ids, dtype=torch.bool)
+    for t in eos_ids:
+        is_eos |= gen_ids == t
+    is_eos_l = is_eos.long()
+    after_first_eos = (is_eos_l.cumsum(dim=1) - is_eos_l) > 0
+    return (~after_first_eos).float()
+
+
 def compute_per_token_losses(
     action_log_probs: torch.Tensor,
     ref_action_log_probs: torch.Tensor,
@@ -906,16 +941,17 @@ def main(cli_args=None):
                         advantages, valid_seq_mask = adv_res
                         optimizer.zero_grad()
                         
-                        outputs = model(input_ids=output_ids, attention_mask=(output_ids != tokenizer.pad_token_id).long())
+                        pad_mask = completion_mask(gen_ids, eos_token_ids(tokenizer, model))
+                        full_attn = torch.cat([inputs.attention_mask, pad_mask.long()], dim=1)
+                        outputs = model(input_ids=output_ids, attention_mask=full_attn)
                         logits = outputs.logits[:, input_length-1:-1, :]
                         
                         log_probs = torch.nn.functional.log_softmax(logits, dim=-1)
                         action_log_probs = torch.gather(log_probs, 2, gen_ids.unsqueeze(-1)).squeeze(-1)
-                        pad_mask = (gen_ids != tokenizer.pad_token_id).float()
 
                         with torch.no_grad():
                             with model.disable_adapter():
-                                ref_outputs = model(input_ids=output_ids, attention_mask=(output_ids != tokenizer.pad_token_id).long())
+                                ref_outputs = model(input_ids=output_ids, attention_mask=full_attn)
                                 ref_logits = ref_outputs.logits[:, input_length-1:-1, :]
                                 ref_log_probs = torch.nn.functional.log_softmax(ref_logits, dim=-1)
                                 ref_action_log_probs = torch.gather(ref_log_probs, 2, gen_ids.unsqueeze(-1)).squeeze(-1)
