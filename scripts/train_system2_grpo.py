@@ -944,7 +944,9 @@ def main(cli_args=None):
                         pad_mask = completion_mask(gen_ids, eos_token_ids(tokenizer, model))
                         full_attn = torch.cat([inputs.attention_mask, pad_mask.long()], dim=1)
                         outputs = model(input_ids=output_ids, attention_mask=full_attn)
-                        logits = outputs.logits[:, input_length-1:-1, :]
+                        # Stage 2H: score tokens under the distribution they were sampled from
+                        # (generate() used temperature=SAMPLING_CONFIG["temperature"]); TRL does the same.
+                        logits = outputs.logits[:, input_length-1:-1, :] / SAMPLING_CONFIG["temperature"]
                         
                         log_probs = torch.nn.functional.log_softmax(logits, dim=-1)
                         action_log_probs = torch.gather(log_probs, 2, gen_ids.unsqueeze(-1)).squeeze(-1)
@@ -952,7 +954,7 @@ def main(cli_args=None):
                         with torch.no_grad():
                             with model.disable_adapter():
                                 ref_outputs = model(input_ids=output_ids, attention_mask=full_attn)
-                                ref_logits = ref_outputs.logits[:, input_length-1:-1, :]
+                                ref_logits = ref_outputs.logits[:, input_length-1:-1, :] / SAMPLING_CONFIG["temperature"]
                                 ref_log_probs = torch.nn.functional.log_softmax(ref_logits, dim=-1)
                                 ref_action_log_probs = torch.gather(ref_log_probs, 2, gen_ids.unsqueeze(-1)).squeeze(-1)
                         

@@ -249,3 +249,110 @@ def test_eos_token_ids_merges_tokenizer_and_generation_config():
     model = SimpleNamespace(generation_config=SimpleNamespace(eos_token_id=[151645, 151643]))
     assert eos_token_ids(tok, model) == [151643, 151645]
     assert eos_token_ids(SimpleNamespace(eos_token_id=2, pad_token_id=None)) == [2]
+
+
+def test_trainer_scores_tokens_at_sampling_temperature():
+    """Log-probs must use the temperature generate() sampled at (was T=1 vs sampled T=0.8)."""
+    pytest.importorskip("torch")
+    import inspect
+    import scripts.train_system2_grpo as t
+    src = inspect.getsource(t.main)
+    assert src.count('logits[:, input_length-1:-1, :] / SAMPLING_CONFIG["temperature"]') == 2  # policy + ref
+
+
+# --- evaluate_system2 rewrite: mirrors training (prompt, parser, step budget, recovery) ---
+
+class _Enc(dict):
+    def __getattr__(self, k):
+        return self[k]
+
+    def to(self, device):
+        return self
+
+
+def _eval_env(step_infos, conflicts=False):
+    """Mock env whose step() returns the given (reward, done, info) in order."""
+    from unittest.mock import MagicMock
+    env = MagicMock()
+    obs = MagicMock()
+    obs.repo_manifest.conflicts = ["c"] if conflicts else []
+    env.reset.return_value = (obs, {})
+    env._serializer.to_chat_prompt.return_value = []
+    seq = iter(step_infos)
+
+    def step(action):
+        r, done, info = next(seq)
+        return obs, r, done, False, info
+    env.step.side_effect = step
+    return env
+
+
+def _eval_model(n_outputs):
+    torch = pytest.importorskip("torch")
+    from unittest.mock import MagicMock
+    model, tok = MagicMock(), MagicMock()
+    tok.apply_chat_template.return_value = "p"
+    tok.return_value = _Enc({"input_ids": torch.tensor([[1, 2]])})
+    model.generate.return_value = torch.tensor([[1, 2, 3]])
+    return model, tok
+
+
+def test_eval_continues_after_failed_step_and_counts_unnecessary_isolate():
+    pytest.importorskip("torch")
+    from unittest.mock import patch
+    from scripts.evaluate_system2 import run_episode, summarize
+    model, tok = _eval_model(3)
+    env = _eval_env([
+        (-0.6, False, {"episode_complete": False}),          # ISOLATE on a no-conflict repo
+        (-1.6, False, {"episode_complete": False}),          # failed INSTALL: old eval stopped here
+        (7.9, True, {"episode_complete": True}),             # recovery
+    ])
+    steps = iter([PlannedStep(action_type=ActionType.ISOLATE, description="d", target=".venv"),
+                  PlannedStep(action_type=ActionType.INSTALL, description="d", target="requirements.txt"),
+                  PlannedStep(action_type=ActionType.INSTALL, description="d", target="requirements.txt")])
+    with patch("scripts.evaluate_system2.parse_planned_step", side_effect=lambda _: next(steps)):
+        rec = run_episode(env, model, tok, {"repo": "o/r", "category": "python"})
+    assert rec["completed"] and rec["steps"] == 3 and not rec["env_error"]
+    m = summarize([rec])
+    assert m["completion_rate"] == 1.0
+    assert m["unnecessary_isolate_rate"] == 1.0
+    assert m["first_step_isolate_rate"] == 1.0
+    assert m["mean_steps"] == 3
+
+
+def test_eval_isolate_with_conflicts_is_not_unnecessary():
+    pytest.importorskip("torch")
+    from unittest.mock import patch
+    from scripts.evaluate_system2 import run_episode, summarize
+    model, tok = _eval_model(1)
+    env = _eval_env([(1.0, True, {"episode_complete": True})], conflicts=True)
+    with patch("scripts.evaluate_system2.parse_planned_step",
+               return_value=PlannedStep(action_type=ActionType.ISOLATE, description="d", target=".venv")):
+        rec = run_episode(env, model, tok, {"repo": "o/r"})
+    m = summarize([rec])
+    assert m["no_conflict_episodes"] == 0 and m["unnecessary_isolate_rate"] == 0.0
+
+
+def test_eval_parse_error_ends_episode_as_failure():
+    pytest.importorskip("torch")
+    from unittest.mock import patch
+    from src.rl_env.parser import ParseError
+    from scripts.evaluate_system2 import run_episode, summarize
+    model, tok = _eval_model(1)
+    env = _eval_env([])
+    with patch("scripts.evaluate_system2.parse_planned_step", side_effect=ParseError("bad")):
+        rec = run_episode(env, model, tok, {"repo": "o/r"})
+    assert rec["parse_error"] and not rec["completed"] and rec["steps"] == 1
+    assert summarize([rec])["parse_error_rate"] == 1.0
+    env.step.assert_not_called()
+
+
+def test_eval_defaults_match_training():
+    pytest.importorskip("torch")
+    from scripts.evaluate_system2 import get_parser, MAX_NEW_TOKENS
+    from scripts.train_system2_grpo import MODEL_ID, CORPUS_MANIFEST, SAMPLING_CONFIG
+    a = get_parser().parse_args([])
+    assert a.model_id == MODEL_ID
+    assert a.manifest == CORPUS_MANIFEST
+    assert MAX_NEW_TOKENS == SAMPLING_CONFIG["max_new_tokens"]
+    assert a.splits == ["val", "test"]

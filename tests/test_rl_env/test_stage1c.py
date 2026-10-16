@@ -497,7 +497,8 @@ def test_evaluate_system2_env_reset_error_separation():
     mock_env._serializer.to_chat_prompt.return_value = []
 
     with patch("scripts.evaluate_system2.PlannerEnv", return_value=mock_env):
-        with patch("scripts.evaluate_system2.extract_step_dict", return_value={"action_type": "CHECK", "description": "check"}):
+        # Stage 2H: the eval uses the training parser (extract_step_dict was removed).
+        with patch("scripts.evaluate_system2.parse_planned_step", return_value=PlannedStep(action_type=ActionType.CHECK, description="check")):
             metrics = evaluate_model(
                 model_name="TestModel",
                 model=mock_model,
@@ -509,14 +510,13 @@ def test_evaluate_system2_env_reset_error_separation():
 
     # Reset failure was counted under env_errors
     assert metrics["env_errors"] == 1
-    # Reset failure was excluded from execution_failed
-    assert metrics["failures"]["execution_failed"] == 0
-    # Reset failure was excluded from total_episodes (2 succeeded resets out of 3 repos)
-    assert metrics["total_episodes"] == 2
+    # Reset failure was excluded from the episode denominator (2 succeeded resets out of 3 repos)
+    # Stage 2H: metric keys renamed (total_episodes -> episodes, full_completion -> completed).
+    assert metrics["episodes"] == 2
     # Reset failure was excluded from category total
     assert metrics["by_category"]["python"]["total"] == 1
     assert metrics["by_category"]["node"]["total"] == 1
-    assert metrics["full_completion"] == 2
+    assert metrics["completed"] == 2
 
 
 def test_evaluate_system2_step_error_preserves_global_metrics():
@@ -550,7 +550,8 @@ def test_evaluate_system2_step_error_preserves_global_metrics():
     mock_env._serializer.to_chat_prompt.return_value = []
 
     with patch("scripts.evaluate_system2.PlannerEnv", return_value=mock_env):
-        with patch("scripts.evaluate_system2.extract_step_dict", return_value={"action_type": "CHECK", "description": "check"}):
+        # Stage 2H: the eval uses the training parser (extract_step_dict was removed).
+        with patch("scripts.evaluate_system2.parse_planned_step", return_value=PlannedStep(action_type=ActionType.CHECK, description="check")):
             metrics = evaluate_model(
                 model_name="TestModel",
                 model=mock_model,
@@ -562,10 +563,8 @@ def test_evaluate_system2_step_error_preserves_global_metrics():
 
     # Step error: env_errors must be 1, and no local metrics committed to global
     assert metrics["env_errors"] == 1
-    assert metrics["total_episodes"] == 0
-    assert metrics["valid_structure"] == 0
-    assert metrics["valid_json"] == 0
-    assert metrics["execution_success"] == 0
-    assert metrics["total_steps"] == 0
-    assert metrics["full_completion"] == 0
-    assert metrics["failures"]["execution_failed"] == 0
+    # Stage 2H: metric keys renamed; the errored episode stays out of every denominator.
+    assert metrics["episodes"] == 0
+    assert metrics["mean_steps"] == 0
+    assert metrics["mean_reward"] == 0
+    assert metrics["completed"] == 0

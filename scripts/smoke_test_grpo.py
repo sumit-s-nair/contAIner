@@ -124,19 +124,22 @@ def main():
         # 5. Compute loss and step
         optimizer.zero_grad()
         
-        outputs = model(input_ids=output_ids, attention_mask=(output_ids != tokenizer.pad_token_id).long())
-        logits = outputs.logits[:, input_length-1:-1, :]
+        # Stage 2H: mask everything after the first EOS (generate() pads with eos_token_id).
+        from scripts.train_system2_grpo import completion_mask, eos_token_ids
+        mask = completion_mask(gen_ids, eos_token_ids(tokenizer, model))
+        full_attn = torch.cat([inputs.attention_mask, mask.long()], dim=1)
+        outputs = model(input_ids=output_ids, attention_mask=full_attn)
+        logits = outputs.logits[:, input_length-1:-1, :] / 0.8
         
         log_probs = torch.nn.functional.log_softmax(logits, dim=-1)
         action_log_probs = torch.gather(log_probs, 2, gen_ids.unsqueeze(-1)).squeeze(-1)
         
-        mask = (gen_ids != tokenizer.pad_token_id).float()
         sequence_log_probs = (action_log_probs * mask).sum(dim=1)
         
         with torch.no_grad():
             with model.disable_adapter():
-                ref_outputs = model(input_ids=output_ids, attention_mask=(output_ids != tokenizer.pad_token_id).long())
-                ref_logits = ref_outputs.logits[:, input_length-1:-1, :]
+                ref_outputs = model(input_ids=output_ids, attention_mask=full_attn)
+                ref_logits = ref_outputs.logits[:, input_length-1:-1, :] / 0.8
                 ref_log_probs = torch.nn.functional.log_softmax(ref_logits, dim=-1)
                 ref_action_log_probs = torch.gather(ref_log_probs, 2, gen_ids.unsqueeze(-1)).squeeze(-1)
                 ref_sequence_log_probs = (ref_action_log_probs * mask).sum(dim=1)
