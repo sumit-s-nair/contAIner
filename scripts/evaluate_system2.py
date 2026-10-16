@@ -125,7 +125,7 @@ def run_episode(env, model, tokenizer, repo: Dict[str, Any], max_new_tokens: int
                                  pad_token_id=tokenizer.eos_token_id)
         completion = tokenizer.decode(out[0, inputs.input_ids.shape[1]:], skip_special_tokens=True)
         if trace is not None:
-            trace.append(f"## Step {rec['steps'] + 1}\n\n**Output:**\n```\n{completion}\n```\n")
+            trace.append(f"## Step {rec['steps'] + 1}\n\n**Output:**\n~~~\n{completion}\n~~~\n")
 
         try:
             action = parse_planned_step(completion)
