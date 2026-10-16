@@ -47,6 +47,7 @@ More-specific patterns should appear before less-specific ones.
 from __future__ import annotations
 
 import re
+import shlex
 from typing import Dict, List, Optional, Tuple
 
 from src.sandbox.models import AtomicStep
@@ -164,6 +165,18 @@ _PKG_CAPTURE_RE = re.compile(
 )
 
 
+# pip options that consume the following token as their value.
+_PIP_OPTS_WITH_VALUE = {
+    "-i", "--index-url", "--extra-index-url", "-c", "--constraint", "-t", "--target",
+    "--prefix", "--root", "-f", "--find-links", "--platform", "--python-version",
+    "--implementation", "--abi", "--src", "--upgrade-strategy", "--progress-bar",
+    "--cache-dir", "--log", "--trusted-host", "--proxy", "--timeout", "--retries",
+}
+# pip options meaning "install from a file/dir", not a named package.
+_PIP_SOURCE_OPTS = {"-r", "--requirement", "-e", "--editable"}
+_PKG_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*")
+
+
 def _extract_primary_package(command: str) -> Optional[str]:
     """
     Extract the primary package name from a command string.
@@ -171,9 +184,42 @@ def _extract_primary_package(command: str) -> Optional[str]:
     Returns ``None`` if no package-like token is found.  Used to produce
     tighter verify commands (e.g. ``python -c 'import requests'`` instead of
     the generic multi-package form).
+
+    For ``pip install`` the arguments are tokenised and options are skipped.
+    The old regex took the first token after ``pip install``, so
+    ``pip install --user six`` gave ``import __user`` and
+    ``pip install -r requirements.txt`` gave ``import _r`` (both always failed;
+    caught by TestIntegration.test_install_and_verify_round_trip on the 4090).
+    ``-r``/``-e`` and path-like targets return ``None`` (caller falls back to
+    ``pip check``).
     """
-    m = _PKG_CAPTURE_RE.search(command)
-    return m.group(1) if m else None
+    m = re.search(r"pip3?\s+install\b(.*)", command, re.IGNORECASE)
+    if m is None:
+        m2 = _PKG_CAPTURE_RE.search(command)
+        return m2.group(1) if m2 else None
+    try:
+        tokens = shlex.split(m.group(1))
+    except ValueError:
+        tokens = m.group(1).split()
+    skip_next = False
+    for tok in tokens:
+        if tok in ("&&", ";", "|", "||"):
+            break
+        if skip_next:
+            skip_next = False
+            continue
+        if tok.startswith("-"):
+            opt = tok.split("=", 1)[0]
+            if opt in _PIP_SOURCE_OPTS:
+                return None
+            if opt in _PIP_OPTS_WITH_VALUE and "=" not in tok:
+                skip_next = True
+            continue
+        if tok.startswith((".", "/", "~")) or "/" in tok or "\\" in tok or tok.endswith((".whl", ".tar.gz", ".zip")):
+            return None
+        name = _PKG_NAME_RE.match(tok)
+        return name.group(0) if name else None
+    return None
 
 
 def _make_pip_verify(package: Optional[str]) -> str:

@@ -356,3 +356,23 @@ def test_eval_defaults_match_training():
     assert a.manifest == CORPUS_MANIFEST
     assert MAX_NEW_TOKENS == SAMPLING_CONFIG["max_new_tokens"]
     assert a.splits == ["val", "test"]
+
+
+# --- verify_table: pip options were captured as the package (4090 integration failure) ---
+
+@pytest.mark.parametrize("cmd,pkg,verify", [
+    ("pip install --user six", "six", "python -c 'import six'"),          # was import __user
+    ("pip install -U --user flask", "flask", "python -c 'import flask'"),
+    ("pip install -i https://x/simple numpy", "numpy", "python -c 'import numpy'"),
+    ("pip install --index-url=https://x six", "six", "python -c 'import six'"),
+    ("pip install \"requests>=2.0\"", "requests", "python -c 'import requests'"),
+    ("python -m pip install pytest==8.3.5", "pytest", "python -c 'import pytest'"),
+    ("python -m pip install -r requirements.txt", None, "pip check"),     # was import _r
+    ("pip install -e .", None, "pip check"),
+    ("python -m pip install .", None, "pip check"),
+])
+def test_pip_verify_skips_options(cmd, pkg, verify):
+    from src.rl_env.verify_table import _extract_primary_package, lookup_verify_command
+    from src.sandbox.models import AtomicStep
+    assert _extract_primary_package(cmd) == pkg
+    assert lookup_verify_command(AtomicStep(command=cmd, description="d")) == verify
