@@ -1,0 +1,517 @@
+{
+  "updated_at": "2026-10-16T14:34:22",
+  "criterion": "oracle (manifests + per-package pinned tail) reaches episode_complete with total > 0; required = installed at a version satisfying a declared constraint, and pip check passes",
+  "repos": {
+    "LeCoupa/awesome-cheatsheets": {
+      "sha": "38f406dc19f556d4633e36d3ae144895fcab138f",
+      "won": false,
+      "total": 0.0,
+      "ended": "plan_exhausted",
+      "seconds": 6.1,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [],
+        "missing_required": [],
+        "pip_check": null,
+        "stderr": ""
+      }
+    },
+    "fastify/fastify": {
+      "sha": "37df44a421817e7bb048fce834bf691abb0999d6",
+      "won": false,
+      "total": 0.0,
+      "ended": "plan_exhausted",
+      "seconds": 5.3,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [],
+        "missing_required": null,
+        "pip_check": null,
+        "stderr": ""
+      }
+    },
+    "github/spec-kit": {
+      "sha": "f6e72bc8523de8ec8368129cbdea78d45f27cef8",
+      "won": true,
+      "total": 7.7,
+      "ended": "terminated",
+      "seconds": 23.4,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "MadsLorentzen/ai-job-search": {
+      "sha": "407dc34a2c4951e4ea3b047eaccdf2e4081a139a",
+      "won": false,
+      "total": -6.7,
+      "ended": "truncated",
+      "seconds": 17.1,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install -upstream",
+          "install check-upstream-updates",
+          "install install-portal-clis",
+          "install job-key",
+          "install robots-check"
+        ],
+        "missing_required": [
+          "-upstream",
+          "check-upstream-updates",
+          "install-portal-clis",
+          "job-key",
+          "robots-check",
+          "security-guards",
+          "tools"
+        ],
+        "pip_check": null,
+        "stderr": "ERROR: Could not find a version that satisfies the requirement robots-check (from versions: none)"
+      }
+    },
+    "hakimel/reveal.js": {
+      "sha": "e240e175232fa2de660a02bc0d7bf5f655b159bb",
+      "won": false,
+      "total": 0.0,
+      "ended": "plan_exhausted",
+      "seconds": 5.4,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [],
+        "missing_required": null,
+        "pip_check": null,
+        "stderr": ""
+      }
+    },
+    "sherlock-project/sherlock": {
+      "sha": "e40a45ec2a074b90703b3b4b842c8a3adbd6ada3",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 20.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "DietrichGebert/ponytail": {
+      "sha": "742e0abae1501e12d1254a81d05f16bba10d08c1",
+      "won": true,
+      "total": 7.7,
+      "ended": "terminated",
+      "seconds": 14.2,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "D4Vinci/Scrapling": {
+      "sha": "7a684934907a8c7feaafe9ff1ccfd9d45cc26faf",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 13.1,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "pallets/flask": {
+      "sha": "d086db856be187255b8ec61ef409357393020f32",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 10.8,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "karpathy/nanochat": {
+      "sha": "92d63d4e8bb4df75c3b71618f31ddde2378b2bcd",
+      "won": false,
+      "total": 0.256,
+      "ended": "truncated",
+      "seconds": 43.2,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install pyproject.toml"
+        ],
+        "missing_required": [
+          "torch",
+          "wandb"
+        ],
+        "pip_check": null,
+        "stderr": "error: subprocess-exited-with-error"
+      }
+    },
+    "psf/requests": {
+      "sha": "611c6162cbc4ac2020a2f91c7cfa4f3abf9bbb60",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 11.3,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "Alishahryar1/free-claude-code": {
+      "sha": "c5239619be489ff393fff29caf838c8a5a957454",
+      "won": false,
+      "total": -0.657,
+      "ended": "truncated",
+      "seconds": 43.9,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install pyproject.toml"
+        ],
+        "missing_required": [
+          "grpcio-tools",
+          "httpx2",
+          "json5",
+          "jsonschema",
+          "loguru",
+          "markdown-it-py",
+          "nvidia-riva-client",
+          "openai",
+          "pyperclip",
+          "python-dotenv",
+          "python-telegram-bot",
+          "requests",
+          "ruamel-yaml",
+          "simplejson",
+          "sqlalchemy",
+          "tiktoken",
+          "tomlkit",
+          "uvicorn"
+        ],
+        "pip_check": null,
+        "stderr": "ERROR: Package 'free-claude-code' requires a different Python: 3.11.17 not in '==3.14.7'"
+      }
+    },
+    "AUTOMATIC1111/stable-diffusion-webui": {
+      "sha": "82a973c04367123ae98bd9abdf80d9eda9b910e2",
+      "won": false,
+      "total": 0.537,
+      "ended": "plan_exhausted",
+      "seconds": 187.3,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install pyproject.toml",
+          "install eslint<9.0.0,>=8.40.0"
+        ],
+        "missing_required": [
+          "eslint"
+        ],
+        "pip_check": null,
+        "stderr": "ERROR: Could not find a version that satisfies the requirement eslint<9.0.0,>=8.40.0 (from versions: none)"
+      }
+    },
+    "Panniantong/Agent-Reach": {
+      "sha": "94f06c1969dfc1834001269d79d3ad0972d9dee6",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 17.6,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "h5bp/html5-boilerplate": {
+      "sha": "b6597338e695dc4a8165c5abcb2bfffa586c3ee5",
+      "won": false,
+      "total": 0.0,
+      "ended": "plan_exhausted",
+      "seconds": 4.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [],
+        "missing_required": null,
+        "pip_check": null,
+        "stderr": ""
+      }
+    },
+    "muziing/PySide6-Code-Tutorial": {
+      "sha": "1faa029b1fe9c082d4ae7447a2e47d1e0e0815de",
+      "won": true,
+      "total": 6.6,
+      "ended": "terminated",
+      "seconds": 27.0,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "dreddnafious/thereisnospoon": {
+      "sha": "98dd9e746be20fbbb89d7c6fa5b22ef5c030cd7f",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 16.3,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "sepandhaghighi/gitfollow": {
+      "sha": "346f926648c8ea8f37c22320da2fcc9f92d21816",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 10.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "salaheddinek/video-editing-py-script": {
+      "sha": "d8536dc1e856538ab62b7c91c4d56a3f4518eed8",
+      "won": false,
+      "total": -1.4,
+      "ended": "plan_exhausted",
+      "seconds": 23.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install svg"
+        ],
+        "missing_required": [
+          "svg"
+        ],
+        "pip_check": null,
+        "stderr": "ERROR: Could not find a version that satisfies the requirement svg (from versions: none)"
+      }
+    },
+    "Felixoid/clickhouse-plantuml": {
+      "sha": "63043425317a4a10183f8f59f59c094fbc2a075f",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 9.2,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "IDouble/Python-Scripts": {
+      "sha": "e5ff7e743c1c9889fbc8c8366323ca7f03f97b6f",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 8.5,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "MorvanZhou/Reinforcement-learning-with-tensorflow": {
+      "sha": "93e333484be0e262d28b65507b6a1d002424a056",
+      "won": false,
+      "total": -5.633,
+      "ended": "truncated",
+      "seconds": 32.6,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install arm-env",
+          "install car-env",
+          "install duelingdqnprioritizedreplay",
+          "install maze-env"
+        ],
+        "missing_required": [
+          "arm-env",
+          "car-env",
+          "duelingdqnprioritizedreplay",
+          "maze-env",
+          "pyglet",
+          "rl-brain",
+          "tensorflow",
+          "tkinter"
+        ],
+        "pip_check": null,
+        "stderr": "ERROR: Could not find a version that satisfies the requirement maze-env (from versions: none)"
+      }
+    },
+    "kidscancode/pygame_tutorials": {
+      "sha": "dd5574788cfbfc4736d7d507b5b3d15eb5f1b115",
+      "won": false,
+      "total": -3.05,
+      "ended": "truncated",
+      "seconds": 36.9,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install settings",
+          "install steeringmanager",
+          "install tilemap"
+        ],
+        "missing_required": [
+          "settings",
+          "steeringmanager",
+          "tilemap"
+        ],
+        "pip_check": null,
+        "stderr": "ERROR: Could not find a version that satisfies the requirement tilemap (from versions: none)"
+      }
+    },
+    "ThatXliner/idae": {
+      "sha": "b92bc0f21ac8b2f4d15195bb7d25820de110946f",
+      "won": true,
+      "total": 7.467,
+      "ended": "terminated",
+      "seconds": 14.0,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "talkpython/python-for-absolute-beginners-course": {
+      "sha": "f3d4ea5656e06fc1b588156f396f54102a4cf1d4",
+      "won": true,
+      "total": 7.8,
+      "ended": "terminated",
+      "seconds": 10.8,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "AlexFlipnote/discord_bot.py": {
+      "sha": "c8ea8e4719d42b4a083e22fa4447caed75b04e06",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 12.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "codingforentrepreneurs/30-Days-of-Python-3.6": {
+      "sha": "13482c5c4032605e0412814a079adea70741e9cd",
+      "won": false,
+      "total": -5.073,
+      "ended": "truncated",
+      "seconds": 20.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install data-class",
+          "install data-manager",
+          "install py-day-mod",
+          "install py-day-test"
+        ],
+        "missing_required": [
+          "data-class",
+          "data-manager",
+          "py-day-mod",
+          "py-day-test",
+          "twilio",
+          "twitter",
+          "utils"
+        ],
+        "pip_check": null,
+        "stderr": "ERROR: Could not find a version that satisfies the requirement py-day-test (from versions: none)"
+      }
+    },
+    "rohan472000/rohan472000": {
+      "sha": "0525da003b7602e0e72206e9ac4a801d82634f03",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 15.2,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "Unity-Technologies/Robotics-Object-Pose-Estimation": {
+      "sha": "",
+      "won": false,
+      "total": 0.0,
+      "ended": "plan_exhausted",
+      "seconds": 6.0,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [],
+        "missing_required": [],
+        "pip_check": null,
+        "stderr": ""
+      }
+    },
+    "muziing/PyQt_practice": {
+      "sha": "5224cd83c54c330de36fd95eddf3c1a295997ac6",
+      "won": true,
+      "total": 7.9,
+      "ended": "terminated",
+      "seconds": 11.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "harmony-one/harmony-ops": {
+      "sha": "f181303cd46bba0447411bcbaa05c2ab0755ed3d",
+      "won": false,
+      "total": -8.618,
+      "ended": "truncated",
+      "seconds": 19.7,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install collect-data",
+          "install creation-certificates",
+          "install creation-elb2",
+          "install creation-entries",
+          "install creation-listener",
+          "install creation-rule"
+        ],
+        "missing_required": [
+          "collect-data",
+          "creation-certificates",
+          "creation-elb2",
+          "creation-entries",
+          "creation-listener",
+          "creation-rule",
+          "creation-tg",
+          "eth-abi",
+          "helpers",
+          "jinja2",
+          "pandas",
+          "pexpect",
+          "pyhmy",
+          "python-dotenv",
+          "pyyaml",
+          "registration-exps",
+          "requests",
+          "staking-tx-history",
+          "utils",
+          "web3"
+        ],
+        "pip_check": null,
+        "stderr": "ERROR: Could not find a version that satisfies the requirement creation-rule (from versions: none)"
+      }
+    },
+    "pandas-dev/pandas": {
+      "sha": "8eded316d50e33cc6e0e57bc596b4ba4d6923ff8",
+      "won": true,
+      "total": 6.2,
+      "ended": "terminated",
+      "seconds": 64.9,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2
+    },
+    "numpy/numpy": {
+      "sha": "7676923380c4574d9275c63ac1960ee80c827bf5",
+      "won": false,
+      "total": -1.6,
+      "ended": "plan_exhausted",
+      "seconds": 18.4,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": {
+        "failed_steps": [
+          "install pyproject.toml"
+        ],
+        "missing_required": [],
+        "pip_check": null,
+        "stderr": "error: subprocess-exited-with-error"
+      }
+    },
+    "apache/airflow": {
+      "sha": "91a8ab6950a1abc53828716b8826d671659cebf1",
+      "won": false,
+      "total": 0.0,
+      "ended": null,
+      "seconds": 64.9,
+      "image": "python-3.11-git-toolchain-v2",
+      "criterion": 2,
+      "why": "RuntimeError: [DockerEpisodeExecutor] Timed out copying /workspace to /workspace_rw in container None."
+    }
+  }
+}

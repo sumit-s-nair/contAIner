@@ -1,0 +1,188 @@
+{
+  "base": {
+    "val": {
+      "episodes": 6,
+      "env_errors": 0,
+      "completion_rate": 0.6666666666666666,
+      "completed": 4,
+      "mean_steps": 5.5,
+      "mean_steps_completed": 4.25,
+      "mean_reward": -0.5638888888888883,
+      "parse_error_episodes": 0,
+      "parse_error_rate": 0.0,
+      "no_conflict_episodes": 5,
+      "unnecessary_isolate_rate": 0.8,
+      "first_step_isolate_rate": 0.8333333333333334,
+      "first_step_install_rate": 0.0,
+      "isolate_action_share": 0.15151515151515152,
+      "blocked_steps": 0,
+      "review_denied_steps": 0,
+      "by_category": {
+        "manifest_present": {
+          "total": 4,
+          "completed": 2
+        },
+        "manifest_less": {
+          "total": 2,
+          "completed": 2
+        }
+      }
+    },
+    "test": {
+      "episodes": 32,
+      "env_errors": 2,
+      "completion_rate": 0.3125,
+      "completed": 10,
+      "mean_steps": 6.75,
+      "mean_steps_completed": 4.0,
+      "mean_reward": -4.9677083333333325,
+      "parse_error_episodes": 0,
+      "parse_error_rate": 0.0,
+      "no_conflict_episodes": 30,
+      "unnecessary_isolate_rate": 0.9666666666666667,
+      "first_step_isolate_rate": 0.96875,
+      "first_step_install_rate": 0.0,
+      "isolate_action_share": 0.2824074074074074,
+      "blocked_steps": 0,
+      "review_denied_steps": 0,
+      "by_category": {
+        "manifest_present": {
+          "total": 15,
+          "completed": 5
+        },
+        "manifest_less": {
+          "total": 15,
+          "completed": 5
+        },
+        "known_conflict": {
+          "total": 2,
+          "completed": 0
+        }
+      }
+    }
+  },
+  "system2_grpo_run_b45f5d/checkpoint-200": {
+    "val": {
+      "episodes": 6,
+      "env_errors": 0,
+      "completion_rate": 0.8333333333333334,
+      "completed": 5,
+      "mean_steps": 2.1666666666666665,
+      "mean_steps_completed": 1.0,
+      "mean_reward": 6.477777777777778,
+      "parse_error_episodes": 0,
+      "parse_error_rate": 0.0,
+      "no_conflict_episodes": 5,
+      "unnecessary_isolate_rate": 0.0,
+      "first_step_isolate_rate": 0.16666666666666666,
+      "first_step_install_rate": 0.8333333333333334,
+      "isolate_action_share": 0.07692307692307693,
+      "blocked_steps": 0,
+      "review_denied_steps": 0,
+      "by_category": {
+        "manifest_present": {
+          "total": 4,
+          "completed": 3
+        },
+        "manifest_less": {
+          "total": 2,
+          "completed": 2
+        }
+      }
+    },
+    "test": {
+      "episodes": 33,
+      "env_errors": 1,
+      "completion_rate": 0.3333333333333333,
+      "completed": 11,
+      "mean_steps": 5.666666666666667,
+      "mean_steps_completed": 1.0,
+      "mean_reward": -4.729292929292928,
+      "parse_error_episodes": 0,
+      "parse_error_rate": 0.0,
+      "no_conflict_episodes": 31,
+      "unnecessary_isolate_rate": 0.03225806451612903,
+      "first_step_isolate_rate": 0.06060606060606061,
+      "first_step_install_rate": 0.9393939393939394,
+      "isolate_action_share": 0.016042780748663103,
+      "blocked_steps": 0,
+      "review_denied_steps": 0,
+      "by_category": {
+        "manifest_present": {
+          "total": 15,
+          "completed": 6
+        },
+        "manifest_less": {
+          "total": 16,
+          "completed": 5
+        },
+        "known_conflict": {
+          "total": 2,
+          "completed": 0
+        }
+      }
+    }
+  },
+  "system2_grpo_run_b45f5d/checkpoint-300": {
+    "val": {
+      "episodes": 6,
+      "env_errors": 0,
+      "completion_rate": 0.8333333333333334,
+      "completed": 5,
+      "mean_steps": 2.1666666666666665,
+      "mean_steps_completed": 1.0,
+      "mean_reward": 6.477777777777778,
+      "parse_error_episodes": 0,
+      "parse_error_rate": 0.0,
+      "no_conflict_episodes": 5,
+      "unnecessary_isolate_rate": 0.0,
+      "first_step_isolate_rate": 0.16666666666666666,
+      "first_step_install_rate": 0.8333333333333334,
+      "isolate_action_share": 0.07692307692307693,
+      "blocked_steps": 0,
+      "review_denied_steps": 0,
+      "by_category": {
+        "manifest_present": {
+          "total": 4,
+          "completed": 3
+        },
+        "manifest_less": {
+          "total": 2,
+          "completed": 2
+        }
+      }
+    },
+    "test": {
+      "episodes": 33,
+      "env_errors": 1,
+      "completion_rate": 0.3333333333333333,
+      "completed": 11,
+      "mean_steps": 5.666666666666667,
+      "mean_steps_completed": 1.0,
+      "mean_reward": -4.608080808080807,
+      "parse_error_episodes": 0,
+      "parse_error_rate": 0.0,
+      "no_conflict_episodes": 31,
+      "unnecessary_isolate_rate": 0.2903225806451613,
+      "first_step_isolate_rate": 0.09090909090909091,
+      "first_step_install_rate": 0.9090909090909091,
+      "isolate_action_share": 0.06417112299465241,
+      "blocked_steps": 0,
+      "review_denied_steps": 0,
+      "by_category": {
+        "manifest_present": {
+          "total": 15,
+          "completed": 6
+        },
+        "manifest_less": {
+          "total": 16,
+          "completed": 5
+        },
+        "known_conflict": {
+          "total": 2,
+          "completed": 0
+        }
+      }
+    }
+  }
+}

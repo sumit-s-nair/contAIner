@@ -1,0 +1,23 @@
+{
+  "network": "proxy",
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "checkpoints": [
+    "outputs\\system2_grpo_run_b45f5d\\checkpoint-200",
+    "outputs\\system2_grpo_run_b45f5d\\checkpoint-300"
+  ],
+  "no_base": false,
+  "splits": [
+    "val",
+    "test"
+  ],
+  "manifest": "datasets/repo_corpus/corpus_manifest_v3_pilot.json",
+  "limit": 0,
+  "demo_n": 3,
+  "max_new_tokens": 512,
+  "out_dir": "results\\eval_b45f5d",
+  "policies": [
+    "base",
+    "system2_grpo_run_b45f5d/checkpoint-200",
+    "system2_grpo_run_b45f5d/checkpoint-300"
+  ]
+}

@@ -142,4 +142,32 @@ Every run before Stage 1D used both. This is a possible explanation for flat lea
 **Threats to validity:** Empirical validation of learning dynamics requires a live training run.
 **Open question:** Does the policy achieve non-trivial completion rate and reward scaling on the full training corpus once training is restarted?
 
+## [2026-10-17] Stage 2H: from ISOLATE collapse to a stable policy that learns efficient, rule-following setup (Qwen2.5-1.5B, GRPO)
+
+**Question/Hypothesis:** After the Stage 2D-2G ground-truth environment and the Stage 1D loss correction, does GRPO teach the planner a better setup policy than the prompted base model, and is training stable?
+
+**Method:** Pilot corpus v3_pilot (31 train repos, oracle-filtered). 300 episodes per run on an RTX 4090, G=4, LoRA r=16 on 4-bit Qwen2.5-1.5B-Instruct, lr 2e-5, beta 0.1, clip 0.2, max_norm 1.0, max 8 steps. Evaluation (`scripts/evaluate_system2.py`, rewritten): greedy decoding with the training prompt, parser and step budget; the policy may recover after a failed step; a parse error ends the episode; env errors are excluded from denominators. Test split (34 repos, never used for training or selection) was labelled with the same scripted oracle used to filter train/val (`stage2g_winnability.py --all --split test` -> `datasets/repo_corpus/test_winnability.json`, 18/34 won). Headline subset = oracle-won repos with declared dependencies (14); the 4 manifest-less wins are excluded by the same rule as the training corpus, because the oracle won them by installing PyPI packages that share a name with the repo's local modules.
+
+**Result:**
+1. *Pilot collapse (run_3997be, 0.5B, 50 ep):* 0 positive rewards in 1,600 completions; ISOLATE .venv rose from 77% to 96% of actions. Cause: an idle success cost -0.1 while a failed INSTALL cost -2.1, the prompt never said when ISOLATE applies, and the history showed only the model's prose. Fixes: r_no_progress = -0.25, r_failed = -0.75 (ordering progress > no-progress > denied > failed > blocked kept), prompt rules + 2 few-shot examples, `ACTION target: description [outcome]` history, 1.5B policy. Also fixed: trainer logged comp_rate 0 (wrong keys); snapshot images leaked (21.9 GB after 50 ep -> 0.99 GB after 300 ep).
+2. *Run b45f5d (1.5B):* real learning (first-step ISOLATE 0.65 -> 0.12-0.14, steps/ep 2.32 -> 1.20), but KL spikes at ep 92 (KL 41, grad norm 2023), 228 and 265, and a late regression (last 50 ep: completion 0.92, steps 1.64). Cause: `generate()` pads finished rows with eos_token_id (<|im_end|>) while the loss mask excluded only pad_token_id (<|endoftext|>), so forced padding entered both the PG and K3-KL terms. Every spike was a single-step group with one long completion next to short ones; ep 265 had identical rewards (zero advantage) and still grad norm 350 from KL alone. Fix: mask everything after the first EOS (attention mask too); also score log-probs at the sampling temperature (0.8).
+3. *Run 9ced13 (fixed):* max KL 0.12 (b45f5d 41.3), 0 episodes with KL > 1 (5), max pre-clip grad norm 1.0 (2023), 7 failed episodes (13). First-step ISOLATE fell below 0.3 by ep 50-99 (b45f5d: ep 150-199); the last 50 episodes are the best of the run (completion 1.00, reward 8.04, 1.08 steps).
+4. *Evaluation, test headline subset (14 oracle-won, declared deps):*
+
+| policy | completed | steps/ep | steps when completed | mean reward | unnecessary ISOLATE |
+|---|---|---|---|---|---|
+| base (untrained, same prompt) | 10/14 (0.71) | 5.14 | 4.00 | 0.80 | 1.00 |
+| b45f5d ckpt-200 | 11/14 (0.79) | 2.50 | 1.00 | 4.55 | 0.00 |
+| 9ced13 ckpt-300 | 11/14 (0.79) | 2.50 | 1.00 | 4.55 | 0.00 |
+
+All 18 oracle-won: base 10/18, trained 11/18. All 33 test repos: base 10/32, trained 11/33. Val (6, hand-picked from the train pool; a sanity check, not a paper metric): base 4/6, trained 5/6. Per repo, the trained set is the base set plus one (pallets/flask on test, Textualize/rich on val); the trained policy never loses a repo the base completes. b45f5d-200 and every 9ced13 checkpoint make identical per-repo decisions under greedy decoding.
+
+**Interpretation:** GRPO taught the planner to follow the stated rule (ISOLATE only when conflicts are listed) and to go straight to the right manifest install. This carries over to unseen repos (unnecessary ISOLATE 0.97 -> 0.03-0.10 on all test repos). Solved repos need 4x fewer steps, and the policy completes every winnable repo where a manifest install suffices (11/11), in one step. It solves none of the winnable repos that need per-package recovery after a manifest install fails (ThatXliner/idae, muziing/PySide6-Code-Tutorial, pandas-dev/pandas): it repeats `INSTALL <manifest>` until the budget runs out, the same pattern as every failed training episode. The completion gain is small (+1 repo); the main effect is efficiency and rule-following. The padding fix removed the instability and the late regression without changing greedy eval outcomes.
+
+**Novelty/contribution relevance:** Evidence that RL against a ground-truth sandbox (installed-package state + pip check, not self-reported verification) changes planner behaviour in a way that generalises to held-out repos, with a reproducible oracle-defined evaluation subset. The padding/EOS mask bug and its spike signature are a practical note for GRPO on chat models whose pad and EOS tokens differ.
+
+**Threats to validity:** Small evaluation sets (14 headline, 6 val); one seed per configuration; greedy decoding only (no variance estimate). The untrained baseline already completes most winnable repos thanks to the prompt rules and examples, so the completion effect is bounded. The oracle and reward accept same-named PyPI packages for import-inferred dependencies (excluded from training and from the headline subset, but not fixed). Test repos needing Python != 3.11, npm, or heavy builds are unwinnable in the current sandbox. System 3 is still the deterministic stub.
+
+**Open question:** Can the policy learn per-package recovery (install the remaining required packages after a manifest install fails) — through reward shaping, curriculum on recovery repos, or exploration — without losing the one-step behaviour on easy repos?
+
 - [2026-08-30] System 2 RL training currently uses a deterministic command-expansion stub in place of System 3; swapping in the real trained System 3 model is a required follow-up before this pipeline reflects the intended architecture.
