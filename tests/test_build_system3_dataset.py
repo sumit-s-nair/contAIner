@@ -116,3 +116,13 @@ def test_evaluate_system3_stub_baseline(workdir, failing_manifest_install):
     rec = summary["stub"]["recovery"]
     assert rec["n"] >= 1 and rec["repeats_failed_rate"] == 1.0 and rec["exec_success_rate"] == 0.0
     assert summary["stub"]["canonical"]["exec_success_rate"] == 1.0
+
+
+def test_non_python_repo_has_no_cases():
+    from types import SimpleNamespace
+    env = SimpleNamespace(
+        _repo_entry={"repo": "react/create-react-app"},
+        _obs=SimpleNamespace(manifest_paths={"javascript": ["package.json"]}),
+        _instance=SimpleNamespace(manifest=SimpleNamespace(ecosystems={"javascript": object()})),
+    )
+    assert B.canonical_cases(env, None) == []

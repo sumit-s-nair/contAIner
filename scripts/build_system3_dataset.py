@@ -229,8 +229,15 @@ def _spec(dep) -> Optional[str]:
 
 
 def canonical_cases(env, local_path: Optional[str]) -> List[Tuple[str, List[PlannedStep], PlannedStep, str]]:
-    """(label, prefix_steps, planned, kind) for one repo, deterministic."""
+    """(label, prefix_steps, planned, kind) for one repo, deterministic.
+
+    Python repos only: the stub and System 3 target pip; other ecosystems get
+    a non-Python image (no `python` binary), so every case would fail for a
+    reason no command can fix.
+    """
     repo = env._repo_entry["repo"]
+    if "python" not in env._instance.manifest.ecosystems:
+        return []
     paths = (env._obs.manifest_paths or {}).get("python", [])[:3]
     eco = env._instance.manifest.ecosystems.get("python")
     cases: List[Tuple[str, List[PlannedStep], PlannedStep, str]] = []
@@ -279,8 +286,12 @@ def collect_repo(split: str, entry: Dict[str, Any], a, docs: DocProvider, done: 
     base = None
     try:
         env.reset(entry)
+        cases = canonical_cases(env, env._local_path)
+        if not cases:
+            stats["skipped_non_python"] += 1
+            return stats
         base = _snapshot(env)
-        for label, prefix, planned, kind in canonical_cases(env, env._local_path):
+        for label, prefix, planned, kind in cases:
             cid = _case_id(entry["repo"], label)
             if cid in done:
                 stats["skipped"] += 1
