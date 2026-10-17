@@ -198,3 +198,23 @@ def test_env_empty_expansion_is_unmapped():
     env.reset()
     _, _, _, _, info = env.step(PlannedStep(ActionType.ISOLATE, "venv", ".venv"))
     assert info["exec_status"] == ExecutionStatus.UNMAPPED.value
+
+
+@pytest.mark.parametrize("target,expected", [
+    ("aiodns<5,>=3 aiohttp", ["aiodns<5,>=3", "aiohttp"]),
+    ("requests, flask", ["requests", "flask"]),
+    ("requests>=2.0, flask<3", ["requests>=2.0", "flask<3"]),
+    ("requests,flask", ["requests", "flask"]),
+])
+def test_stub_multi_spec_keeps_comma_specifiers(target, expected):
+    import shlex
+    from src.rl_env.system3_stub import expand_planned_step
+    (step,) = expand_planned_step(PlannedStep(ActionType.INSTALL, "x", target))
+    assert shlex.split(step.command)[4:] == expected
+
+
+def test_stub_single_spec_with_comma_specifier_unchanged():
+    import shlex
+    from src.rl_env.system3_stub import expand_planned_step
+    (step,) = expand_planned_step(PlannedStep(ActionType.INSTALL, "x", "aiodns<5,>=3"))
+    assert shlex.split(step.command)[4:] == ["aiodns<5,>=3"] and step.verify_command

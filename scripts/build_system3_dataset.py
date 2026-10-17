@@ -272,10 +272,20 @@ def canonical_cases(env, local_path: Optional[str]) -> List[Tuple[str, List[Plan
 
     cases.append(("isolate", [], isolate, "isolate"))
 
-    if local_path:
+    # CHECK runs after the dependencies are installed (as the planner does):
+    # from a fresh container every test suite fails at import, which no
+    # command can fix.
+    install_first: Optional[PlannedStep] = None
+    if paths:
+        install_first = PlannedStep(ActionType.INSTALL, _pick("install_manifest", repo + paths[0], paths[0]), paths[0])
+    elif len(specs) >= 2:
+        multi = " ".join(specs[:6])
+        install_first = PlannedStep(ActionType.INSTALL, _pick("install_specs", repo + "m", multi), multi)
+    if local_path and install_first is not None:
         for d in ("tests", "test"):
             if (Path(local_path) / d).is_dir():
-                cases.append((f"check:{d}", [], PlannedStep(ActionType.CHECK, _pick("check", repo, d), d), "check"))
+                cases.append((f"install+check:{d}", [install_first],
+                              PlannedStep(ActionType.CHECK, _pick("check", repo, d), d), "check"))
                 break
     return cases
 

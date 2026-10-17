@@ -40,6 +40,32 @@ def _safe_rel_path(target: str) -> Optional[PurePosixPath]:
     return p
 
 
+def _all_valid(tokens: List[str]) -> bool:
+    try:
+        for t in tokens:
+            Requirement(t)
+    except InvalidRequirement:
+        return False
+    return True
+
+
+def _multi_specs(target: str) -> List[str]:
+    """Split a multi-package target into specs.
+
+    Whitespace first, so specifiers containing commas stay whole
+    ("aiodns<5,>=3 aiohttp" -> 2 specs).  Stage 3A fix: splitting on commas
+    first turned that into "aiodns<5", ">=3", ..., failed validation, and the
+    whole list was installed as ONE quoted argument (always fails).  Comma
+    separation ("requests, flask") still works via the fallback.
+    """
+    tokens = [t.strip(",") for t in target.split()]
+    tokens = [t for t in tokens if t]
+    if len(tokens) >= 2 and _all_valid(tokens):
+        return tokens
+    tokens = [t for t in re.split(r"[\s,]+", target) if t]
+    return tokens if len(tokens) >= 2 and _all_valid(tokens) else []
+
+
 def _install_steps(target: str, raw_target: str) -> List[AtomicStep]:
     rel = _safe_rel_path(target)
     if rel is not None and rel.suffix.lower() == ".txt":
@@ -55,13 +81,8 @@ def _install_steps(target: str, raw_target: str) -> List[AtomicStep]:
             description=f"Install project at {proj_dir}",
             verify_command=None, destructive=False, timeout=MANIFEST_INSTALL_TIMEOUT,
         )]
-    tokens = [t for t in re.split(r"[\s,]+", target) if t]
+    tokens = _multi_specs(target)
     if len(tokens) >= 2:
-        try:
-            for t in tokens:
-                Requirement(t)
-        except InvalidRequirement:
-            tokens = []
         if tokens:
             return [AtomicStep(
                 command="python -m pip install " + " ".join(shlex.quote(t) for t in tokens),
