@@ -72,19 +72,48 @@ def _extract_compressible_text(chunk: DocChunk) -> str:
     return "\n\n".join(p for p in parts if p.strip())
 
 
+def _compress_flag_description(text: str) -> str:
+    """Compress ONE flag description on its own (extractive, deterministic).
+
+    Never returns an empty string: a flag without its description is worse
+    than an uncompressed one.
+    """
+    if not text or not text.strip():
+        return text
+    out = reassemble_segments(compress_segments_extractive(segment_text(text))).strip()
+    return out or text
+
+
 def _inject_compressed_text(
     chunk: DocChunk,
     segments: list[Segment],
+    method: Literal["extractive", "abstractive"] = "extractive",
+    cache: TTLCache | None = None,
 ) -> DocChunk:
-    """Write compressed segment text back into the chunk's narrative fields.
+    """Write compressed text back into the chunk's narrative fields.
 
-    Because segments may span multiple logical fields, we reconstruct the
-    full combined text and then split on the ``\\n\\n`` boundaries used in
-    ``_extract_compressible_text``.
+    ``os_specific_notes`` takes the compressed text of its own segments.
+    Flag descriptions are compressed one by one (``_compress_flag_description``)
+    so each flag keeps its own description.
+
+    Stage 3A fix: this used to split the compressed notes+flags blob on
+    newlines and hand the pieces out by position.  The extractive compressor
+    re-joins kept sentences with spaces, so the boundaries vanished: with no
+    OS notes, flag 0 received sentences from later flags; with OS notes, the
+    notes absorbed flag text.  The MCP snapshot used for System 3 had pip
+    flags paired with other flags' descriptions.
     """
-    reassembled = reassemble_segments(segments)
-    # Re-split by paragraph separator (double newline)
-    parts = [p.strip() for p in reassembled.split("\n\n") if p.strip()]
+    notes_text = ""
+    if chunk.os_specific_notes and chunk.os_specific_notes.strip():
+        # The notes are the first part of the blob (see
+        # _extract_compressible_text).  Compress them on their own so no flag
+        # text can leak in.
+        notes_segments = segment_text(chunk.os_specific_notes)
+        if method == "abstractive":
+            notes_segments = compress_segments_abstractive(notes_segments, cache=cache)
+        else:
+            notes_segments = compress_segments_extractive(notes_segments)
+        notes_text = reassemble_segments(notes_segments).strip() or chunk.os_specific_notes
 
     new_chunk = DocChunk(
         tool=chunk.tool,
@@ -99,27 +128,15 @@ def _inject_compressed_text(
         error=chunk.error,
     )
 
-    # Distribute compressed parts back into fields in the same order they were added.
-    part_idx = 0
+    if notes_text:
+        new_chunk.os_specific_notes = notes_text
 
-    if chunk.os_specific_notes and part_idx < len(parts):
-        new_chunk.os_specific_notes = parts[part_idx]
-        part_idx += 1
-
-    flag_descs = [
-        f for f in (chunk.key_flags or [])
-        if isinstance(f, dict) and f.get("description")
-    ]
-    if flag_descs and part_idx < len(parts):
-        # The flag descriptions were joined with \n; split them back
-        compressed_descs = [s.strip() for s in parts[part_idx].split("\n") if s.strip()]
-        for i, flag in enumerate(new_chunk.key_flags):
-            if isinstance(flag, dict) and flag.get("description"):
-                if i < len(compressed_descs):
-                    flag["description"] = compressed_descs[i]
-        part_idx += 1
+    for flag in new_chunk.key_flags:
+        if isinstance(flag, dict) and flag.get("description"):
+            flag["description"] = _compress_flag_description(flag["description"])
 
     return new_chunk
+
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -131,6 +148,7 @@ def reassemble_chunk(
     compressed_segments: list[Segment],
     original_segments: list[Segment],
     method: Literal["extractive", "abstractive"],
+    cache: TTLCache | None = None,
 ) -> CompressedDocChunk:
     """Build a ``CompressedDocChunk`` from original and compressed segments.
 
@@ -184,15 +202,18 @@ def reassemble_chunk(
     )
 
     # ── Token counts ───────────────────────────────────────────────────
-    orig_prose_tokens = sum(
-        _tok(s.text) for s in original_segments if s.kind == "PROSE"
-    )
-    comp_prose_tokens = sum(
-        _tok(s.text) for s in compressed_segments if s.kind == "PROSE"
-    )
+    # Both totals are measured the same way: tokens of the compressible text
+    # of the chunk (before / after).
+    original_total = _tok(_extract_compressible_text(chunk))
+    orig_prose_tokens = max(0, original_total - orig_code_tokens)
 
-    original_total = orig_code_tokens + orig_prose_tokens
-    compressed_total = comp_code_tokens + comp_prose_tokens
+    # ── Inject compressed text back into the chunk ─────────────────────
+    # Notes are compressed with *method*; flag descriptions one by one
+    # (see _inject_compressed_text).  The report is computed from the chunk
+    # actually returned, not from the blob-level segments.
+    new_chunk = _inject_compressed_text(chunk, compressed_segments, method=method, cache=cache)
+    compressed_total = _tok(_extract_compressible_text(new_chunk))
+    comp_prose_tokens = max(0, compressed_total - orig_code_tokens)
 
     prose_reduction_ratio: float = 0.0
     if orig_prose_tokens > 0:
@@ -207,9 +228,6 @@ def reassemble_chunk(
         prose_reduction_ratio=round(prose_reduction_ratio, 4),
         method=method,
     )
-
-    # ── Inject compressed text back into the chunk ─────────────────────
-    new_chunk = _inject_compressed_text(chunk, compressed_segments)
     new_chunk.tokens_estimate = compressed_total
 
     result = CompressedDocChunk.from_doc_chunk(new_chunk, report=report)

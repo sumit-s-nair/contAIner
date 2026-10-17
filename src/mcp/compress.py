@@ -103,5 +103,6 @@ def compress_chunk(
         compressed_segments=compressed_segments,
         original_segments=original_segments,
         method=method,
+        cache=cache,
     )
     return result

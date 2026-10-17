@@ -214,15 +214,18 @@ def summarize(records: List[Dict[str, Any]]) -> Dict[str, Any]:
 def evaluate_model(model_name: str, model, tokenizer, test_repos: List[Dict[str, Any]],
                    demo_repos: List[str], out_dir: Path, network: str = "proxy",
                    split: str = "test", max_new_tokens: int = MAX_NEW_TOKENS,
-                   manifest_path: str = DEFAULT_MANIFEST) -> Dict[str, Any]:
-    """Evaluate one policy on a list of repos; returns summary metrics plus ``records``."""
+                   manifest_path: str = DEFAULT_MANIFEST, expander=None) -> Dict[str, Any]:
+    """Evaluate one policy on a list of repos; returns summary metrics plus ``records``.
+
+    ``expander``: System 3 (``Sys3ModelExpander``); None = the stub.  Stage 3A.
+    """
     logger.info("Evaluating %s on %s (%d repos, network=%s)", model_name, split, len(test_repos), network)
     env = PlannerEnv(config=EnvConfig(
         dry_run=False,
         review_policy=TrainingReviewPolicy.AUTO_DENY,
         corpus_manifest_path=manifest_path,
         docker_config=DockerExecutorConfig(network=NetworkConfig(mode=network)),
-    ))
+    ), expander=expander)
     out_dir = Path(out_dir)
     demo_dir = out_dir / "demo_traces"
     records: List[Dict[str, Any]] = []
@@ -231,8 +234,13 @@ def evaluate_model(model_name: str, model, tokenizer, test_repos: List[Dict[str,
             trace = [f"# {repo['repo']} ({repo.get('category', '')})\n\n**Policy:** {model_name}  **Split:** {split}\n"] \
                 if repo["repo"] in demo_repos else None
             t0 = time.time()
+            mark = len(expander.log) if expander is not None else 0
             rec = run_episode(env, model, tokenizer, repo, max_new_tokens=max_new_tokens, trace=trace)
             rec.update({"policy": model_name, "split": split, "seconds": round(time.time() - t0, 1)})
+            if expander is not None:
+                rec["system3"] = expander.log[mark:]
+                rec["system3_fallbacks"] = sum(bool(e.get("fallback")) for e in rec["system3"])
+                rec["system3_errors"] = sum(e.get("status") != "ok" for e in rec["system3"])
             records.append(rec)
             if rec["env_error"]:
                 logger.error("ENV ERROR %s: %s", repo["repo"], rec["env_error"])
@@ -270,6 +278,14 @@ def get_parser() -> argparse.ArgumentParser:
     p.add_argument("--demo_n", type=int, default=3, help="Write markdown traces for the first N repos per split")
     p.add_argument("--max_new_tokens", type=int, default=MAX_NEW_TOKENS)
     p.add_argument("--out_dir", default=None, help="Default: results/system2_eval_<timestamp>")
+    # Stage 3A: System 3 model instead of the stub
+    p.add_argument("--system3_adapter", default=None, help="System 3 LoRA dir (default: stub)")
+    p.add_argument("--system3_model_id", default="Qwen/Qwen2.5-Coder-1.5B-Instruct")
+    p.add_argument("--system3_docs_dir", default="datasets/system3-slot/docs")
+    p.add_argument("--system3_no_adapter", action="store_true",
+                   help="System 3 = base model without adapter (zero-shot ablation)")
+    p.add_argument("--system3_fallback", action="store_true",
+                   help="on System 3 parse/policy error use the stub's expansion (counted)")
     return p
 
 
@@ -301,6 +317,18 @@ def main(cli_args=None):
     with open(out_dir / "config.json", "w", encoding="utf-8") as f:
         json.dump({**vars(args), "policies": [policy_name(p) for p in policies]}, f, indent=2)
 
+    expander = None
+    if args.system3_adapter or args.system3_no_adapter:
+        from src.system3_command_generation.slot import DocProvider
+        from src.system3_command_generation.slot.generate import HFGenerator, Sys3ModelExpander
+        expander = Sys3ModelExpander(
+            generator=HFGenerator(args.system3_model_id,
+                                  adapter=None if args.system3_no_adapter else args.system3_adapter),
+            docs=DocProvider(docs_dir=Path(args.system3_docs_dir)),
+            fallback_to_stub=args.system3_fallback,
+        )
+        logger.info("System 3: %s", "base (no adapter)" if args.system3_no_adapter else args.system3_adapter)
+
     summary: Dict[str, Dict[str, Dict[str, Any]]] = {}
     ep_file = out_dir / "episodes.jsonl"
     for adapter in policies:
@@ -313,7 +341,8 @@ def main(cli_args=None):
                 repos = repos[: args.limit]
             demo = [r["repo"] for r in repos[: args.demo_n]]
             m = evaluate_model(name, model, tokenizer, repos, demo, out_dir, network=args.network,
-                               split=split, max_new_tokens=args.max_new_tokens, manifest_path=args.manifest)
+                               split=split, max_new_tokens=args.max_new_tokens, manifest_path=args.manifest,
+                               expander=expander)
             with open(ep_file, "a", encoding="utf-8") as f:
                 for r in m.pop("records"):
                     f.write(json.dumps(r) + "\n")

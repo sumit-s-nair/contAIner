@@ -213,7 +213,17 @@ class PlannerEnv:
 
     metadata = {"render_modes": ["text"]}
 
-    def __init__(self, config: Optional[EnvConfig] = None) -> None:
+    def __init__(self, config: Optional[EnvConfig] = None, expander: Optional[Any] = None) -> None:
+        """
+        expander:
+            System 3.  ``None`` = the deterministic stub
+            (``expand_planned_step(action)``).  Otherwise a callable
+            ``expander(action, context) -> List[AtomicStep]`` where *context*
+            is the ``Sys3Context`` built from this episode
+            (``src.system3_command_generation.slot.context_from_env``).
+            Stage 3A.
+        """
+        self._expander = expander
         self._cfg       = config or EnvConfig()
         self._rng       = random.Random(self._cfg.seed)
         self._serializer = ObservationSerializer()
@@ -231,6 +241,9 @@ class PlannerEnv:
         self._done:            bool                             = False
         self._repo_entry:      Optional[Dict]                   = None
         self._local_path:      Optional[str]                    = None
+        # What each planned step expanded to (System 3 output), parallel to
+        # _plan_so_far / _execution_history.  System 3 context reads it.
+        self._expanded_history: List[List[AtomicStep]]          = []
 
     # ------------------------------------------------------------------ public
 
@@ -303,6 +316,7 @@ class PlannerEnv:
 
         self._plan_so_far = []
         self._execution_history = []
+        self._expanded_history = []
         self._done = False
         # Stage 2G ground truth: installed packages in the container
         # (name -> version) and the high-water set of required packages already
@@ -347,7 +361,7 @@ class PlannerEnv:
             raise RuntimeError("Call reset() before step().")
 
         # --- Execute action via System 3 Stub -----------------------------
-        atomic_steps = expand_planned_step(action)
+        atomic_steps = self._expand(action)
         
         # All-must-succeed semantics for multi-command expansion
         aggregated_status = ExecutionStatus.SUCCESS
@@ -439,6 +453,7 @@ class PlannerEnv:
         )
         self._obs.step_index += 1
         self._execution_history.append(exec_result)
+        self._expanded_history.append(list(atomic_steps))
 
         # --- Check termination conditions ---------------------------------
         blocked = (
@@ -545,6 +560,16 @@ class PlannerEnv:
             info["verify_returncode"] = exec_result.verify_returncode
 
         return self._obs, reward, terminated, truncated, info
+
+    def _expand(self, action: PlannedStep) -> List[AtomicStep]:
+        """System 3: PlannedStep -> AtomicSteps (stub unless an expander is set)."""
+        if self._expander is None:
+            return expand_planned_step(action)
+        from src.system3_command_generation.slot.context import context_from_env
+        steps = self._expander(action, context_from_env(self, action))
+        return list(steps) if steps else [AtomicStep(command="__UNMAPPED_ACTION__",
+                                                     description="System 3 produced no command",
+                                                     destructive=False)]
 
     def render(self) -> str:
         """Return a human-readable text representation of the current episode state."""
@@ -672,13 +697,14 @@ class PlannerEnv:
             raise EnvForkError("Cannot fork an environment that has finished (_done=True).")
 
         # 1. New PlannerEnv using the exact same config object
-        forked = PlannerEnv(config=self._cfg)
+        forked = PlannerEnv(config=self._cfg, expander=self._expander)
 
         # 2. Deep copies of mutable state
         forked._instance = copy.deepcopy(self._instance)
         forked._obs = copy.deepcopy(self._obs)
         forked._plan_so_far = copy.deepcopy(self._plan_so_far)
         forked._execution_history = copy.deepcopy(self._execution_history)
+        forked._expanded_history = copy.deepcopy(getattr(self, "_expanded_history", []))
         forked._local_path = copy.deepcopy(self._local_path)
         forked._done = copy.deepcopy(self._done)
         forked._repo_entry = copy.deepcopy(self._repo_entry)
@@ -714,6 +740,7 @@ class PlannerEnv:
                 # Clear plan & history on the fork before replaying through step()
                 forked._plan_so_far = []
                 forked._execution_history = []
+                forked._expanded_history = []
                 forked._obs.episode_steps = []
                 forked._obs.step_index = 0
                 forked._done = False
